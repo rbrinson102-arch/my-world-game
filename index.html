@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="description" content="Corner to Crown: a top-down crime game. Start on a corner, end up the boss. Play as a crook or a cop in District 7, with your friends, on your phone or computer.">
+<meta name="description" content="My Block: a top-down crime game. Start on a corner, end up the boss. Play as a crook or a cop in District 7, with your friends, on your phone or computer.">
 <meta name="theme-color" content="#07090e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Corner to Crown">
-<meta property="og:title" content="Corner to Crown">
+<meta name="apple-mobile-web-app-title" content="My Block">
+<meta property="og:title" content="My Block">
 <meta property="og:description" content="Crooks vs cops in District 7. Play free in your browser with your friends.">
 <meta property="og:image" content="icon-512.png">
 <link rel="manifest" href="manifest.json">
@@ -20,7 +20,7 @@
 <script src="supabase.js"></script>
 </head>
 <body>
-<title>Corner to Crown</title>
+<title>My Block</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
@@ -228,8 +228,8 @@ canvas#mini{cursor:pointer;pointer-events:auto}
 
 <div class="wrap">
   <header class="top">
-    <h1>Corner to <span>Crown</span></h1>
-    <p>Early access · Endless seasons · District 7. Fictional game.</p>
+    <h1>My <span>Block</span></h1>
+    <p>Prototype v1.0 · Endless seasons: District 7. Fictional game.</p>
   </header>
 
   <div class="stage" id="stage">
@@ -341,7 +341,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
     </div>
     <div class="intro" id="intro">
       <div class="box">
-        <h2>Corner to <span>Crown</span></h2>
+        <h2>My <span>Block</span></h2>
         <p>District 7, after midnight. Everybody wants a piece of Rico's city. Pick who you are.</p>
         <div class="prof">
           <label for="pname">Street name<input id="pname" maxlength="16" autocomplete="off" placeholder="What they call you"></label>
@@ -357,6 +357,9 @@ canvas#mini{cursor:pointer;pointer-events:auto}
           <button class="mode cop" data-role="cop"><span class="tag">Start $200 + cruiser</span><strong>Cop</strong><small>Rookie officer. Answer dispatch, chase getaway cars, cuff suspects and wanted players.</small></button>
         </div>
         <button class="primary" id="continue" hidden>Continue</button>
+        <p class="muted2" id="codeLine" hidden></p>
+        <div class="prof" id="loadRow"><label for="loadCode">Have a save code?<input id="loadCode" maxlength="16" autocomplete="off" placeholder="XXXX-XXXX-XXXX"></label><button class="small" id="loadBtn" style="align-self:end">Load</button></div>
+        <p class="muted2" id="loadMsg" hidden></p>
         <p class="keys" id="introKeys">Keyboard: WASD move/drive · mouse aim · click or F shoot · E act · Q switch weapon · Space continues scenes</p>
       </div>
     </div>
@@ -368,6 +371,9 @@ canvas#mini{cursor:pointer;pointer-events:auto}
       <ul>
         <li>Pay Pookie for intel and the door card shows who's inside before you walk in.</li>
         <li>Get away: break line of sight and the stars drop. Hide out at a house you own, or respray your car at Sparkle Car Wash. At 2 stars the cops shoot; at 4, SWAT. Shoot back or run.</li>
+        <li>Stash your cash at any property you own. Getting busted or killed can't touch the stash.</li>
+        <li>Every day you get 3 jobs worth $750 each, plus a $1,500 bonus for finishing all 3.</li>
+        <li>Your progress backs up online. Your save code is in Empire: type it on any phone or computer to keep playing where you left off.</li>
         <li>Climb Corner → Runner → Lieutenant → Boss → Kingpin → The Crown. Tap Ranks to see where you stand against everyone.</li>
         <li>Walk into a stash house, clear the rooms, crack the safe, get out, lose the cops.</li>
         <li>Iron Works sells pistols, SMGs, shotguns, armor and ammo.</li>
@@ -615,17 +621,18 @@ const CROWN=[
 function props(){return stashes.filter(s=>s.owned).length+(save.grow&&save.grow.lvl>=3?1:0)+(save.role==='owner'?1:0)+(save.smug&&save.smug.truck>=1?1:0)+(save.empire&&save.empire.front?1:0)}
 let crownT=1;
 function crownTick(dt){if(save.mode!=='crook')return;crownT-=dt;if(crownT>0)return;crownT=1;save.crown=save.crown||0;
+  if(save.crown<3&&(save.flags.ricoDown||save.rep>=150)){save.crown=3;persist();hudKey='';titleCard('Boss','Your Boss rank is locked in.');toast('Boss status saved to your rank. Next up: Kingpin.',3);return}
   while(CROWN[save.crown+1]&&CROWN[save.crown+1].req().every(r=>r[1])){save.crown++;persist();hudKey='';titleCard('Promoted',CROWN[save.crown].n);toast(save.crown===3?'You run things now. Everyone on the map sees your Boss crown.':`New rank: ${CROWN[save.crown].n}.`,3)}}
 function lbScore(){const e=save.empire||{},season=save.m>=scriptedLen()?seasonOf(save.m-scriptedLen()):0;
   if(save.mode==='cop')return Math.max(0,Math.round(save.arrests*60+save.rep*10+(e.copRank||0)*1500+season*800));
-  return Math.max(0,Math.round(save.rep*10+(save.crown||0)*1500+props()*500+(save.escapes||0)*50+season*800+Math.min(save.cash,2e6)/100))}
+  return Math.max(0,Math.round(save.rep*10+(save.crown||0)*1500+props()*500+(save.escapes||0)*50+season*800+Math.min(save.cash+(save.bank||0),2e6)/100))}
 const RANKS_CROOK=r=>r>=300?'Kingpin':r>=150?'Boss':r>=60?'Lieutenant':r>=20?'Runner':'Corner';
 const RANKS_COP=a=>a>=12?'Sergeant':a>=5?'Detective':'Officer';
 let hudKey='';
 function hud(){
-  const key=[save.crown,save.cash,save.rep,stars,calm>0,Math.round(player.hp),Math.round(save.armor),curW,save.ammo[curW],save.ia,save.arrests,save.mode].join('|');
+  const key=[save.crown,save.bank,save.cash,save.rep,stars,calm>0,Math.round(player.hp),Math.round(save.armor),curW,save.ammo[curW],save.ia,save.arrests,save.mode].join('|');
   if(key===hudKey)return;hudKey=key;
-  $('cash').textContent=money(save.cash);
+  $('cash').textContent=money(save.cash)+(save.bank>0?` · stash ${money(save.bank)}`:'');
   const st=$('stars');
   if(save.mode==='crook'){st.hidden=false;st.innerHTML=[0,1,2,3,4].map(i=>`<i class="${i<stars?'on':''}">★</i>`).join('');st.classList.toggle('flash',stars>0&&calm>0);$('badge').textContent='';$('iaWrap').hidden=true}
   else{st.hidden=true;$('badge').textContent=`${RANKS_COP(save.arrests)} · ${save.arrests} arrests${save.flags.crooked?' · on the take':''}`;$('iaWrap').hidden=!save.flags.crooked;$('ia').style.width=clamp(save.ia,0,100)+'%'}
@@ -707,6 +714,7 @@ function context(){
   if(dist(player,HOSPITAL_DOOR)<46&&player.hp<100)return{t:'heal',label:'Patch up $150'};
   if(save.mode==='crook'&&dist(player,POOKIE)<44)return{t:'intel',label:intelT>0?'Intel active':'Buy intel $100'};
   if(save.mode==='crook'){const s=nearStash();if(s&&s.cooldown<=0&&!s.owned)return{t:'enter',label:'Kick in door',s}}
+  if(save.mode==='crook'&&stars===0&&atProperty()){if(save.cash>=100)return{t:'bank',label:`Stash ${money(save.cash)}`};if(save.bank>0)return{t:'unbank',label:`Take out ${money(save.bank)}`}}
   const c=nearCar();if(c)return{t:'car',label:c.owned?'Get in your truck':c.kind==='police'?'Jack cop car':save.mode==='cop'?'Take car':'Jack car',c};
   return null;
 }
@@ -722,6 +730,8 @@ function actPress(){
   if(cx.t==='vip'){vipChat();return}
   if(cx.t==='grow'){openGrow();return}
   if(cx.t==='sell'){sellBags();return}
+  if(cx.t==='bank'){bankIn();return}
+  if(cx.t==='unbank'){bankOut();return}
   if(cx.t==='order'){const b=pick(blocks.filter(x=>x.kind==='plain'&&Math.hypot(doorOf(x).x-BUYER_DOOR.x,doorOf(x).y-BUYER_DOOR.y)>700)),d=doorPt(b),n=ri(8,16);save.grow.job={x:d.x,y:d.y,bags:n,pay:n*220,label:`the dealer on ${streetAt(d.x,d.y+T)||districtAt(d.x,d.y)}`};persist();toast(`Order: ${n} bags to ${save.grow.job.label} for ${money(n*220)}. Follow the arrow.`,3.2);return}
   if(cx.t==='tow'){if(save.cash<200){toast('Towing costs $200.');return}save.cash-=200;spawnTruck();persist();toast('Your truck is back at the docks.',2);return}
   if(cx.t==='buytruck'){if(save.cash<4000){toast('The box truck costs $4,000.');return}save.cash-=4000;save.smug.truck=1;const tk=ownedTruck();if(tk)tk.truck=1;persist();toast('Box truck is yours. Bigger loads, bigger pay.',2.6);return}
@@ -780,6 +790,7 @@ function leaveHouse(){
   const s=int.stash;const loot=int.cracked;
   scene='city';player.x=cityReturn.x;player.y=cityReturn.y;camInit=false;bullets=[];
   if(loot){
+    save.robs=(save.robs||0)+1;
     save.cash+=s.value;const rep=6+Math.round(s.value/600);save.rep+=rep;s.cooldown=150;
     if(s.corner)save.flags.m3loot=true;
     addStars(s.main?3:2);toast(`+${money(s.value)} · +${rep} rep. The alarm's ringing. Lose the cops!`,3);
@@ -1039,9 +1050,7 @@ function respawn(at){
 }
 let lastSeen=null,chaseMax=0,seenNow=false;
 function copSees(){const f=player.inCar||player;return cars.some(c=>c.kind==='police'&&dist(c,f)<420&&los(c,f))||actors.some(a=>a.kind==='cop'&&!a.dead&&dist(a,f)<340&&los(a,f))}
-function hideoutNear(){const f=player;const doors=stashes.filter(s=>s.owned).map(s=>s);
-  if(save.role==='grower')doors.push(GROW_DOOR);if(save.role==='owner'||save.role==='dancer')doors.push(CLUB_DOOR);if(save.empire&&save.empire.front)doors.push(WASH_DOOR);
-  return doors.some(d=>dist(f,d)<50)}
+function hideoutNear(){return propDoors().some(d=>dist(player,d)<50)}
 function escaped(){
   const m=chaseMax;chaseMax=0;stars=0;calm=0;lastSeen=null;seenNow=false;hudKey='';
   if(m>=2){const r=m*4;save.rep+=r;save.escapes=(save.escapes||0)+1;persist();toast(`ESCAPED a ${m}-star chase. +${r} rep.`,3)}
@@ -2278,6 +2287,10 @@ function renderEmpire(){
   if(save.mode==='crook'){const c=save.crown||0,nx=CROWN[c+1];row('Rank',`${CROWN[c].n} (${c+1} of ${CROWN.length})`);row('Properties',String(props()));
     if(nx)row(`Next: ${nx.n}`,nx.req().map(r=>`${r[1]?'✓':'○'} ${r[0]}`).join('  ·  '));else row('Next','You wear the crown. Defend it every season.');
     if(save.grow&&save.grow.lvl>0||save.role==='grower')row('Grow house',`Level ${save.grow.lvl+1}: ${GROW_LV[save.grow.lvl].n}`)}
+  if(save.jobs&&save.jobs.list)save.jobs.list.forEach((j,i)=>{const J=JOBS[j.k];if(!J)return;row(i?'':"Today's jobs",`${j.done?'✓':'○'} ${J.txt(J.n)}${j.done?'':` (${Math.max(0,Math.min(J.n,J.v()-j.base))}/${J.n})`} · $750`)});
+  if(save.mode==='crook'){row('Cash stash',`${money(save.bank||0)}${atProperty()?'':' · go to a property you own to stash or take out'}`);
+    if(atProperty()&&stars===0){const d=document.createElement('div');d.className='btnrow';d.innerHTML=`<button class="small go" data-act="in" ${save.cash<1?'disabled':''}>Stash all cash</button><button class="small" data-act="out" ${!(save.bank>0)?'disabled':''}>Take it all out</button>`;el.appendChild(d)}}
+  row('Save code',window.__cloud?`${fmtCode(saveCode())}${cloudOk===false?' (offline, will retry)':cloudOk?' · backed up':''}`:'Cloud saves work on the public game link');
   row('Leaderboard score',lbScore().toLocaleString());
   if(!empireOn()){row('Seasons',`Finish your Chapter 1 story to start the never-ending seasons.`);return}
   row('Now',`Season ${seasonOf(i)}, Episode ${epOf(i)}`);
@@ -2290,8 +2303,56 @@ function renderEmpire(){
   row('Rival',e.rival?`${e.rival.name} from ${e.rival.city}`:'Nobody yet this season');
 }
 
+$('empBody').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;if(b.dataset.act==='in')bankIn();if(b.dataset.act==='out')bankOut();renderEmpire()});
 $('empBtn').addEventListener('click',openEmpire);$('empClose').addEventListener('click',closeEmpire);$('empModal').addEventListener('click',ev=>{if(ev.target.id==='empModal')closeEmpire()});
 
+
+/* ================= cloud save ================= */
+const CODE_AB='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function saveCode(){if(!save.saveCode){const a=new Uint8Array(12);crypto.getRandomValues(a);save.saveCode=[...a].map(x=>CODE_AB[x%32]).join('');persist()}return save.saveCode}
+const fmtCode=c=>c?c.replace(/(.{4})(.{4})(.{4})/,'$1-$2-$3'):'';
+let cloudT=5,cloudOk=null,cloudLast='';
+function cloudPush(force){if(!window.__cloud||!save.mode)return;saveCode();const js=JSON.stringify(save);if(!force&&js===cloudLast)return;cloudLast=js;window.__cloud.save(save.saveCode,save).then(()=>{if(cloudOk!==true){cloudOk=true;if(!save.flags.codeShown){save.flags.codeShown=true;persist();toast(`Progress backed up. Your save code is in Empire: ${fmtCode(save.saveCode)}`,5)}}}).catch(()=>{cloudOk=false;cloudLast=''})}
+function cloudTick(dt){cloudT-=dt;if(cloudT<=0){cloudT=20;cloudPush()}}
+addEventListener('pagehide',()=>{try{cloudPush()}catch(e){}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)try{cloudPush()}catch(e){}});
+let loadArmed=null;
+$('loadBtn').addEventListener('click',async()=>{const m=$('loadMsg');m.hidden=false;
+  const code=$('loadCode').value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(!/^[A-HJ-NP-Z2-9]{12}$/.test(code)){m.textContent='Save codes are 12 letters and numbers, like ABCD-EFGH-JK23.';return}
+  if(!window.__cloud){m.textContent='Cloud saves work on the public game link, not this preview.';return}
+  if(hasProgress()&&loadArmed!==code&&code!==save.saveCode){loadArmed=code;m.textContent='This replaces the save on this device. Tap Load again to confirm.';return}
+  m.textContent='Loading…';
+  try{const d=await window.__cloud.load(code);if(!d||!d.flags){m.textContent='No save found for that code.';return}
+    save=Object.assign(FRESH(),d);save.saveCode=code;persist();m.textContent=`Loaded ${d.profile&&d.profile.name||'your save'}. Restarting…`;setTimeout(()=>location.reload(),700)}
+  catch(e){m.textContent='Could not reach the save server. Try again in a minute.'}});
+(function(){if(save.saveCode&&save.mode){const c=$('codeLine');c.hidden=false;c.textContent=`Your save code: ${fmtCode(save.saveCode)} (use it to load your save on another phone or computer)`}})();
+
+/* ================= cash stash ================= */
+function propDoors(){const doors=stashes.filter(s=>s.owned).map(s=>({x:s.x,y:s.y}));
+  if(save.role==='grower')doors.push(GROW_DOOR);if(save.role==='owner'||save.role==='dancer')doors.push(CLUB_DOOR);if(save.empire&&save.empire.front)doors.push(WASH_DOOR);return doors}
+const atProperty=()=>scene==='city'&&propDoors().some(d=>dist(player,d)<70);
+function bankIn(){if(!atProperty()||stars>0||save.cash<1)return;save.bank=(save.bank||0)+save.cash;toast(`Stashed ${money(save.cash)}. Cops and hospitals can't touch it.`,2.6);save.cash=0;persist();hudKey='';cloudT=Math.min(cloudT,1)}
+function bankOut(){if(!atProperty()||!(save.bank>0))return;save.cash+=save.bank;toast(`Took out ${money(save.bank)}.`,2);save.bank=0;persist();hudKey=''}
+
+/* ================= daily jobs ================= */
+const JOBS={
+  rep:{txt:n=>`Earn ${n} rep`,v:()=>save.rep,n:25},
+  esc:{txt:()=>'Escape a 2-star chase',v:()=>save.escapes||0,n:1},
+  rob:{txt:()=>'Rob a stash house',v:()=>save.robs||0,n:1},
+  ep:{txt:()=>'Finish a mission or episode',v:()=>save.m,n:1},
+  run:{txt:n=>`Deliver ${n} loads`,v:()=>save.smug?save.smug.runs:0,n:2},
+  bag:{txt:n=>`Sell ${n} bags`,v:()=>save.grow?save.grow.sold:0,n:10},
+  night:{txt:()=>'Run a night at Velvet',v:()=>save.club?save.club.nights:0,n:1},
+  set:{txt:n=>`Dance ${n} sets`,v:()=>save.dancer?save.dancer.sets:0,n:3},
+  arr:{txt:n=>`Make ${n} arrests`,v:()=>save.arrests,n:3}
+};
+function jobsFor(){if(save.mode==='cop')return['arr','rep','ep'];return[({gang:'rob',smuggler:'run',grower:'bag',owner:'night',dancer:'set'})[save.role]||'rob','esc','ep']}
+let jobsT=2;
+function jobsTick(dt){if(!save.mode)return;jobsT-=dt;if(jobsT>0)return;jobsT=1;const day=new Date().toDateString();
+  if(!save.jobs||save.jobs.day!==day||save.jobs.mode!==save.mode){save.jobs={day,mode:save.mode,bonus:false,list:jobsFor().map(k=>({k,base:JOBS[k].v(),done:false}))};persist();toast("Today's 3 jobs are in Empire. Finish all 3 for a bonus.",3);return}
+  for(const j of save.jobs.list){if(j.done||!JOBS[j.k])continue;if(JOBS[j.k].v()-j.base>=JOBS[j.k].n){j.done=true;save.cash+=750;save.rep+=10;persist();hudKey='';toast(`Daily job done: ${JOBS[j.k].txt(JOBS[j.k].n)}. +$750, +10 rep.`,3)}}
+  if(!save.jobs.bonus&&save.jobs.list.every(j=>j.done)){save.jobs.bonus=true;save.cash+=1500;persist();hudKey='';setTimeout(()=>toast('All 3 daily jobs done. Bonus +$1,500. New jobs tomorrow.',3.4),3200)}}
 
 /* ================= leaderboard ================= */
 let lbOpen=false,lbFilter='all',lbT=8,lbRows=null;
@@ -2366,7 +2427,7 @@ const running=()=>started&&!cineOn&&!shopOpen&&!mapOpen&&!growOpen&&!clubOpen&&!
 function frame(now){
   const dt=Math.min(.05,(now-last)/1000);last=now;const t=now/1000;FDT=dt;
   cineTick(dt);beatTick();
-  if(started){growTick(dt);clubTick(dt);empireTick(dt);crownTick(dt);lbTick(dt);if(empOpen){empRT-=dt;if(empRT<=0){empRT=1;renderEmpire()}}if(save.dancer){save.dancer.cd=Math.max(0,save.dancer.cd-dt);save.dancer.vipCd=Math.max(0,save.dancer.vipCd-dt)}}
+  if(started){growTick(dt);clubTick(dt);empireTick(dt);crownTick(dt);lbTick(dt);cloudTick(dt);jobsTick(dt);if(empOpen){empRT-=dt;if(empRT<=0){empRT=1;renderEmpire()}}if(save.dancer){save.dancer.cd=Math.max(0,save.dancer.cd-dt);save.dancer.vipCd=Math.max(0,save.dancer.vipCd-dt)}}
   if(running()){
     if(frozen>0)frozen-=dt;
     else{
@@ -2452,12 +2513,17 @@ $('pname').value=(save.profile&&save.profile.name)||'';$('pcrew').value=(save.pr
 FITS.forEach(c=>{const b=document.createElement('button');b.type='button';b.style.background=c;b.setAttribute('aria-label','Shirt color');b.setAttribute('aria-pressed',String(c===selFit));b.addEventListener('click',()=>{selFit=c;document.querySelectorAll('#swatches button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});$('swatches').appendChild(b)});
 // Dre leaves after mission 1
 setInterval(()=>{if(save.mode==='crook'&&(save.m>0||save.role!=='gang'))actors=actors.filter(a=>a.kind!=='friend')},2000);
-document.querySelectorAll('.mode').forEach(b=>b.addEventListener('click',()=>{readProfile();const r=b.dataset.role;startGame(r==='cop'?'cop':'crook',true,r)}));
+let armedRole=null;
+const hasProgress=()=>!!(save.mode&&save.flags.started&&(save.m>0||save.rep>=20||(save.crown||0)>0));
+document.querySelectorAll('.mode').forEach(b=>b.addEventListener('click',()=>{const r=b.dataset.role;
+  if(hasProgress()&&armedRole!==r){armedRole=r;document.querySelectorAll('.mode .tag').forEach(t=>{if(t.dataset.o)t.textContent=t.dataset.o});const t=b.querySelector('.tag');t.dataset.o=t.dataset.o||t.textContent;t.textContent='Tap again to START OVER';
+    const m=$('loadMsg');m.hidden=false;m.textContent=`Careful: starting a new life erases your ${CROWN[save.crown||0].n} save on this device (${money(save.cash+(save.bank||0))}, ${save.rep} rep). Tap Continue to keep it.`;return}
+  readProfile();startGame(r==='cop'?'cop':'crook',true,r)}));
 if(save.mode&&save.flags.started){const c=$('continue');c.hidden=false;c.textContent=`Continue as ${(ROLE_LABEL[save.role||(save.mode==='cop'?'cop':'gang')]||save.mode).toLowerCase()} · ${save.m>=scriptedLen()?`season ${seasonOf(save.m-scriptedLen())}, episode ${epOf(save.m-scriptedLen())}`:`${save.mode==='cop'?'shift':'mission'} ${save.m+1}`}`;c.addEventListener('click',()=>{readProfile();startGame(save.mode,false)})}
 $('newgame').addEventListener('click',()=>{started=false;$('intro').hidden=false;$('continue').hidden=true;cineOn=false;$('cine').hidden=true});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){for(const k in K)K[k]=0;firing=false}});
 resize();
-window.__uw={lbScore:()=>lbScore(),props:()=>props(),get stars(){return stars},copSees:()=>copSees(),growLevelUp:()=>growLevelUp(),growNext:()=>growNext(),context:()=>context(),renderLb:()=>renderLb(),episode:()=>episode(),empireState:()=>empireState(),scriptedLen:()=>scriptedLen(),resetEp:()=>{epCache=null},CROOK_EPS,COP_EPS,get missionActive(){return missionActive},get save(){return save},get player(){return player},get scene(){return scene},stashes,get actors(){return actors},get intActors(){return intActors},get cars(){return cars},get int(){return int},enterHouse,cineAdvance,get cineOn(){return cineOn},get call(){return call},startGame,setStars:n=>{stars=n},testPeers:l=>{peersList=l;myPeer='me1';onPeers()},BUYER:BUYER_DOOR,missionCount:()=>list().length,missionList:()=>list(),say,get remote(){return remote},get dmgOut(){return dmgOut}};
+window.__uw={bankIn:()=>bankIn(),bankOut:()=>bankOut(),atProperty:()=>atProperty(),jobsTick:d=>jobsTick(d),saveCode:()=>saveCode(),lbScore:()=>lbScore(),props:()=>props(),get stars(){return stars},copSees:()=>copSees(),growLevelUp:()=>growLevelUp(),growNext:()=>growNext(),context:()=>context(),renderLb:()=>renderLb(),episode:()=>episode(),empireState:()=>empireState(),scriptedLen:()=>scriptedLen(),resetEp:()=>{epCache=null},CROOK_EPS,COP_EPS,get missionActive(){return missionActive},get save(){return save},get player(){return player},get scene(){return scene},stashes,get actors(){return actors},get intActors(){return intActors},get cars(){return cars},get int(){return int},enterHouse,cineAdvance,get cineOn(){return cineOn},get call(){return call},startGame,setStars:n=>{stars=n},testPeers:l=>{peersList=l;myPeer='me1';onPeers()},BUYER:BUYER_DOOR,missionCount:()=>list().length,missionList:()=>list(),say,get remote(){return remote},get dmgOut(){return dmgOut}};
 requestAnimationFrame(frame);
 })();
 </script>
