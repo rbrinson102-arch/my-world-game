@@ -238,7 +238,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
 <div class="wrap">
   <header class="top">
     <h1>My <span>Block</span></h1>
-    <p id="subhead">Prototype v2.2 · Fictional game.</p>
+    <p id="subhead">Prototype v2.3 · Fictional game.</p>
   </header>
 
   <div class="stage" id="stage">
@@ -470,6 +470,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
         <li>Trap: re-up at The Plug, then serve people on the sidewalk with a green $. Each block only has so many customers, so the big players sell wholesale to other players on the Exchange. Work your way up or buy your way in. Test before you buy: scammers step on their work. Hire protection, because somebody always wants your spot.</li>
         <li>Run a whole network: deal, grow (a felony in North Carolina, so you sell it yourself), pimp, scam (fake IDs, stolen cards, phishing) and work as a lawyer, all on one character. Start hustles in Empire.</li>
         <li>Kingsley Towers: be a Trap House, shoot your way up the stairs and take the building. Cook on the top floors, get more customers, and fortify it, because other players and the feds will come for it. Cops rise from Patrol Officer to FBI to CIA Director, eager or crooked.</li>
+        <li>Every city has its own story and its own boss. Build an organization: recruit a lieutenant, enforcer, cook, accountant, lawyer, wheelman, hacker and a connect. Each one has a recruiting job, a perk and a paycheck. Miss payroll and they quit, or worse, talk.</li>
         <li>Goldsboro is level 1. Each next city (Raleigh, Durham, Charlotte, Chicago) unlocks as you rank up. Prices swing city to city, so buy low and sell high.</li>
         <li>Eight businesses per city (two per player), plus small shops on every block you can squeeze for protection money. Make an offer on someone else's business in Empire.</li>
         <li>Cops pick a path. Good cops get a clean-record pay bonus, $1,500 bounties for serving federal warrants, and can build IA cases on dirty cops. Dirty cops take bribes, shake down wanted players, and sell the evidence locker to The Plug, but IA is always watching. 70% IA and you lose the badge.</li>
@@ -974,7 +975,7 @@ function enterHouse(s){
 }
 function leaveHouse(){
   if(int&&int.kind==='club'){scene='city';player.x=cityReturn.x;player.y=cityReturn.y;camInit=false;bullets=[];int=null;intActors=[];persist();return}
-  const s=int.stash;const loot=int.cracked&&!s.raid&&!s.towers;const towWin=s.towers&&intActors.some(a=>a.kind==='boss'&&a.dead);
+  const s=int.stash;const loot=int.cracked&&!s.raid&&!s.towers;const towWin=s.towers&&intActors.some(a=>a.kind==='boss'&&a.dead);if(s.arc&&s.p&&intActors.some(a=>a.kind==='boss'&&a.dead))s.p.won=true;
   scene='city';player.x=cityReturn.x;player.y=cityReturn.y;camInit=false;bullets=[];
   if(!loot&&int.called){addStars(2,'She called it in. Cops on the way.')}
   if(loot){
@@ -1434,7 +1435,7 @@ function missionTick(){
     if(m.done)m.done();save.m++;persist();
     const next=()=>{if(save.m===scriptedLen()){big('win','Chapter 1 complete','Season 1 starts now. The story never ends.',3.2);setTimeout(startMission,3600)}else if(curMission())setTimeout(startMission,900)};
     big('win',m.label?'Episode complete':'Mission passed',m.label?m.label:save.mode==='cop'?'':'+ respect',2.2);
-    setTimeout(()=>{out?cine(out,next):next()},2300);
+    setTimeout(()=>{out&&out.length?cine(out,next):next()},2300);
   }
 }
 function spawnThugs(){
@@ -2547,18 +2548,153 @@ const COP_EPS={
       intro:()=>[{who:'Lt. Daniels',text:`The case is made. The man at the top is inside ${s.boss}'s house tonight with his crew.`,cam:s},
                  {who:'Lt. Daniels',text:`You go in, you bring him out. This is the whole season right here.`}],
       start:()=>{s.cooldown=0;s.inside=3+seasonOf(epIdx());s.bossHome=true;s.hq=true;persist()},
-      tick:()=>{if(!p.won&&save.flags.hqDown===p.sid){p.won=true;persist()}if(!p.won&&scene==='city'){if(!s.hq||s.cooldown>0||!s.bossHome){s.cooldown=0;s.inside=3+seasonOf(epIdx());s.bossHome=true;s.hq=true}if(go(s,60)&&enterCdCity<=0){enterCdCity=3;enterHouse(s)}}if(enterCdCity>0)enterCdCity-=FDT},
+      tick:()=>{if(!p.won&&save.flags.hqDown===p.sid){p.won=true;persist()}if(!p.won&&scene==='city'){if(!s.hq||s.cooldown>0||!s.bossHome){s.cooldown=0;s.inside=3+seasonOf(epIdx());s.bossHome=true;s.hq=true}if(go(s,60)&&!player.inCar&&enterCdCity<=0){enterCdCity=3;enterHouse(s)}}if(enterCdCity>0)enterCdCity-=FDT},
       obj:()=>p.won?'Report back to the precinct':scene==='interior'?'Take down the boss':`Raid ${s.boss}'s house`,
       target:()=>p.won?POLICE_DOOR:scene==='interior'?(intActors.find(a=>a.kind==='boss'&&!a.dead)||int.exit):s,
       check:()=>p.won&&go(POLICE_DOOR,90),
       done:()=>{s.hq=false;save.flags.hqDown=null;save.empire.caseFile=0;save.empire.copRank++;save.rep+=25;save.cash+=3000},
       outro:()=>[{who:'Lt. Daniels',text:`Front page tomorrow. There'll be another one by the weekend. There always is.`},{who:'Narrator',text:`End of Season ${seasonOf(epIdx())}. You've been promoted to ${['Detective','Sergeant','Lieutenant','Captain','Commander'][Math.min(4,save.empire.copRank)]}.`}]}}}
 };
+/* ---------- v2.3 ORGANIZATION + STEP MISSIONS + CITY ARCS ---------- */
+const ORG_ROLES={
+  lt:{n:'Lieutenant',pay:300,perk:'Runs things when you are away: your houses pay 25% more.'},
+  enforcer:{n:'Enforcer',pay:250,perk:'Half the stick-up crews never show up.'},
+  cook:{n:'Cook',pay:250,perk:'Kingsley Towers batches come out 50% bigger.'},
+  accountant:{n:'Accountant',pay:300,perk:'Federal heat cools faster. Your cash stash earns 2% every payday.'},
+  lawyer:{n:'Lawyer on retainer',pay:350,perk:'Jail time cut by a third.'},
+  driver:{n:'Wheelman',pay:200,perk:'Free travel between cities.'},
+  hacker:{n:'Hacker',pay:250,perk:'Scam heat cools twice as fast. Phishing pays 50% more.'},
+  connect:{n:'The Connect',pay:400,perk:'Connect re-ups cost 15% less and come twice as often.'}};
+function orgFix(){const o=save.org=save.org||{};for(const k in ORG_ROLES)if(o[k]===undefined)o[k]=null;if(o.payT===undefined)o.payT=600;return o}
+const orgHas=k=>save.mode==='crook'&&!!(save.org&&save.org[k]);
+const orgEmpty=()=>Object.keys(ORG_ROLES).filter(k=>!orgFix()[k]);
+function orgHire(k,name){const o=orgFix();o[k]={name,loyalty:70,since:Date.now()};persist();hudKey='';titleCard('New hire',`${name} · ${ORG_ROLES[k].n}`);toast(`${name} is your ${ORG_ROLES[k].n}. ${ORG_ROLES[k].perk} Pays ${money(ORG_ROLES[k].pay)} every 10 minutes.`,5)}
+function orgTick(dt){if(save.mode!=='crook'||!save.org||!running())return;const o=save.org,staff=Object.keys(ORG_ROLES).filter(k=>o[k]);if(!staff.length)return;
+  o.payT-=dt;if(o.payT>0)return;o.payT=600;const bill=staff.reduce((a,k)=>a+ORG_ROLES[k].pay,0);
+  if(orgHas('accountant')&&save.bank>0){const i=Math.round(save.bank*.02);save.bank+=i}
+  if(save.cash+(save.bank||0)>=bill){payFrom(bill);staff.forEach(k=>o[k].loyalty=Math.min(100,o[k].loyalty+5));toast(`Payday: ${money(bill)} to your people.`,2.6)}
+  else{staff.forEach(k=>o[k].loyalty-=20);toast(`You couldn't make payroll (${money(bill)}). Your people are talking.`,3.4);
+    for(const k of staff){if(o[k].loyalty<30){const nm=o[k].name;o[k]=null;if(Math.random()<.35){const e=empireState();e.fed=Math.min(100,e.fed+25);radio(`${nm} walked out and went straight to the feds. Federal heat +25.`,6)}else radio(`${nm} quit. You need a new ${ORG_ROLES[k].n}.`,5)}}}
+  persist();hudKey=''}
+function orgAct(k,a){const o=orgFix(),m=o[k];if(!m)return;if(a==='bonus'){if(save.cash<500){toast('A bonus is $500.',2);return}save.cash-=500;m.loyalty=Math.min(100,m.loyalty+15);toast(`${m.name} appreciates that.`,2)}
+  if(a==='fire'){o[k]=null;toast(`You cut ${m.name} loose.`,2.4);if(m.loyalty<50&&Math.random()<.3){const e=empireState();e.fed=Math.min(100,e.fed+15);radio(`${m.name} is bitter. Word is they're talking to detectives.`,5)}}
+  persist();hudKey='';if(empOpen)renderEmpire(true)}
+function orgRows(el,row){const o=orgFix();const h=document.createElement('b');h.textContent='Your organization';h.style.marginTop='6px';el.appendChild(h);
+  for(const k in ORG_ROLES){const m=o[k];row(ORG_ROLES[k].n,m?`${m.name} · loyalty ${Math.round(m.loyalty)}% · ${money(ORG_ROLES[k].pay)}/10 min`:'Open: a recruiting job will come up in your episodes');
+    if(m){const d=document.createElement('div');d.className='btnrow';d.innerHTML=`<button class="small" data-org="${k}" data-oa="bonus">Bonus $500</button><button class="small" data-org="${k}" data-oa="fire">Cut loose</button>`;el.appendChild(d)}}}
+/* step engine: each mission is a list of steps */
+const FAR=()=>{let best=null;for(let i=0;i<20;i++){const p=randomSpot();if(!best||dist(p,player)>dist(best,player))best=p}return best};
+function seqM(p,steps,limit){p.i=p.i||0;p.sub=p.sub||{};
+  const fail=why=>{p.i=0;p.sub={};p.tl=undefined;persist();toast(why||'Too slow. Start over.',3)};
+  return{tick:()=>{const s=steps[p.i];if(!s)return;if(limit&&p.i>0){p.tl=(p.tl===undefined?limit:p.tl)-FDT;if(p.tl<=0){fail();return}}
+      if(s.tick)s.tick(p.sub,p);if(s.ok(p.sub,p)){if(p.sub.c){p.last=p.sub.c;p.ch=(p.ch||[]).concat([p.sub.c])}p.i++;p.sub={};if(s.after)s.after(p);persist()}},
+    obj:()=>{const s=steps[p.i];return s?s.o(p.sub,p)+(limit&&p.i>0&&p.tl!==undefined?` · ${Math.ceil(p.tl)}s`:''):''},
+    target:()=>{const s=steps[p.i];return s&&s.t?s.t(p.sub,p):null},
+    check:()=>p.i>=steps.length}}
+const G=(pt,o,opt)=>({o:()=>o,t:()=>pt,ok:()=>go(pt,(opt&&opt.r)||70)&&(!opt||!opt.car||!!player.inCar)&&(!opt||!opt.clean||stars===0),after:opt&&opt.after});
+const F=(pt,n,o,msg)=>({tick:s=>fightAt(s,pt,n,msg),o:s=>fightObj(s,o,'Take them out'),t:s=>fightTarget(s,pt),ok:s=>!!s.cleared});
+const H=(pt,secs,o,waves)=>({o:s=>go(pt,120)?`${o} · ${Math.max(0,Math.ceil(secs-(s.t||0)))}s`:`Get to the spot: ${o}`,t:()=>pt,
+  tick:s=>{if(go(pt,120)){s.t=(s.t||0)+FDT;const w=Math.floor((s.t/secs)*(waves||2));if(w>(s.w||0)&&w<(waves||2)+0){s.w=w;spawnThugsAt(pt,2+Math.min(3,seasonOf(epIdx())),'They are coming for the spot!')}}},ok:s=>(s.t||0)>=secs});
+const LC=()=>({o:()=>stars>0?'Lose the cops':'Lose the cops',ok:()=>stars===0});
+const C=(title,text,opts)=>({o:s=>s.c?'':'Make the call',ok:s=>!!s.c,tick:s=>{if(!s.c&&!offerOpen&&running()&&!cineOn)offer(title,typeof text==='function'?text():text,opts.map(x=>({l:x.l,go:x.go,f:()=>{s.c=x.v||x.l;if(x.f)x.f(s);persist()}})))}});
+function markCar(s){for(const w of cars)if(w.mark&&w.kind==='wreck')w.mark=false;let c=cars.find(c=>c.mark);if(!c){const r=roadSpot(500,1400)||roadSpot(0,99999);c={x:r.x,y:r.y,ang:r.dir*Math.PI/2,speed:0,kind:'parked',color:'#c9a0ff',hp:100,hitCd:0,stuck:0,rev:0,mark:true};cars.push(c)}return c}
+const CAR=o=>({o:()=>o,t:()=>markCar(),tick:()=>markCar(),ok:()=>!!(player.inCar&&player.inCar.mark)});
+const DROP=(pt,o)=>({o:()=>player.inCar&&player.inCar.mark?o:'Get back in the marked car',t:()=>player.inCar&&player.inCar.mark?pt:markCar(),ok:()=>!!(player.inCar&&player.inCar.mark&&go(pt,140)),after:()=>{const c=player.inCar;if(c){c.mark=false;c.kind='parked';c.speed=0;player.inCar=null;player.x=c.x;player.y=c.y+30}}});
+function HOUSE(door,boss,inside,o){const S={id:'arc',b:null,x:door.x,y:door.y,boss,value:3000,out:0,inside,bossHome:true,cooldown:0,layout:ri(0,4),twist:'none',arc:true,owned:false};
+  return{o:s=>s.won?'':scene==='interior'?`Take out ${boss}`:o,t:s=>scene==='interior'?(intActors.find(a=>a.kind==='boss'&&!a.dead)||int.exit):door,
+    tick:s=>{S.p=s;if(!s.won&&scene==='city'&&!player.inCar&&go(door,45)&&Date.now()>houseCd){houseCd=Date.now()+4000;S.inside=inside+Math.min(3,seasonOf(epIdx())-1);enterHouse(S)}},ok:s=>!!s.won&&scene==='city'}}
+/* new episode types */
+const SP=()=>seasonOf(epIdx());let houseCd=0;
+const bet=n=>{save.cash=Math.max(0,save.cash+n)};
+const nm2=r=>`${NAMES1[Math.floor(r()*NAMES1.length)]} "${NICKS[Math.floor(r()*NICKS.length)]}"`;
+Object.assign(CROOK_EPS,{
+  /* ---- recruiting jobs: one per open role ---- */
+  rec_lt:{when:()=>!orgHas('lt'),gen:r=>({a:nm2(r),b:nm2(r),bad:Math.floor(r()*2),x:randomSpot(),y:randomSpot()}),
+    make:p=>{const who=[p.a,p.b],sq=seqM(p,[G(p.x,`Collect the count from ${p.a}`,{after:()=>toast(p.bad===0?`${p.a}'s bag feels light.`:`${p.a}'s count is right to the dollar.`,3)}),G(p.y,`Collect the count from ${p.b}`,{after:()=>toast(p.bad===1?`${p.b}'s bag feels light.`:`${p.b}'s count is right to the dollar.`,3)}),
+      C('Pick your right hand','One of them skimmed. The one you pick runs your corners when you are gone.',[{l:`Make ${p.a} lieutenant`,v:'a',go:1},{l:`Make ${p.b} lieutenant`,v:'b'}])]);
+      return Object.assign(sq,{title:'The Right Hand',intro:()=>[{who:'Pookie',text:`You can't be on every corner. You need a lieutenant. ${p.a} and ${p.b} both want it.`},{who:'Pookie',text:'Collect the count from both. See whose money comes back right.'}],
+        done:()=>{const idx=p.last==='a'?0:1;orgHire('lt',who[idx]);if(idx===p.bad){save.org.lt.loyalty=40;setTimeout(()=>toast(`You picked the one who skimmed. Keep an eye on ${who[idx]}.`,4),5200)}},
+        outro:()=>[{who:who[p.last==='a'?0:1],text:'I won\'t let you down.'}]})}},
+  rec_enforcer:{when:()=>!orgHas('enforcer'),gen:r=>({n:nm2(r),pt:randomSpot()}),
+    make:p=>Object.assign(seqM(p,[G(CARD_DOOR,`Find ${p.n} at the card room`),F(p.pt,3,`${p.n} wants to see what you got: meet his crew`,`${p.n}'s people want a fight!`),F(p.pt,4,'Second round','More of them!')]),
+      {title:'The Muscle',intro:()=>[{who:'Pookie',text:`${p.n} broke three jaws last month. He only works for somebody who can fight.`}],done:()=>orgHire('enforcer',p.n),outro:()=>[{who:p.n,text:`Aight. You can hang. I'm with you.`}]})},
+  rec_cook:{when:()=>!orgHas('cook'),gen:r=>({n:nm2(r),pt:FAR()}),
+    make:p=>Object.assign(seqM(p,[C('Get the cook out',`${p.n} is the best cook in the state and he's sitting in county on a $3,000 bail. Or you can hit the transport van.`,[{l:`Post bail (${money(3000)})`,v:'bail',go:1,f:s=>{if(save.cash>=3000){save.cash-=3000;p.bail=true}else{s.c=null;toast('You need $3,000 for bail.',2.4)}}},{l:'Hit the transport van',v:'hit'}]),
+        {o:s=>p.bail?'':fightObj(s,'Hit the transport van','Take out the guards'),t:s=>p.bail?null:fightTarget(s,p.pt),tick:s=>{if(p.bail){s.cleared=true;return}fightAt(s,p.pt,3+SP(),'Transport guards!')},ok:s=>!!s.cleared,after:()=>{if(!p.bail)addStars(2,'You hit a county transport. Every cop is out.')}},LC()]),
+      {title:'The Cook',intro:()=>[{who:'Pookie',text:`Whatever you're cooking in the Towers, ${p.n} can make it better.`}],done:()=>orgHire('cook',p.n),outro:()=>[{who:p.n,text:`Free air. Show me the kitchen.`}]})},
+  rec_accountant:{when:()=>!orgHas('accountant'),gen:r=>({n:`${NAMES1[Math.floor(r()*NAMES1.length)]} Price`,pt:randomSpot()}),
+    make:p=>Object.assign(seqM(p,[G(CARD_DOOR,'Meet the bank teller at the card room'),C('Her problem',`${p.n} owes a loan shark $4,000 from cards. Fix it and she cleans your money.`,[{l:'Pay the shark $4,000',v:'pay',go:1,f:s=>{if(save.cash>=4000){save.cash-=4000;p.paid=true}else{s.c=null;toast('You need $4,000.',2.4)}}},{l:'Lean on the shark',v:'lean'}]),
+        {o:s=>p.paid?'':fightObj(s,'Lean on the loan shark','Take out his boys'),t:s=>p.paid?null:fightTarget(s,p.pt),tick:s=>{if(p.paid){s.cleared=true;return}fightAt(s,p.pt,3,"The shark's boys!")},ok:s=>!!s.cleared}]),
+      {title:'The Numbers',intro:()=>[{who:'Pookie',text:'Cash you can\'t explain is cash the feds take. You need somebody who knows the numbers.'}],done:()=>orgHire('accountant',p.n),outro:()=>[{who:p.n,text:'From now on, nothing you own is in your name.'}]})},
+  rec_lawyer:{when:()=>!orgHas('lawyer'),gen:r=>({n:`${NAMES1[Math.floor(r()*NAMES1.length)]} Whitfield, Esq.`,pt:FAR()}),
+    make:p=>Object.assign(seqM(p,[G(POLICE_DOOR,'Get into the precinct records room clean (no stars)',{clean:true,after:()=>addStars(1,'You took the file. Someone saw you leaving.')}),LC(),G(p.pt,'Bring the file to the lawyer\'s office',{clean:true})]),
+      {title:'Counsel',intro:()=>[{who:'Pookie',text:`${p.n} lost his license over a file sitting in the precinct. Bring it to him and he works for you.`}],done:()=>orgHire('lawyer',p.n),outro:()=>[{who:p.n,text:'Anytime you get picked up, you say one word: lawyer. Then you call me.'}]})},
+  rec_driver:{when:()=>!orgHas('driver'),gen:r=>({n:nm2(r),a:randomSpot(),b:FAR(),c:randomSpot()}),
+    make:p=>Object.assign(seqM(p,[CAR('Steal the race car (purple marker)'),G(p.a,'Checkpoint 1',{car:true,r:120}),G(p.b,'Checkpoint 2',{car:true,r:120}),G(p.c,'Checkpoint 3',{car:true,r:120})],75),
+      {done:()=>{cars.forEach(c=>c.mark=false);orgHire('driver',p.n)},title:'Wheelman',intro:()=>[{who:p.n,text:'You want me driving for you? Beat my time. Three checkpoints, seventy-five seconds.'}],outro:()=>[{who:p.n,text:'Not bad. I\'ll drive. You pay.'}]})},
+  rec_hacker:{when:()=>!orgHas('hacker'),gen:r=>({n:nm2(r),pt:randomSpot()}),
+    make:p=>Object.assign(seqM(p,[G(p.pt,`Meet ${p.n} at the safe house`),H(p.pt,40,'Guard the laptop while it downloads',3)]),
+      {title:'The Hacker',intro:()=>[{who:p.n,text:'I can get into anything. But the people I took from want me dead. Keep me alive for forty seconds.'}],done:()=>orgHire('hacker',p.n),outro:()=>[{who:p.n,text:'Done. Every card, every bank login. You and me are partners now.'}]})},
+  rec_connect:{when:()=>!orgHas('connect')&&trapFix().tier>=1,gen:r=>({n:nm2(r),a:randomSpot(),b:FAR(),c:randomSpot()}),
+    make:p=>Object.assign(seqM(p,[G(DOCKS_DOOR,'Meet the connect at the docks'),G(p.a,'Drop 1'),G(p.b,'Drop 2'),G(p.c,'Drop 3')],150),
+      {title:'The Connect',intro:()=>[{who:p.n,text:'You want product straight from us, no middleman? Prove you can move it. Three drops, two and a half minutes.'}],done:()=>orgHire('connect',p.n),outro:()=>[{who:p.n,text:'Bien. From now on you buy from me.'}]})},
+  /* ---- new variety episodes ---- */
+  debts:{when:()=>true,gen:r=>({a:randomSpot(),b:randomSpot(),c:FAR(),n:[nm2(r),nm2(r),nm2(r)]}),
+    make:p=>{const owe=1000*SP();const stop=(pt,i)=>[G(pt,`Collect from ${p.n[i]}`),C(`${p.n[i]}`,`"I don't have all of it. Give me a week."`,[{l:'Give him the week',v:'w',f:()=>{save.rep=Math.max(0,save.rep-1)}},{l:'Take what he has',v:'t',go:1,f:()=>{save.cash+=Math.round(owe*.5)}},{l:'Make an example',v:'e',f:()=>{save.cash+=owe;save.rep+=3;addStars(1,'Somebody called it in.')}}])];
+      return Object.assign(seqM(p,[...stop(p.a,0),...stop(p.b,1),...stop(p.c,2)]),{title:'Collections',intro:()=>[{who:crewName(),text:'Three people owe us. How you collect decides what the street thinks of you.'}],outro:()=>[]})}},
+  chop:{when:()=>true,gen:()=>({}),
+    make:p=>Object.assign(seqM(p,[CAR('Steal the car on the list (purple marker)'),DROP(DOCKS_DOOR,'Bring it to the chop shop at the docks')]),{title:'Chop Shop',intro:()=>[{who:'Big Wheel',text:'Got a buyer overseas for one car. Purple one. Bring it to the docks in one piece.'}],done:()=>{const pay=1500*SP();save.cash+=pay;save.rep+=4;toast(`The car's already in a container. +${money(pay)}.`,3)}})},
+  summit:{when:()=>save.crown>=2,gen:r=>({pt:randomSpot(),n:nm2(r)}),
+    make:p=>Object.assign(seqM(p,[G(p.pt,`Host the sit-down with ${p.n}`),H(p.pt,45,'Hold the room. Somebody does not want peace',3),C('The terms',`${p.n} wants 20% of your corners to stay out of your way.`,[{l:'Agree (peace, less heat)',v:'y',f:()=>{save.empire.fed=Math.max(0,save.empire.fed-10)}},{l:'Refuse',v:'n',go:1,f:()=>{save.rep+=6}}])]),
+      {title:'The Sit-Down',intro:()=>[{who:crewName(),text:`${p.n} wants to talk peace. Neutral ground. Bring guns anyway.`}],outro:()=>[]})},
+  campaign:{when:()=>save.crown>=2,gen:r=>({a:randomSpot(),b:randomSpot(),c:randomSpot(),n:NAMES1[Math.floor(r()*NAMES1.length)]}),
+    make:p=>Object.assign(seqM(p,[C('City council race',`Councilman ${p.n} is in a close race. $5,000 in envelopes and the zoning board stops looking at your fronts.`,[{l:'Fund him ($5,000)',v:'y',go:1,f:s=>{if(save.cash>=5000)save.cash-=5000;else{s.c=null;toast('You need $5,000.',2)}}},{l:'Stay out of politics',v:'n',f:()=>{p.skip=true}}]),
+        ...[p.a,p.b,p.c].map((pt,k)=>({o:()=>`Envelope ${k+1} to a precinct captain (no stars)`,t:()=>p.skip?null:pt,ok:()=>p.skip||(go(pt,70)&&stars===0)}))]),
+      {title:'Politics',intro:()=>[{who:'Pookie',text:'Real power is not on the corner. It is at city hall.'}],done:()=>{if(p.skip)return;const e=empireState();e.fed=Math.max(0,e.fed-30);e.front=true;save.rep+=8;toast('Your man won. Federal heat -30, your money has a clean place to land.',4)}})},
+  launder:{when:()=>save.cash>=3000,gen:()=>({}),
+    make:p=>Object.assign(seqM(p,[C('Clean the money','You are holding too much dirty cash. How do you wash it?',[{l:'Car wash and laundromat (slow, safe)',v:'s',go:1},{l:orgHas('accountant')?'Shell companies (your accountant)':'Casino chips (fast, risky)',v:'f'}]),
+        {o:()=>'Bring the cash to the bank (no stars)',t:()=>BANK_DOOR,ok:()=>go(BANK_DOOR,80)&&stars===0}]),
+      {title:'Wash Day',intro:()=>[{who:crewName(),text:'Feds can\'t take what they can\'t trace.'}],done:()=>{const fast=p.last==='f',amt=Math.round(save.cash*(fast?.6:.3));const risky=fast&&!orgHas('accountant')&&Math.random()<.35;if(risky){const lost=Math.round(amt*.3);save.cash-=lost;toast(`The casino flagged the chips. You lost ${money(lost)}.`,3.4)}else{save.cash-=amt;save.bank=(save.bank||0)+amt;const e=empireState();e.fed=Math.max(0,e.fed-15);toast(`${money(amt)} is clean and in your stash. Federal heat -15.`,3.4)}}})},
+  cards:{when:()=>true,gen:()=>({}),
+    make:p=>{const buy=1000*SP();return Object.assign(seqM(p,[G(CARD_DOOR,'Sit down at the high-stakes table'),C('Hand 1',`Buy-in ${money(buy)}. You're holding two pair.`,[{l:'Raise',v:'r',go:1,f:s=>{if(save.cash<buy){s.c=null;toast(`You need ${money(buy)} at this table.`,2.4);return}bet(Math.random()<.55?buy:-buy)}},{l:'Fold',v:'f'}]),C('Hand 2','The dealer winks. You could mark the deck.',[{l:'Cheat',v:'c',f:()=>{if(Math.random()<.6){save.cash+=buy*2;toast('Clean. Nobody saw.',2.4)}else{p.caught=true;toast('Caught! They\'re coming for you.',2.4)}}},{l:'Play it straight',v:'s',go:1,f:()=>bet(Math.random()<.5?Math.min(buy,save.cash)||buy:-buy)}]),
+        {o:s=>p.caught?fightObj(s,'They want their money back','Get out of the card room'):'',t:s=>p.caught?fightTarget(s,CARD_DOOR):null,tick:s=>{if(p.caught)fightAt(s,CARD_DOOR,3,'The house wants its money!',200);else s.cleared=true},ok:s=>!!s.cleared}]),
+      {title:'High Stakes',intro:()=>[{who:crewName(),text:'Big game at the card room tonight. Everybody who matters will be at that table.'}]})}}
+});
+/* fix: choice-driven steps need the last choice */
+/* city arcs: a different story in every city */
+const ARCS={
+  goldsboro:[
+    {t:'Country Roads',who:'Unc Ray',intro:'Wayne County runs on back roads. Two buyers out past the bypass want weight. The sheriff\'s deputies watch the highway.',steps:p=>[G(p.q[1],'Buyer 1, edge of town'),G(p.q[3],'Buyer 2, before the deputies set up',{after:()=>addStars(1,'A deputy ran your plate.')}),LC()],pay:2500},
+    {t:'Miss Hattie\'s Kitchen',who:'Miss Hattie',intro:'Miss Hattie has run the numbers out of her kitchen for forty years. Her grandsons think you\'re a problem.',steps:p=>[G(p.pt,'Go see Miss Hattie'),C('Miss Hattie','"I don\'t need partners. But my grandsons need jobs."',[{l:'Partner with her (steady income)',v:'p',go:1,f:()=>{save.flags.hattie=1}},{l:'Take her book',v:'t',f:()=>{save.cash+=4000}}]),{...F(p.pt,3,'Her grandsons want a word','Her grandsons!'),ok:s=>save.flags.hattie===1||!!s.cleared,tick:s=>{if(save.flags.hattie!==1)fightAt(s,p.pt,3,'Her grandsons!')}}],pay:2000},
+    {t:'The Commissioner\'s Nephew',who:'Pookie',intro:'Trey Walker sells out of his uncle\'s car lot and the uncle sits on the county board. Untouchable, unless you make him touchable.',steps:p=>[G(p.pt,'Watch Trey\'s car lot'),C('Trey Walker','You have photos of Trey handing off a bag. What now?',[{l:'Blackmail the uncle',v:'b',go:1,f:()=>{const e=empireState();e.fed=Math.max(0,e.fed-20)}},{l:'Run Trey out yourself',v:'r'}]),HOUSE(p.pt,'Trey Walker',3,'Kick in the car lot office')],pay:5000,boss:1}],
+  raleigh:[
+    {t:'The Lobbyist',who:'Pookie',intro:'Downtown Raleigh, Fayetteville Street. A lobbyist wants product for a party full of people with law degrees. Deliver clean.',steps:p=>[G(p.q[0],'Pick up the order',{clean:true}),G(p.q[1],'Deliver it to the party (no stars)',{clean:true})],pay:4000},
+    {t:'State Contract',who:'Pookie',intro:'A paving contractor launders for half the city. Take his armored car route, or take his business.',steps:p=>[C('The contractor','How do you want him?',[{l:'Rob the armored car',v:'a',go:1},{l:'Buy into his company ($6,000)',v:'b',f:s=>{if(save.cash>=6000){save.cash-=6000;save.flags.contract=1}else{s.c=null;toast('You need $6,000.',2)}}}]),{...F(p.pt,4,'Hit the armored car','Armored car guards!'),ok:s=>save.flags.contract===1||!!s.cleared,tick:s=>{if(save.flags.contract!==1)fightAt(s,p.pt,4,'Armored car guards!')}},LC()],pay:6000},
+    {t:'Bishop',who:'Pookie',intro:'Deacon Bishop runs Raleigh from behind a church and a car dealership. You don\'t own this city until he\'s gone.',steps:p=>[HOUSE(p.pt,'Deacon Bishop',4,'Hit Bishop\'s house')],pay:9000,boss:1}],
+  durham:[
+    {t:'Tobacco Warehouse',who:'Pookie',intro:'Old tobacco warehouses everywhere in Durham. One is perfect for a stash. Squatters with guns disagree.',steps:p=>[F(p.pt,4,'Clear the warehouse','The squatters are armed!')],pay:3000},
+    {t:'The Grad Student',who:'Pookie',intro:'A chemistry grad student is selling a recipe that doubles purity. Two crews want her. Get her first.',steps:p=>[G(p.pt,'Find the grad student'),H(p.pt,35,'Keep her safe while she packs',2),G(p.q[1],'Get her to your spot')],pay:4000},
+    {t:'Bull City Crown',who:'Pookie',intro:'Marcus "Kingfish" Lee runs Durham. He knows you\'re coming.',steps:p=>[HOUSE(p.pt,'Kingfish Lee',5,'Hit Kingfish\'s spot')],pay:11000,boss:1}],
+  charlotte:[
+    {t:'Wire Room',who:'Pookie',intro:'Charlotte is a bank town. A teller will push a wire through if you bring a fake ID she can file.',steps:p=>[C('The wire',()=>save.scam&&save.scam.ids>0?'She needs a fake ID on file. You have one.':'She needs a fake ID on file and you don\'t have one. You could rob her drawer instead, but that pays half and brings heat.',[{l:'Use one of your fake IDs',v:'id',go:1,f:s=>{if(save.scam&&save.scam.ids>0){save.scam.ids--}else{s.c=null;toast('No fake ID. Rob the drawer, or print one first.',3)}}},{l:'Rob her drawer instead (half pay, heat)',v:'rob',f:()=>{p.half=true}}]),G(BANK_DOOR,'Get the cash at the bank',{after:()=>{if(p.half)addStars(2,'The teller hit the silent alarm!')}}),LC()],pay:8000},
+    {t:'Speedway Money',who:'Pookie',intro:'Race weekend. Every rich man in the state is in town. Run product through the parking lots fast.',steps:p=>[G(p.q[0],'Lot 1'),G(p.q[1],'Lot 2'),G(p.q[2],'Lot 3')],limit:120,pay:6000},
+    {t:'Uptown',who:'Pookie',intro:'Victor Lang launders for half the Southeast out of an Uptown tower. Take his books and his chair.',steps:p=>[HOUSE(p.pt,'Victor Lang',5,'Hit Lang\'s office')],pay:14000,boss:1}],
+  chicago:[
+    {t:'Tribute',who:'Pookie',intro:'Chicago has rules older than you. The old families want tribute from anyone new.',steps:p=>[C('The old families','"Ten percent. Every month. Or you go home."',[{l:'Pay the tribute ($10,000)',v:'p',f:s=>{if(save.cash>=10000){save.cash-=10000;p.paid=true}else{s.c=null;toast('You need $10,000.',2)}}},{l:'Tell them no',v:'n',go:1}]),{o:s=>p.paid?'':fightObj(s,'They sent shooters to your block','Take them out'),tick:s=>{if(p.paid)s.cleared=true;else fightAt(s,p.q[0],5,'The old families sent shooters!')},t:s=>p.paid?null:fightTarget(s,p.q[0]),ok:s=>!!s.cleared}],pay:6000},
+    {t:'The L Drop',who:'Pookie',intro:'Drops under the train tracks, timed with the trains. Miss one and the buyer walks.',steps:p=>[G(p.q[0],'Drop 1'),G(p.q[1],'Drop 2'),G(p.q[2],'Drop 3'),G(p.q[3],'Drop 4')],limit:150,pay:9000},
+    {t:'The Commission',who:'Pookie',intro:'Big Sal Moretti chairs the table every crew in Chicago answers to. Take his seat.',steps:p=>[HOUSE(p.pt,'Big Sal Moretti',6,'Hit Moretti\'s social club')],pay:20000,boss:1}]};
+function arcDone(){save.arcs=save.arcs||{};return save.arcs[CITY_ID]||0}
+for(const city in ARCS)ARCS[city].forEach((A,i)=>{CROOK_EPS[`arc_${city}_${i}`]={when:()=>false,gen:()=>({pt:randomSpot(),q:[randomSpot(),FAR(),randomSpot(),FAR()]}),
+  make:p=>{const sq=seqM(p,A.steps(p),A.limit);return Object.assign(sq,{title:`${CITY_DEFS[city].name}: ${A.t}`,intro:()=>[{who:A.who,text:A.intro}],
+    done:()=>{save.arcs=save.arcs||{};save.arcs[city]=Math.max(save.arcs[city]||0,i+1);const pay=Math.round(A.pay*(CITY.mult||1)*(p.half?.5:1));save.cash+=pay;save.rep+=A.boss?25:8;toast(`+${money(pay)}${A.boss?`. ${CITY_DEFS[city].name} answers to you now.`:''}`,3.4);if(A.boss)titleCard('City taken',CITY_DEFS[city].name)},
+    outro:()=>A.boss?[{who:'Narrator',text:`${CITY_DEFS[city].name} is yours. ${CITY_ORDER[CITY_ORDER.indexOf(city)+1]?`The next city is ${CITY_DEFS[CITY_ORDER[CITY_ORDER.indexOf(city)+1]].name}. It plays by different rules.`:'There is nobody left above you.'}`}]:[]})}}});
+
 function chooseEp(idx){
   const cop=save.mode==='cop',lib=cop?COP_EPS:CROOK_EPS,e=empireState(),ep=epOf(idx);
   if(ep===6)return cop?'c_finale':'finale';
-  if(!cop&&ep===1)return 'outsiders';
   if(!cop&&e.fed>=85)return 'lawyer';
+  if(!cop){const A=ARCS[CITY_ID],d=arcDone();if(A&&d<A.length)return `arc_${CITY_ID}_${d}`;
+    const rec=orgEmpty().map(k=>'rec_'+k).filter(k=>CROOK_EPS[k]&&CROOK_EPS[k].when());if(rec.length&&Math.random()<.5)return pick(rec)}
   const used=Object.keys(e.eps).filter(k=>seasonOf(+k)===seasonOf(idx)).map(k=>e.eps[k].tid);
   const pool=Object.keys(lib).filter(k=>!['finale','outsiders','lawyer','c_finale'].includes(k)&&lib[k].when()&&!used.includes(k));
   return pick(pool.length?pool:Object.keys(lib).filter(k=>lib[k].when()&&!['finale','c_finale','outsiders','lawyer'].includes(k)));
@@ -2569,7 +2705,7 @@ function episode(){
   const e=empireState();
   if(!e.eps[idx]){const tid=chooseEp(idx);const r=mulberry(idx*7919+Date.now()%997);e.eps[idx]={tid,p:(save.mode==='cop'?COP_EPS:CROOK_EPS)[tid].gen(r)};persist()}
   const rec=e.eps[idx],lib=save.mode==='cop'?COP_EPS:CROOK_EPS;
-  if(!lib[rec.tid]){delete e.eps[idx];return episode()}
+  if(!lib[rec.tid]||(save.mode==='crook'&&rec.tid.startsWith('arc_')&&!rec.tid.startsWith(`arc_${CITY_ID}_`)&&!(rec.p&&rec.p.i>0))){delete e.eps[idx];return episode()}
   const m=lib[rec.tid].make(rec.p);m.label=`Season ${seasonOf(idx)} · Episode ${epOf(idx)}`;
   epCache={idx,mode:save.mode,m};return m;
 }
@@ -2579,8 +2715,9 @@ function empireTick(dt){
   if(save.mode==='crook'){
     e.incomeT-=dt;
     if(e.incomeT<=0){e.incomeT=90;const n=e.terr.length;
-      if(n){const amt=n*350*seasonOf(epIdx());save.cash+=amt;e.fed+=n*2*(e.front?.4:1);toast(`Your houses paid ${money(amt)}.${e.front?' The car wash cleaned it.':''}`,2.6)}
-      if(e.front)e.fed=Math.max(0,e.fed-3);
+      if(n){const amt=Math.round(n*350*seasonOf(epIdx())*(orgHas('lt')?1.25:1));save.cash+=amt;e.fed+=n*2*(e.front?.4:1);toast(`Your houses paid ${money(amt)}.${e.front?' The car wash cleaned it.':''}`,2.6)}
+      {const side=(save.flags.hattie===1?300:0)+(save.flags.contract===1?400:0);if(side){const amt=side*seasonOf(epIdx());save.cash+=amt;toast(`${save.flags.hattie===1?'Miss Hattie\'s numbers':''}${save.flags.hattie===1&&save.flags.contract===1?' and ':''}${save.flags.contract===1?'your paving company':''} paid ${money(amt)}.`,2.4)}}
+      if(e.front)e.fed=Math.max(0,e.fed-3);if(orgHas('accountant'))e.fed=Math.max(0,e.fed-3);
       e.crew.forEach(c=>c.loyalty=Math.max(0,Math.min(100,c.loyalty+(n?1:-2))));
       e.fed=Math.min(100,e.fed);persist();hudKey=''}
   }
@@ -2601,7 +2738,7 @@ function renderEmpire(force){const ae0=document.activeElement;if(!force&&ae0&&ae
      if(has('pimp'))row('Pimping',`${(save.pimp.stable||[]).length} working`);if(has('scam')){const sc=scamFix();row('Scam laptop',`${sc.ids} IDs · ${sc.cards} cards · heat ${Math.round(sc.heat)}%`)}
      const d=document.createElement('div');d.className='btnrow';let any=false;
      for(const k of Object.keys(HUSTLES)){if(has(k))continue;const H=HUSTLES[k];any=true;const b=document.createElement('button');b.className='small';b.dataset.hz=k;b.textContent=`Start: ${H.n} · ${money(H.cost)}${H.need&&!H.req()?` (needs ${H.need})`:''}`;b.disabled=save.cash<H.cost||!H.req();d.appendChild(b)}
-     if(any)el.appendChild(d)}}
+     if(any)el.appendChild(d);orgRows(el,row);{const A=ARCS[CITY_ID],dn=arcDone();if(A)row(`${CITY.name} story`,dn>=A.length?'Done. This city answers to you.':`Chapter ${dn+1} of ${A.length}: ${A[dn].t}`)}}}
   if(save.jobs&&save.jobs.list)save.jobs.list.forEach((j,i)=>{const J=JOBS[j.k];if(!J)return;row(i?'':"Today's jobs",`${j.done?'✓':'○'} ${J.txt(J.n)}${j.done?'':` (${Math.max(0,Math.min(J.n,J.v()-j.base))}/${J.n})`} · $750`)});
   if(save.mode==='crook'){row('Cash stash',`${money(save.bank||0)}${atProperty()?'':' · go to a property you own to stash or take out'}`);
     if(atProperty()&&stars===0){const d=document.createElement('div');d.className='btnrow';d.innerHTML=`<button class="small go" data-act="in" ${save.cash<1?'disabled':''}>Stash all cash</button><button class="small" data-act="out" ${!(save.bank>0)?'disabled':''}>Take it all out</button>`;el.appendChild(d)}}
@@ -2662,6 +2799,7 @@ function renderEmpire(force){const ae0=document.activeElement;if(!force&&ae0&&ae
 
 $('empBody').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;
   if(b.dataset.hz){startHustle(b.dataset.hz);return}
+  if(b.dataset.org){orgAct(b.dataset.org,b.dataset.oa);return}
   if(b.dataset.crew){const a=b.dataset.crew;if(a==='create')crewDo('create',{name:$('crName').value,tag:$('crTag').value});else if(a==='join')crewDo('join',{tag:$('jTag').value,code:$('jCode').value});else if(a==='msg'){sendCrewMsg($('crMsg').value);$('crMsg').value=''}else crewDo(a,{id:b.dataset.id,name:b.dataset.name,amt:b.dataset.amt});return}
   if(b.dataset.offer){makeOffer(b.dataset.offer,+b.dataset.amt);return}
   if(b.dataset.case){save.copCase={id:b.dataset.case,tag:b.dataset.tag,name:b.dataset.cn};persist();toast(`Case open on [${b.dataset.tag}]. The wiretap is live.`,3);renderEmpire(true);return}
@@ -2846,7 +2984,7 @@ const jailActive=()=>!!(save.jail&&Date.now()<save.jail.until);
 let jailT=0,lawRows=[],hitRows=[],lawT=6,warnedCase={},hitWarned={};
 const mmss=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`};
 function sendToJail(by){
-  const st=Math.max(1,chaseMax||stars||1),mins=Math.round(4+st*4+heatLv()*2);
+  const st=Math.max(1,chaseMax||stars||1),mins=Math.max(2,Math.round((4+st*4+heatLv()*2)*(orgHas('lawyer')?.67:1)));
   save.jail={until:Date.now()+mins*60000,mins,pd:false,caseId:null,status:'',lawyer:null,lawyerId:null,refund:0,by:by||''};persist();
   setTimeout(async()=>{started=false;showJail();try{cloudPush(true)}catch(e){}
     if(window.__law){await lbEnsure();try{const id=await window.__law.open(save.lbId,save.lbSecret,(save.profile&&save.profile.name)||'Player',CITY_ID,0,mins);if(save.jail){save.jail.caseId=id;save.jail.status='open';save.jail.refund=0;persist();jailSync()}}catch(e){}}},3100);
@@ -3254,7 +3392,7 @@ $('jPD').addEventListener('click',publicDefender);$('jBail').addEventListener('c
 $('slotBtn').addEventListener('click',switchSlot);
 (function(){const other=(()=>{try{return JSON.parse(localStorage.getItem(SLOT==='1'?'uws-v4-s2':'uws-v4')||'null')}catch(e){return null}})();
   const nm=other&&other.profile&&other.profile.name;$('slotBtn').textContent=nm?`Switch to ${nm}${other.jail&&Date.now()<other.jail.until?` (in jail ${mmss(other.jail.until-Date.now())})`:''}`:`Make a second character`;
-  $('subhead').textContent=`v2.2 · Level ${CITY_ORDER.indexOf(CITY_ID)+1}: ${CITY.name}, ${CITY.st} · Fictional game.`;$('introCity').textContent=`${CITY.name}, ${CITY.st}. After midnight. Everybody wants a piece of this city. Pick who you are.`;$('mapTitle').textContent=`${CITY.name}, ${CITY.st}`;
+  $('subhead').textContent=`v2.3 · Level ${CITY_ORDER.indexOf(CITY_ID)+1}: ${CITY.name}, ${CITY.st} · Fictional game.`;$('introCity').textContent=`${CITY.name}, ${CITY.st}. After midnight. Everybody wants a piece of this city. Pick who you are.`;$('mapTitle').textContent=`${CITY.name}, ${CITY.st}`;
   if(save.jail&&Date.now()<save.jail.until)setTimeout(showJail,50);else if(save.jail){save.jail=null;persist()}})();
 /* ---------- TRAP: street dealing, the Exchange, protection, scams ---------- */
 const TRAP_TIERS=[
@@ -3269,7 +3407,7 @@ const tEsc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;
 function trapFix(){const t=save.trap=save.trap||{};const d={tier:0,sold:0,earned:0,dem:0,demT:0,lotT:0,scams:0,scammed:0,mine:{},bought:[],muscleT:0,guard:null,stickT:300,scamT:480,toldUp:-1,meet:null};for(const k in d)if(t[k]===undefined)t[k]=d[k];return t}
 const TT=()=>TRAP_TIERS[clamp(trapFix().tier,0,4)];
 const streetPrice=()=>Math.round(TT().street*prodMult());
-const lotCost=()=>Math.round(TT().cost*(CITY.mult||1));
+const lotCost=()=>Math.round(TT().cost*(CITY.mult||1)*(orgHas('connect')?.85:1));
 function demandLeft(){const t=trapFix();if(Date.now()>t.demT){t.dem=0;t.demT=Date.now()+600000}return Math.max(0,trapCap()-t.dem)}
 const canExchange=()=>trapFix().tier>=2||(save.grow&&save.grow.lvl>=1&&has('grower'))||(save.mode==='cop'&&copTier()>=7&&isDirty());
 const trapCap=()=>Math.round(TT().cap*(myTowers()?1.5:1));
@@ -3295,14 +3433,14 @@ function dummySale(p){const t=trapFix();if(demandLeft()<=0)return;if(p)p.want=fa
 function reup(){const t=trapFix(),T0=TT(),cost=T0.lot*lotCost();
   if(Date.now()<t.lotT){toast(`The connect is dry. Next shipment in ${mmss(t.lotT-Date.now())}.`,2.4);return}
   if(save.cash<cost){toast(`${T0.lot} bags costs ${money(cost)}. Or buy cheaper from players on the Exchange (Trap).`,3);return}
-  save.cash-=cost;save.grow.bags+=T0.lot;t.lotT=Date.now()+240000;persist();hudKey='';toast(`Re-up: ${T0.lot} bags for ${money(cost)}. Sell to people on the sidewalk with a green $.`,3.4)}
+  save.cash-=cost;save.grow.bags+=T0.lot;t.lotT=Date.now()+(orgHas('connect')?120000:240000);persist();hudKey='';toast(`Re-up: ${T0.lot} bags for ${money(cost)}. Sell to people on the sidewalk with a green $.`,3.4)}
 function trapUp(buy){const t=trapFix(),nx=TRAP_TIERS[t.tier+1];if(!nx)return;const ok=nx.req(t).every(r=>r[1]),cost=ok?nx.up:nx.buy;
   if(!ok&&!buy)return;if(save.cash<cost){toast(`Need ${money(cost)}.`,2);return}
   save.cash-=cost;t.tier++;persist();hudKey='';toast(ok?`You worked your way up. You're a ${nx.n} now.`:`You bought your way in. You're a ${nx.n} now. People will test you.`,3.2);
   if(!ok){t.stickT=Math.min(t.stickT,60)}renderTrap()}
 function trapCheckUp(){const t=trapFix(),nx=TRAP_TIERS[t.tier+1];if(nx&&t.toldUp!==t.tier&&nx.req(t).every(r=>r[1])){t.toldUp=t.tier;toast(`You can move up to ${nx.n}. Open Trap.`,3)}}
 /* stick-ups and scam calls */
-function stickUp(){const t=trapFix(),g=protectedBy();
+function stickUp(){const t=trapFix(),g=protectedBy();if(orgHas('enforcer')&&Math.random()<.5){toast('Your enforcer ran off a stick-up crew before they got close.',2.8);return}
   if(t.muscleT>Date.now()&&Math.random()<.6){toast('Stick-up kids rolled up on your spot. Your muscle ran them off.',2.8);return}
   const n=g?2:3;stick={a:jumpers(player,n,'Stick-up kid'),t:45,kind:'stick'};sosT=Date.now();presT=0;
   radio(`Somebody wants your spot. ${n} stick-up kids are coming for your pack!${g?` ${g.name} got the call.`:' Hire protection in Trap.'}`,5)}
@@ -3422,7 +3560,7 @@ function scamDo(a){const s=scamFix();if(!has('scam'))return;
   if(a==='id'){if(s.idQ.length>=3){trapMsg='Your printer can only run 3 at a time.';return}if(save.cash<ID_COST){trapMsg=`Blank cards and holograms cost ${money(ID_COST)}.`;return}save.cash-=ID_COST;const last=s.idQ.length?s.idQ[s.idQ.length-1]:Date.now();s.idQ.push(Math.max(Date.now(),last)+ID_TIME);trapMsg='Printing a fake ID. One minute.'}
   if(a==='collect'){const n=s.idQ.filter(t=>t<=Date.now()).length;if(n){s.ids+=n;s.idQ=s.idQ.filter(t=>t>Date.now());trapMsg=`${n} fake ID${n>1?'s':''} ready.`}}
   if(a==='dumps'){if(save.cash<300){trapMsg='A pack of dumps costs $300.';return}save.cash-=300;let good=0;for(let i=0;i<3;i++)if(Math.random()<.7)good++;s.cards+=good;s.heat=Math.min(100,s.heat+2);trapMsg=good===3?'Three good cards.':`Bought 3 dumps off the dark web. ${good} work, ${3-good} were dead. Scammers scam scammers.`}
-  if(a==='phish'){if(Date.now()<s.phishT){trapMsg=`Phone numbers are burned. Next blast in ${mmss(s.phishT-Date.now())}.`;return}s.phishT=Date.now()+120000;const pay=Math.round(ri(200,800)*(1+Math.min(2,s.made/20000))*prodMult());save.cash+=pay;s.made+=pay;s.heat=Math.min(100,s.heat+6);
+  if(a==='phish'){if(Date.now()<s.phishT){trapMsg=`Phone numbers are burned. Next blast in ${mmss(s.phishT-Date.now())}.`;return}s.phishT=Date.now()+120000;const pay=Math.round(ri(200,800)*(1+Math.min(2,s.made/20000))*prodMult()*(orgHas('hacker')?1.5:1));save.cash+=pay;s.made+=pay;s.heat=Math.min(100,s.heat+6);
     trapMsg=`Text blast hit. Somebody's grandma sent ${money(pay)}.`;if(Math.random()<.12)s.markT=Math.min(s.markT,20)}
   persist();hudKey=''}
 function scamContext(){if(save.mode!=='crook'||scene!=='city'||player.inCar||stars>0)return null;const s=save.scam;if(!s)return null;
@@ -3436,7 +3574,7 @@ function cashOut(){const s=scamFix();if(s.cards<1||s.ids<1)return;const n=Math.m
   if(Math.random()<.15){s.ids--;s.cards-=n;addStars(2,'The teller flagged the ID. Bank security is calling it in!');toast('Flagged. They kept the ID and the cards.',3)}
   else{s.ids--;s.cards-=n;const pay=Math.round(n*900*prodMult());save.cash+=pay;s.made+=pay;toast(`Cashed out ${n} cards under a fake name. +${money(pay)}.`,3)}persist();hudKey=''}
 function scamTick(dt){if(save.mode!=='crook'||!save.scam)return;const s=save.scam;
-  s._dec=(s._dec||0)+dt;if(s._dec>=20){s._dec=0;s.heat=Math.max(0,s.heat-1)}
+  s._dec=(s._dec||0)+dt;if(s._dec>=(orgHas('hacker')?10:20)){s._dec=0;s.heat=Math.max(0,s.heat-1)}
   if(!running()||scene!=='city'||stick)return;
   if(s.heat>=30){s.markT-=dt;if(s.markT<=0){s.markT=rnd(300,480);stick={a:jumpers(player,2,'Scam victim'),t:45,kind:'angry'};radio('Somebody you scammed found you. They brought friends.',4)}}
   if(s.heat>=50){s.ssT-=dt;if(s.ssT<=0){s.ssT=rnd(240,360);addStars(2,'The Secret Service traced the cards to you!')}}}
@@ -3481,7 +3619,7 @@ async function towersWon(raid){const pf=prof();
     towersSync()}catch(e){toast('Could not reach the building. Try again.',2.4)}}
 function openTowers(){if(!started||cineOn||trapOpen||offerOpen)return;towOpen=true;for(const kk in K)K[kk]=0;firing=false;renderTowers();$('towModal').hidden=false}
 function closeTowers(){towOpen=false;$('towModal').hidden=true}
-const towBatch=()=>towFix().evict?40:20;
+const towBatch=()=>Math.round((towFix().evict?40:20)*(orgHas('cook')?1.5:1));
 function renderTowers(){if(!towOpen)return;const t=towFix(),def=towersRow?clamp(+towersRow.def||0,0,3):0;let h='';
   h+=`<div class="stat2">Defense: ${TOW_DEF[def].n} · Heat ${Math.round(t.heat)}% · ${t.evict?'Tenants evicted':'Tenants stayed (lookouts)'} · Your block gets 50% more customers.</div>`;
   const c=t.cook&&(!t.cook.city||t.cook.city===CITY_ID)?t.cook:null;h+='<h3>Cook floor</h3>';if(t.cook&&!c)h+=`<p class="muted2">You have a batch cooking in ${tEsc(CITY_DEFS[t.cook.city].name)}.</p>`;else 
@@ -3591,7 +3729,7 @@ function renderTravel(){const el=$('travelRow');el.textContent='';
   for(const id of CITY_ORDER){const c=CITY_DEFS[id];const lv=CITY_ORDER.indexOf(id)+1,mk=market(id);const b=document.createElement('button');b.className='small'+(id===CITY_ID?' go':'');
     if(id===CITY_ID){b.textContent=`Level ${lv} · ${c.name} (you are here) · ${mk.txt}`;b.disabled=true}
     else if(!cityUnlocked(id)){b.textContent=`Level ${lv} · ${c.name} · locked until ${cityNeed(id)}`;b.disabled=true}
-    else{const cost=save.mode==='cop'&&copTier()>=5?0:c.st===CITY.st?250:900;b.textContent=`Level ${lv} · ${c.name}, ${c.st} · ${money(cost)} · ${mk.txt}`;b.dataset.city=id;b.dataset.cost=cost}
+    else{const cost=(save.mode==='cop'&&copTier()>=5)||orgHas('driver')?0:c.st===CITY.st?250:900;b.textContent=`Level ${lv} · ${c.name}, ${c.st} · ${money(cost)} · ${mk.txt}`;b.dataset.city=id;b.dataset.cost=cost}
     el.appendChild(b)}}
 $('travelRow').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled||!b.dataset.city)return;const cost=+b.dataset.cost;
   if(stars>0||turfWar){toast('Not with the heat on you. Lose the cops first.',2.4);return}if(save.cash<cost){toast(`The ticket costs ${money(cost)}.`,2);return}
@@ -3659,7 +3797,7 @@ const running=()=>started&&!cineOn&&!shopOpen&&!mapOpen&&!growOpen&&!clubOpen&&!
 function frame(now){
   const dt=Math.min(.05,(now-last)/1000);last=now;const t=now/1000;FDT=dt;
   cineTick(dt);beatTick();
-  if(started){growTick(dt);clubTick(dt);empireTick(dt);crownTick(dt);lbTick(dt);cloudTick(dt);jobsTick(dt);sirenTick();turfTick(dt);lawTick(dt);frontsTick(dt);trapTick(dt);scamTick(dt);towersTick(dt);careerTick(dt);crewTick(dt);safeTick(dt);heistTick(dt);ciTick(dt);copTick(dt);racketTick(dt);stakeTick(dt);extTick(dt);cityUnlockTick();if(running()){escortTick(dt);pimpTick(dt);escortBadCheck()}stage.classList.toggle('hasbombs',(save.bombs||0)>0);if(empOpen){empRT-=dt;if(empRT<=0){empRT=1;const ae=document.activeElement;if(!(ae&&ae.tagName==='INPUT'&&$('empBody').contains(ae))&&!(ae&&ae.tagName==='INPUT'&&ae.value))renderEmpire()}}if(save.dancer){save.dancer.cd=Math.max(0,save.dancer.cd-dt);save.dancer.vipCd=Math.max(0,save.dancer.vipCd-dt)}}
+  if(started){growTick(dt);clubTick(dt);empireTick(dt);crownTick(dt);lbTick(dt);cloudTick(dt);jobsTick(dt);sirenTick();turfTick(dt);lawTick(dt);frontsTick(dt);trapTick(dt);scamTick(dt);orgTick(dt);towersTick(dt);careerTick(dt);crewTick(dt);safeTick(dt);heistTick(dt);ciTick(dt);copTick(dt);racketTick(dt);stakeTick(dt);extTick(dt);cityUnlockTick();if(running()){escortTick(dt);pimpTick(dt);escortBadCheck()}stage.classList.toggle('hasbombs',(save.bombs||0)>0);if(empOpen){empRT-=dt;if(empRT<=0){empRT=1;const ae=document.activeElement;if(!(ae&&ae.tagName==='INPUT'&&$('empBody').contains(ae))&&!(ae&&ae.tagName==='INPUT'&&ae.value))renderEmpire()}}if(save.dancer){save.dancer.cd=Math.max(0,save.dancer.cd-dt);save.dancer.vipCd=Math.max(0,save.dancer.vipCd-dt)}}
   if(running()){
     if(frozen>0)frozen-=dt;
     else{
@@ -3685,7 +3823,7 @@ function frame(now){
         while(peds.length<30)peds.push(newPed());
         while(cars.filter(c=>c.kind==='traffic').length<15){const c=newTraffic();if(!c)break;cars.push(c)}
         if(save.mode==='crook'&&cars.filter(c=>c.kind==='patrol').length<2+(save.smug&&save.smug.cargo&&save.smug.cargo.hot?2:0))spawnPatrol();
-        if(cars.filter(c=>c.kind==='parked'||c.kind==='wreck').length>8){const i=cars.findIndex(c=>(c.kind==='wreck'||c.kind==='parked')&&!c.owned&&dist(c,player)>700);if(i>=0)cars.splice(i,1)}
+        if(cars.filter(c=>c.kind==='parked'||c.kind==='wreck').length>8){const i=cars.findIndex(c=>(c.kind==='wreck'||c.kind==='parked')&&!c.owned&&!c.mark&&dist(c,player)>700);if(i>=0)cars.splice(i,1)}
         actors=actors.filter(a=>!a.fled&&!(a.dead&&a.deadT>40&&a.kind!=='guard'));
       }
       missionTick();
@@ -3763,7 +3901,7 @@ if(save.mode&&save.flags.started){const c=$('continue');c.hidden=false;c.textCon
 $('newgame').addEventListener('click',()=>{started=false;$('intro').hidden=false;$('continue').hidden=!(save.mode&&save.flags.started);cineOn=false;$('cine').hidden=true});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){for(const k in K)K[k]=0;firing=false}});
 resize();
-window.__uw={yardPeople:()=>{yardPeople();return yardPpl.map(p=>p.n)},startFight:i=>startFight(yardInmates()[i]),fightAct:a=>fightAct(a),get fight(){return fight},yardInmates:()=>yardInmates(),endFight:h=>endFight(h),showJail:()=>showJail(),sendToJail:b=>sendToJail(b),set towersRowT(v){towersRow=v},get towersRow(){return towersRow},towersContext:()=>towersContext(),towersAssault:r=>towersAssault(r),towersWon:r=>towersWon(r),openTowers:()=>openTowers(),towAct:(a,l)=>towAct(a,l),towFix:()=>towFix(),startHustle:k=>startHustle(k),has:h=>has(h),scamFix:()=>scamFix(),scamDo:a=>scamDo(a),scamContext:()=>scamContext(),swipeCard:()=>swipeCard(),cashOut:()=>cashOut(),copTier:()=>copTier(),careerTick:d=>careerTick(d),get int(){return int},get intActors(){return intActors},leaveHouse:()=>leaveHouse(),TOWERS_DOOR,BANK_DOOR,trapCap:()=>trapCap(),trapFix:()=>trapFix(),serve:()=>{const p=nearCustomer();serveCustomer(p)},reup:()=>reup(),trapUp:b=>trapUp(b),stickUp:()=>stickUp(),get stick(){return stick},scamCall:()=>scamCall(),openTrap:()=>openTrap(),trapDo:(a,x)=>trapDo(a,x),demandLeft:()=>demandLeft(),get peds(){return peds},trapContext:()=>trapContext(),meetDone:()=>meetDone(),market:id=>market(id),cityUnlocked:id=>cityUnlocked(id),openExtort:i=>openExtort(i),get ext(){return ext},extRelease:()=>extRelease(),myRacketCount:()=>myRacketCount(),showTut:()=>showTut(),peerTest:(peer,pr,mp)=>{myPeer=mp;copPeerEvents({peer},pr,performance.now())},isDirty:()=>isDirty(),npcBribe:p=>npcBribe(p),sellEvidence:()=>sellEvidence(),copTick:d=>copTick(d),sfx:k=>sfx(k),get soundOn(){return soundOn},get pimpFoes(){return pimpFoes},safeTick:d=>safeTick(d),inSafeZone:()=>inSafeZone(),get heist(){return heist},set heistSet(h){heist=h},flipWire:()=>flipWire(),get ci(){return save.ci},crewDo:(a,x)=>crewDo(a,x),crewSync:()=>crewSync(),get myCrew(){return myCrew},sendCrewMsg:t=>sendCrewMsg(t),get int(){return int},buyFront:k=>buyFront(k),openFront:k=>openFront(k),frontAction:a=>frontAction(a),frontsTickNow:()=>{frontTick=0;frontsTick(0)},fstate:k=>fstate(k),escortTick:d=>escortTick(d),pimpTick:d=>pimpTick(d),pimpRecruit:()=>pimpRecruit(),moveProgress:()=>moveProgress(),throwBomb:()=>throwBomb(),explode:(x,y)=>explode(x,y),get bombs(){return bombs},busted:b=>busted(b),get jail(){return save.jail},releaseJail:m=>releaseJail(m),CITY_ID,SLOT,turfContext:()=>turfContext(),startTurfWar:c=>startTurfWar(c),get turfWar(){return turfWar},myBlocks:()=>myBlocks(),ownerOf:i=>ownerOf(i),turfSync:()=>turfSync(),get pactRows(){return pactRows},heatLv:()=>heatLv(),cornerOf:i=>cornerOf(i),bankIn:()=>bankIn(),bankOut:()=>bankOut(),atProperty:()=>atProperty(),jobsTick:d=>jobsTick(d),saveCode:()=>saveCode(),lbScore:()=>lbScore(),props:()=>props(),get stars(){return stars},copSees:()=>copSees(),growLevelUp:()=>growLevelUp(),growNext:()=>growNext(),context:()=>context(),renderLb:()=>renderLb(),episode:()=>episode(),empireState:()=>empireState(),scriptedLen:()=>scriptedLen(),resetEp:()=>{epCache=null},CROOK_EPS,COP_EPS,get missionActive(){return missionActive},get save(){return save},get player(){return player},get scene(){return scene},stashes,get actors(){return actors},get intActors(){return intActors},get cars(){return cars},get int(){return int},enterHouse,cineAdvance,get cineOn(){return cineOn},get call(){return call},startGame,setStars:n=>{stars=n},testPeers:l=>{peersList=l;myPeer='me1';onPeers()},BUYER:BUYER_DOOR,missionCount:()=>list().length,missionList:()=>list(),say,get remote(){return remote},get elsewhere(){return elsewhere},get dmgOut(){return dmgOut}};
+window.__uw={orgHire:(k,n)=>orgHire(k,n),orgFix:()=>orgFix(),orgTick:d=>orgTick(d),chooseEp:i=>chooseEp(i),ARCS,get CROOK_EPS(){return CROOK_EPS},curMission:()=>curMission(),get missionActive(){return missionActive},set missionActiveT(v){missionActive=v},epIdx:()=>epIdx(),resetEpCache:()=>{epCache=null},yardPeople:()=>{yardPeople();return yardPpl.map(p=>p.n)},startFight:i=>startFight(yardInmates()[i]),fightAct:a=>fightAct(a),get fight(){return fight},yardInmates:()=>yardInmates(),endFight:h=>endFight(h),showJail:()=>showJail(),sendToJail:b=>sendToJail(b),set towersRowT(v){towersRow=v},get towersRow(){return towersRow},towersContext:()=>towersContext(),towersAssault:r=>towersAssault(r),towersWon:r=>towersWon(r),openTowers:()=>openTowers(),towAct:(a,l)=>towAct(a,l),towFix:()=>towFix(),startHustle:k=>startHustle(k),has:h=>has(h),scamFix:()=>scamFix(),scamDo:a=>scamDo(a),scamContext:()=>scamContext(),swipeCard:()=>swipeCard(),cashOut:()=>cashOut(),copTier:()=>copTier(),careerTick:d=>careerTick(d),get int(){return int},get intActors(){return intActors},leaveHouse:()=>leaveHouse(),TOWERS_DOOR,BANK_DOOR,trapCap:()=>trapCap(),trapFix:()=>trapFix(),serve:()=>{const p=nearCustomer();serveCustomer(p)},reup:()=>reup(),trapUp:b=>trapUp(b),stickUp:()=>stickUp(),get stick(){return stick},scamCall:()=>scamCall(),openTrap:()=>openTrap(),trapDo:(a,x)=>trapDo(a,x),demandLeft:()=>demandLeft(),get peds(){return peds},trapContext:()=>trapContext(),meetDone:()=>meetDone(),market:id=>market(id),cityUnlocked:id=>cityUnlocked(id),openExtort:i=>openExtort(i),get ext(){return ext},extRelease:()=>extRelease(),myRacketCount:()=>myRacketCount(),showTut:()=>showTut(),peerTest:(peer,pr,mp)=>{myPeer=mp;copPeerEvents({peer},pr,performance.now())},isDirty:()=>isDirty(),npcBribe:p=>npcBribe(p),sellEvidence:()=>sellEvidence(),copTick:d=>copTick(d),sfx:k=>sfx(k),get soundOn(){return soundOn},get pimpFoes(){return pimpFoes},safeTick:d=>safeTick(d),inSafeZone:()=>inSafeZone(),get heist(){return heist},set heistSet(h){heist=h},flipWire:()=>flipWire(),get ci(){return save.ci},crewDo:(a,x)=>crewDo(a,x),crewSync:()=>crewSync(),get myCrew(){return myCrew},sendCrewMsg:t=>sendCrewMsg(t),get int(){return int},buyFront:k=>buyFront(k),openFront:k=>openFront(k),frontAction:a=>frontAction(a),frontsTickNow:()=>{frontTick=0;frontsTick(0)},fstate:k=>fstate(k),escortTick:d=>escortTick(d),pimpTick:d=>pimpTick(d),pimpRecruit:()=>pimpRecruit(),moveProgress:()=>moveProgress(),throwBomb:()=>throwBomb(),explode:(x,y)=>explode(x,y),get bombs(){return bombs},busted:b=>busted(b),get jail(){return save.jail},releaseJail:m=>releaseJail(m),CITY_ID,SLOT,turfContext:()=>turfContext(),startTurfWar:c=>startTurfWar(c),get turfWar(){return turfWar},myBlocks:()=>myBlocks(),ownerOf:i=>ownerOf(i),turfSync:()=>turfSync(),get pactRows(){return pactRows},heatLv:()=>heatLv(),cornerOf:i=>cornerOf(i),bankIn:()=>bankIn(),bankOut:()=>bankOut(),atProperty:()=>atProperty(),jobsTick:d=>jobsTick(d),saveCode:()=>saveCode(),lbScore:()=>lbScore(),props:()=>props(),get stars(){return stars},copSees:()=>copSees(),growLevelUp:()=>growLevelUp(),growNext:()=>growNext(),context:()=>context(),renderLb:()=>renderLb(),episode:()=>episode(),empireState:()=>empireState(),scriptedLen:()=>scriptedLen(),resetEp:()=>{epCache=null},CROOK_EPS,COP_EPS,get missionActive(){return missionActive},get save(){return save},get player(){return player},get scene(){return scene},stashes,get actors(){return actors},get intActors(){return intActors},get cars(){return cars},get int(){return int},enterHouse,cineAdvance,get cineOn(){return cineOn},get call(){return call},startGame,setStars:n=>{stars=n},testPeers:l=>{peersList=l;myPeer='me1';onPeers()},BUYER:BUYER_DOOR,missionCount:()=>list().length,missionList:()=>list(),say,get remote(){return remote},get elsewhere(){return elsewhere},get dmgOut(){return dmgOut}};
 requestAnimationFrame(frame);
 })();
 </script>
