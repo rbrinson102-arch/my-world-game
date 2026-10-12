@@ -97,6 +97,8 @@ canvas#mini{width:118px;height:118px;border-radius:50%;border:2px solid rgba(255
 #actbtn{right:16px;bottom:20px;width:88px;height:88px;border:2px solid var(--amber);background:rgba(255,178,62,.18);font-size:14px}
 #actbtn[disabled]{opacity:.35;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.06)}
 #firebtn{right:116px;bottom:44px;width:78px;height:78px;border:2px solid var(--siren-red);background:rgba(255,75,92,.2);font-size:15px}
+#bombbtn{right:30px;bottom:190px;width:52px;height:52px;border:1px solid rgba(255,140,60,.6);background:rgba(255,120,40,.15);font-size:10.5px}
+.touch #bombbtn{display:none}.touch.hasbombs #bombbtn{display:flex}
 #swapbtn{right:30px;bottom:122px;width:56px;height:56px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);font-size:11px}
 .touch .joy,.touch .tbtn{display:flex}
 .touch .hint{display:none}
@@ -213,6 +215,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
 .proj{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 .proj div{background:var(--raised);border-radius:6px;padding:8px}.proj label{display:block;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .proj b{font-family:var(--mono);font-size:14px}
+#jail{background:rgba(7,9,14,.97);z-index:30}
 .muted2{margin:0;color:var(--muted);font-size:12.5px}
 .lbrow{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:13.5px}.lbrow.me{background:rgba(255,178,62,.1)}.lbrow b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lbrow small{display:block;color:var(--muted);font-size:11.5px}.lbrow em{font-style:normal;font-family:var(--mono);color:var(--amber)}.lbrow span{font-family:var(--mono);color:var(--muted)}
 .erow{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:6px 0;font-size:13.5px}.erow span{color:var(--muted);flex:none}.erow b{text-align:right;font-weight:600}
@@ -229,7 +232,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
 <div class="wrap">
   <header class="top">
     <h1>My <span>Block</span></h1>
-    <p>Prototype v1.1 · Turf wars: District 7. Fictional game.</p>
+    <p>Prototype v1.2 · Cities, jail and lawyers: District 7. Fictional game.</p>
   </header>
 
   <div class="stage" id="stage">
@@ -262,6 +265,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
       <div class="joy" id="joy"><i id="joyKnob"></i></div>
       <button class="tbtn" id="firebtn">Fire</button>
       <button class="tbtn" id="swapbtn">Swap</button>
+      <button class="tbtn" id="bombbtn">Bomb</button>
       <button class="tbtn" id="actbtn" disabled>—</button>
     </div>
     <div class="cine" id="cine" hidden>
@@ -305,6 +309,22 @@ canvas#mini{cursor:pointer;pointer-events:auto}
         <button class="primary" id="beatHit">Hit</button>
       </div>
     </div>
+    <div class="intro" id="jail" hidden>
+      <div class="box">
+        <h2>Locked <span>up</span></h2>
+        <p id="jailWho"></p>
+        <p class="stat2" id="jailTime" style="font-size:20px"></p>
+        <p id="jailCase" class="muted2"></p>
+        <div id="jHire"><p class="muted2">Hire a lawyer. A real player takes your case and argues it in court. If they win, you walk out now. If they lose, you get 10 more minutes.</p>
+          <div class="btnrow"><button class="small go" data-fee="500">Lawyer · $500</button><button class="small go" data-fee="1500">Lawyer · $1,500</button><button class="small go" data-fee="3000">Lawyer · $3,000</button></div></div>
+        <p class="muted2" id="jNoLaw" hidden>Real lawyers work on the public game link.</p>
+        <div id="jHitRow" hidden><p class="muted2" id="jHitLbl">Put a hit on your lawyer:</p><div class="btnrow"><button class="small" data-hit="1000">Hit · $1,000</button><button class="small" data-hit="3000">Hit · $3,000</button></div></div>
+        <div class="btnrow"><button class="small" id="jPD">Public defender · free</button><button class="small" id="jBail">Post bail</button></div>
+        <button class="primary" id="jAlt">Play your other character</button>
+        <b>Locked up with you</b>
+        <div id="jRoster"></div>
+      </div>
+    </div>
     <div class="modal" id="lbModal" hidden>
       <div class="panelbox">
         <h2>Leaderboard</h2>
@@ -325,8 +345,9 @@ canvas#mini{cursor:pointer;pointer-events:auto}
     </div>
     <div class="modal" id="mapModal" hidden>
       <div class="mapbox">
-        <header><h2>District 7 map</h2><button class="ghost" id="mapClose">Close</button></header>
+        <header><h2 id="mapTitle">City map</h2><button class="ghost" id="mapClose">Close</button></header>
         <canvas id="bigmap" width="1440" height="1440"></canvas>
+        <div class="travel"><b>Travel</b><div class="btnrow" id="travelRow"></div><p class="muted2">Each city has its own players and its own turf. Your cash, rank and crew go with you.</p></div>
         <div class="legend">
           <span><i style="background:#fff"></i>You</span>
           <span><i style="background:#ffb23e"></i>Stash house</span>
@@ -342,7 +363,8 @@ canvas#mini{cursor:pointer;pointer-events:auto}
     <div class="intro" id="intro">
       <div class="box">
         <h2>My <span>Block</span></h2>
-        <p>District 7, after midnight. Everybody wants a piece of Rico's city. Pick who you are.</p>
+        <p id="introCity">After midnight. Everybody wants a piece of Rico's city. Pick who you are.</p>
+        <div class="btnrow" id="slotRow"><button class="small" id="slotBtn">Switch character</button></div>
         <div class="prof">
           <label for="pname">Street name<input id="pname" maxlength="16" autocomplete="off" placeholder="What they call you"></label>
           <label for="pcrew">Crew tag<input id="pcrew" maxlength="4" autocomplete="off" placeholder="D7"></label>
@@ -373,6 +395,9 @@ canvas#mini{cursor:pointer;pointer-events:auto}
         <li>Get away: break line of sight and the stars drop. Hide out at a house you own, or respray your car at Sparkle Car Wash. At 2 stars the cops shoot; at 4, SWAT. Shoot back or run.</li>
         <li>Turf war: walk to a block's corner flag and start a war. Clear the soldiers, hold the block 20 seconds, and it pays you. Bosses can call sit-downs in Empire: make peace, pay for it, declare war, or hit a truce partner's block behind their back.</li>
         <li>Cops start easy and get tougher as you rank up. Lose them by breaking line of sight, shoot their cars until they wreck, hide out, or respray.</li>
+        <li>Drive-by: shoot from your car (aim with the mouse, or FIRE auto-aims on phones). Iron Works sells assault rifles, the street sweeper and pipe bombs (G or BOMB).</li>
+        <li>Get busted and you go to county jail for real minutes. Hire a player lawyer, use the public defender, post bail, or play your second character while you wait. Lose your case? Put a hit on your lawyer.</li>
+        <li>Anyone can work as a lawyer on the side (Empire → pass the bar). Travel between Raleigh, Durham, Charlotte and Chicago from the map.</li>
         <li>Stash your cash at any property you own. Getting busted or killed can't touch the stash.</li>
         <li>Every day you get 3 jobs worth $750 each, plus a $1,500 bonus for finishing all 3.</li>
         <li>Your progress backs up online. Your save code is in Empire: type it on any phone or computer to keep playing where you left off.</li>
@@ -425,7 +450,17 @@ const T=48, BS=8, N=6, TILES=N*BS, WORLD=TILES*T;
 function cityTile(tx,ty){ if(tx<0||ty<0||tx>=TILES||ty>=TILES) return 3; const lx=tx%BS, ly=ty%BS; if(lx>=6||ly>=6) return 0; if(lx===0||lx===5||ly===0||ly===5) return 1; return 2; }
 const DIRS=[[1,0],[0,1],[-1,0],[0,-1]];
 const seeded=mulberry(7);
-const ROOFS=['#2a2f3d','#30283a','#2b3532','#38302a','#262c38','#33303a','#2e2a2a'];
+const CITY_DEFS={
+  raleigh:{name:'Raleigh',st:'NC',h:['Rico Ave','Harbor Rd','Grand Blvd','Lincoln St','Arcade Way','Dockside Dr'],v:['1st St','MLK Blvd','Iron St','Church St','Bridge St','Market St'],d:[['Northline','Midtown'],['Southgate','Harbor Row']],roofs:['#2a2f3d','#30283a','#2b3532','#38302a','#262c38','#33303a','#2e2a2a']},
+  durham:{name:'Durham',st:'NC',h:['Main St','Chapel Hill St','Fayetteville St','Alston Ave','Roxboro St','Holloway St'],v:['Duke St','Gregson St','Mangum St','Dillard St','Elm St','Driver St'],d:[['Downtown','Bull City'],['Southside','East End']],roofs:['#2e2a33','#332b26','#2a3030','#3a2e28','#2b2a36','#30302a','#2c2626']},
+  charlotte:{name:'Charlotte',st:'NC',h:['Trade St','Tryon St','Independence Blvd','Beatties Ford Rd','Freedom Dr','Wilkinson Blvd'],v:['Graham St','Church St','College St','Brevard St','Davidson St','Caldwell St'],d:[['Uptown','NoDa'],['West End','South End']],roofs:['#26303a','#2c2c38','#2a3532','#34302c','#232b36','#30303a','#2a2a30']},
+  chicago:{name:'Chicago',st:'IL',h:['Madison St','Roosevelt Rd','Division St','Chicago Ave','63rd St','79th St'],v:['Michigan Ave','State St','Halsted St','Ashland Ave','Pulaski Rd','Cicero Ave'],d:[['The Loop','North Side'],['West Side','South Side']],roofs:['#2c2c2c','#33302c','#28303a','#3a2a2a','#2a2e2a','#302a36','#262a2e']}
+};
+const SLOT=(()=>{try{return localStorage.getItem('uws-slot')==='2'?'2':'1'}catch(e){return '1'}})();
+const SAVE_KEY=SLOT==='1'?'uws-v4':'uws-v4-s2';
+const CITY_ID=(()=>{try{const c=JSON.parse(localStorage.getItem(SAVE_KEY)||'{}').city;return CITY_DEFS[c]?c:'raleigh'}catch(e){return 'raleigh'}})();
+const CITY=CITY_DEFS[CITY_ID];
+const ROOFS=CITY.roofs;
 const blocks=[];
 for(let by=0;by<N;by++)for(let bx=0;bx<N;bx++){const det=[];for(let i=0;i<4;i++)det.push([seeded()*3.2+.2,seeded()*3.2+.2,seeded()*.5+.3]);blocks.push({bx,by,kind:'plain',roof:ROOFS[Math.floor(seeded()*ROOFS.length)],det})}
 const blk=(bx,by)=>blocks[by*N+bx];
@@ -442,9 +477,9 @@ const POLICE_DOOR=doorOf(blk(1,1)), HOSPITAL_DOOR=doorOf(blk(4,1)), GUN_DOOR=doo
 const POOKIE={x:(2*BS+.5)*T,y:(3*BS+.5)*T};
 const hLane=(k,dir)=>(BS*k+(dir===0?7.5:6.5))*T;
 const vLane=(j,dir)=>(BS*j+(dir===1?6.5:7.5))*T;
-const HSTREETS=['Rico Ave','Harbor Rd','Grand Blvd','Lincoln St','Arcade Way','Dockside Dr'];
-const VSTREETS=['1st St','MLK Blvd','Iron St','Church St','Bridge St','Market St'];
-const DISTRICT_NAMES=[['Northline','Midtown'],['Southgate','Harbor Row']];
+const HSTREETS=CITY.h;
+const VSTREETS=CITY.v;
+const DISTRICT_NAMES=CITY.d;
 const districtAt=(x,y)=>DISTRICT_NAMES[Math.floor(y/(BS*T))<3?0:1][Math.floor(x/(BS*T))<3?0:1];
 function streetAt(x,y){const tx=Math.floor(x/T),ty=Math.floor(y/T),lx=tx%BS,ly=ty%BS,k=clamp(Math.floor(ty/BS),0,N-1),j=clamp(Math.floor(tx/BS),0,N-1);if(ly>=6&&lx>=6)return HSTREETS[k]+' & '+VSTREETS[j];if(ly>=6)return HSTREETS[k];if(lx>=6)return VSTREETS[j];return null}
 function placeName(b){return({police:'Precinct',hospital:'Hospital',guns:'Iron Works',club:'Club Velvet',docks:'Dockside Warehouse',grow:'Grow house',buyer:'The Plug',carwash:'Sparkle Car Wash',cardroom:'Harbor Card Room'})[b.kind]||null}
@@ -514,8 +549,9 @@ function los(a,b){const d=dist(a,b),n=Math.ceil(d/12);for(let i=1;i<n;i++){const
 /* ================= save ================= */
 const FRESH=()=>({mode:null,cash:200,rep:0,m:0,flags:{},weapons:{fist:true},ammo:{},armor:0,arrests:0,ia:0});
 let save=FRESH();
-try{const s=JSON.parse(localStorage.getItem('uws-v4'));if(s&&s.flags)save=Object.assign(FRESH(),s)}catch(e){}
-const persist=()=>{try{localStorage.setItem('uws-v4',JSON.stringify(save))}catch(e){}};
+try{const s=JSON.parse(localStorage.getItem(SAVE_KEY));if(s&&s.flags)save=Object.assign(FRESH(),s)}catch(e){}
+save.city=CITY_ID;if(save.turfCity!==CITY_ID){save.turfAll=save.turfAll||{};save.turfAll[save.turfCity||'raleigh']=save.turf||{};save.turf=save.turfAll[CITY_ID]||{};save.turfCity=CITY_ID}
+const persist=()=>{try{localStorage.setItem(SAVE_KEY,JSON.stringify(save))}catch(e){}};
 stashes.forEach(rollStash);
 
 /* ================= weapons ================= */
@@ -523,9 +559,11 @@ const WEAPONS={
   fist:{name:'Fists',dmg:16,rate:.45,melee:true},
   pistol:{name:'Pistol',dmg:30,rate:.3,spread:.05,speed:950,pellets:1,price:500,start:48,refill:36},
   smg:{name:'SMG',dmg:15,rate:.085,spread:.13,speed:950,pellets:1,price:1800,start:120,refill:90},
-  shotgun:{name:'Shotgun',dmg:16,rate:.8,spread:.32,speed:800,pellets:6,price:1400,start:24,refill:16,range:.35}
+  shotgun:{name:'Shotgun',dmg:16,rate:.8,spread:.32,speed:800,pellets:6,price:1400,start:24,refill:16,range:.35},
+  rifle:{name:'Assault rifle',dmg:24,rate:.11,spread:.06,speed:1150,pellets:1,price:4500,start:90,refill:60,ammo:250,range:.75},
+  lmg:{name:'Street sweeper',dmg:20,rate:.06,spread:.11,speed:1050,pellets:1,price:9500,start:200,refill:150,ammo:500,range:.7}
 };
-const ORDER=['fist','pistol','smg','shotgun'];
+const ORDER=['fist','pistol','smg','shotgun','rifle','lmg'];
 let curW='fist';
 
 /* ================= entities ================= */
@@ -583,6 +621,7 @@ addEventListener('keydown',e=>{
   if(k==='e'||k===' '){if(!K.act)actPress();K.act=1}
   if(k==='f')firing=true;
   if(k==='q')swapWeapon();
+  if(k==='g'&&started&&running())throwBomb();
 });
 addEventListener('keyup',e=>{if(e.target&&e.target.tagName==='INPUT')return;const k=e.key.toLowerCase();if(k==='w'||k==='arrowup')K.up=0;if(k==='s'||k==='arrowdown')K.down=0;if(k==='a'||k==='arrowleft')K.left=0;if(k==='d'||k==='arrowright')K.right=0;if(k==='e'||k===' ')K.act=0;if(k==='f')firing=false});
 const cv=$('game');
@@ -604,6 +643,7 @@ ab.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(
 fb.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();firing=true});
 ['pointerup','pointercancel','pointerleave'].forEach(ev=>fb.addEventListener(ev,()=>{firing=false}));
 sb.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();swapWeapon()});
+$('bombbtn').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();throwBomb()});
 $('cine').addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;cineAdvance()});
 
 /* ================= HUD & overlays ================= */
@@ -662,17 +702,19 @@ let shopOpen=false;
 function openShop(){shopOpen=true;for(const k in K)K[k]=0;firing=false;renderShop();$('shopModal').hidden=false}
 function renderShop(){
   const it=[];
-  for(const k of ['pistol','smg','shotgun']){const w=WEAPONS[k];
+  for(const k of ['pistol','smg','shotgun','rifle','lmg']){const w=WEAPONS[k];
     if(!save.weapons[k])it.push(`<button class="item" data-buy="${k}" ${save.cash<w.price?'disabled':''}><span>${w.name}<small>Comes with ${w.start} rounds.</small></span><em>${money(w.price)}</em></button>`);
-    else it.push(`<button class="item" data-ammo="${k}" ${save.cash<100?'disabled':''}><span>${w.name} ammo<small>+${w.refill} rounds. You have ${save.ammo[k]||0}.</small></span><em>$100</em></button>`);
+    else it.push(`<button class="item" data-ammo="${k}" ${save.cash<(w.ammo||100)?'disabled':''}><span>${w.name} ammo<small>+${w.refill} rounds. You have ${save.ammo[k]||0}.</small></span><em>${money(w.ammo||100)}</em></button>`);
   }
+  it.push(`<button class="item" data-bombs="1" ${save.cash<900?'disabled':''}><span>Pipe bombs ×3<small>Throw with G or the BOMB button. Wrecks cars. You have ${save.bombs||0}.</small></span><em>$900</em></button>`);
   it.push(`<button class="item" data-armor="1" ${save.cash<400||save.armor>=100?'disabled':''}><span>Body armor<small>Soaks up most of the damage until it breaks.</small></span><em>$400</em></button>`);
   $('shopItems').innerHTML=it.join('');
 }
 $('shopItems').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b||b.disabled)return;
   if(b.dataset.buy){const k=b.dataset.buy,w=WEAPONS[k];save.cash-=w.price;save.weapons[k]=true;save.ammo[k]=(save.ammo[k]||0)+w.start;curW=k;toast(`Bought a ${w.name.toLowerCase()}.`)}
-  if(b.dataset.ammo){const k=b.dataset.ammo;save.cash-=100;save.ammo[k]=(save.ammo[k]||0)+WEAPONS[k].refill}
+  if(b.dataset.ammo){const k=b.dataset.ammo;save.cash-=WEAPONS[k].ammo||100;save.ammo[k]=(save.ammo[k]||0)+WEAPONS[k].refill}
+  if(b.dataset.bombs){save.cash-=900;save.bombs=(save.bombs||0)+3;toast('Three pipe bombs. Press G (or BOMB) to throw.',2.6)}
   if(b.dataset.armor){save.cash-=400;save.armor=100}
   persist();hudKey='';renderShop();
 });
@@ -717,6 +759,7 @@ function context(){
   if(save.mode==='crook'&&dist(player,POOKIE)<44)return{t:'intel',label:intelT>0?'Intel active':'Buy intel $100'};
   if(save.mode==='crook'){const s=nearStash();if(s&&s.cooldown<=0&&!s.owned)return{t:'enter',label:'Kick in door',s}}
   if(save.mode==='crook'&&stars===0&&atProperty()){if(save.cash>=100)return{t:'bank',label:`Stash ${money(save.cash)}`};if(save.bank>0)return{t:'unbank',label:`Take out ${money(save.bank)}`}}
+  if(save.lawyer&&save.lawyer.caseId&&scene==='city'&&!player.inCar&&dist(player,POLICE_DOOR)<55)return{t:'argue',label:`Hold: argue ${save.lawyer.client}'s case`,hold:4};
   const tc=turfContext();if(tc)return tc;
   const c=nearCar();if(c)return{t:'car',label:c.owned?'Get in your truck':c.kind==='police'?'Jack cop car':save.mode==='cop'?'Take car':'Jack car',c};
   return null;
@@ -759,13 +802,14 @@ function updateHold(dt){
   const cx=context();
   if(holdKind&&K.act&&cx&&cx.t===holdKind){
     holdT+=dt;const need=cx.hold;
-    $('prog').classList.add('show');$('progL').textContent=({safe:'Cracking the safe',cuffp:'Cuffing player',arrest:'Cuffing suspect',load:'Loading cargo',unload:'Unloading',hide:'Laying low',spray:'Respraying',drop:'Dropping off'})[holdKind]||'';$('progBar').style.width=Math.min(100,holdT/need*100)+'%';
+    $('prog').classList.add('show');$('progL').textContent=({safe:'Cracking the safe',cuffp:'Cuffing player',arrest:'Cuffing suspect',load:'Loading cargo',unload:'Unloading',hide:'Laying low',spray:'Respraying',drop:'Dropping off',argue:'Arguing in court'})[holdKind]||'';$('progBar').style.width=Math.min(100,holdT/need*100)+'%';
     if(holdKind==='safe'){int.alarm=true;alertInterior()}
     if(holdT>=need){
       if(holdKind==='safe'){int.cracked=true;const s=int.stash;toast(`Safe open: ${money(s.value)}. Now get out!`,2.6);shake=.2}
       if(holdKind==='arrest'){arrest(cx.p)}
       if(holdKind==='load'){const k=newContract();save.smug.cargo=k;persist();toast(`Loaded. Deliver to ${k.label} for ${money(k.pay)}.${k.hot?' Extra patrols are out.':''}`,3)}
       if(holdKind==='unload'){const k=save.smug.cargo;save.cash+=k.pay;save.smug.runs++;if(save.smug.truck===1)save.smug.boxRuns++;save.rep+=4+Math.round(k.pay/500);save.smug.cargo=null;persist();hudKey='';toast(`Delivered to ${k.label}. +${money(k.pay)}.`,2.6)}
+      if(holdKind==='argue'){argueCase()}
       if(holdKind==='drop'){const g=save.grow,j=g.job;if(g.bags<j.bags)toast(`You only have ${g.bags} bags. This order needs ${j.bags}.`,2.6);else{g.bags-=j.bags;save.cash+=j.pay;g.earned+=j.pay;g.sold+=j.bags;g.heat+=4;save.rep+=3+Math.round(j.bags/3);g.job=null;persist();hudKey='';toast(`Order delivered. +${money(j.pay)}.`,2.6);if(Math.random()<.25)setTimeout(()=>addStars(2,'That was an undercover buy. Run!'),900)}}
       if(holdKind==='hide'||holdKind==='spray'){
         if(copSees())toast('They can see you. Break line of sight first.',2.2);
@@ -818,8 +862,21 @@ function aimAngle(){
   for(const a of hostileTargets()){const d=dist(a,player);if(d>380||!los(player,a))continue;const off=Math.abs(angDiff(Math.atan2(a.y-player.y,a.x-player.x),player.ang));const score=d+off*140;if(score<bs){bs=score;best=a}}
   return best?Math.atan2(best.y-player.y,best.x-player.x):player.ang;
 }
+function driveAim(c){
+  const now=performance.now()/1000;
+  if(!isTouch&&now-mouse.t<2.5)return Math.atan2(mouse.y+camY-c.y,mouse.x+camX-c.x);
+  const cands=hostileTargets().concat(save.mode==='crook'&&stars>0?cars.filter(x=>x.kind==='police'):[]).concat(save.mode==='cop'?cars.filter(x=>x.kind==='perp'):[]);
+  let best=null,bs=1e9;for(const a of cands){const d=dist(a,c);if(d>400||!los(c,a))continue;if(d<bs){bs=d;best=a}}
+  return best?Math.atan2(best.y-c.y,best.x-c.x):c.ang+Math.PI/2;
+}
 function shootPlayer(dt){
   player.fireCd-=dt;
+  if(firing&&player.inCar&&player.fireCd<=0&&frozen<=0){const c=player.inCar,w=WEAPONS[curW];
+    if(w.melee){if(save.weapons.pistol||save.weapons.smg){toast('Switch to a gun to shoot from the car (Q / SWAP).',1.6)}player.fireCd=.6;return}
+    if(!(save.ammo[curW]>0)){player.fireCd=.4;toast('Out of ammo.',1.2);return}
+    save.ammo[curW]--;player.fireCd=w.rate*1.25;hudKey='';const a=driveAim(c);
+    for(let i=0;i<w.pellets;i++){const ang=a+rnd(-w.spread*1.4,w.spread*1.4);bullets.push({x:c.x+Math.cos(a)*20,y:c.y+Math.sin(a)*20,vx:Math.cos(ang)*w.speed,vy:Math.sin(ang)*w.speed,dmg:w.dmg,from:'p',life:w.range||.6})}
+    noise(c,420);return}
   if(!firing||player.inCar||player.fireCd>0||frozen>0)return;
   const w=WEAPONS[curW];const a=aimAngle();player.ang=a;player.aim=a;
   if(w.melee){player.fireCd=w.rate;player.flash=.12;
@@ -888,6 +945,7 @@ function updateBullets(dt){
   }
   bullets=bullets.filter(b=>b.life>0);
   for(const f of fx)f.t-=dt;fx=fx.filter(f=>f.t>0);
+  updateBombs(dt);
 }
 
 /* ================= movement ================= */
@@ -1043,7 +1101,7 @@ function collisions(dt){
 }
 
 /* ================= events ================= */
-function busted(by){if(frozen>0)return;const lost=Math.round(save.cash*.4);save.cash-=lost;const seized=dropContraband();persist();big('busted','Busted',`${by?`Officer ${by} put the cuffs on you. `:''}The cops took ${money(lost)}${seized?` and ${seized}`:''}. You made bail at the precinct.`);respawn(POLICE_DOOR)}
+function busted(by){if(frozen>0||save.jail)return;const lost=Math.round(save.cash*.25);save.cash-=lost;const seized=dropContraband();persist();big('busted','Busted',`${by?`Officer ${by} put the cuffs on you. `:''}The cops took ${money(lost)}${seized?` and ${seized}`:''}. You're going to county.`);sendToJail(by);respawn(POLICE_DOOR)}
 function wasted(){const cop=save.mode==='cop';const lost=Math.round(save.cash*(cop?.1:.2));save.cash-=lost;const by=lastHitBy&&performance.now()-lastHitT<4000?lastHitBy:null;lastHitBy=null;
   if(cop){save.rep=Math.max(0,save.rep-5);if(call)endCall();const cr=cars.find(c=>c.cop&&(c.kind==='cruiser'||c.kind==='player'||c.kind==='wreck'));if(cr){cr.kind='cruiser';cr.hp=100;cr.speed=0;cr.x=POLICE_DOOR.x+60;cr.y=(1*BS+6.5)*T;cr.ang=0}persist();
     big('wasted','Officer down',`${by?`${by} took you out. `:''}Hospital bill ${money(lost)}, -5 rep, your call went to another unit and your cruiser was towed to the precinct.`)}
@@ -1242,10 +1300,10 @@ const roleTag=()=>save.mode==='cop'?RANKS_COP(save.arrests):(save.crown||0)>=3?C
 function makeNet(){
   try{
     if(!window.supabase||!window.supabase.createClient)return null;
-    const client=window.supabase.createClient('https://wjpqrxxeoifrpjfbzzns.supabase.co','sb_publishable_Ev0ej2eCPZ0sAR_svvuqnA_9WHp7pN5',{realtime:{params:{eventsPerSecond:20}}});window.__lb={submit:(id,secret,r)=>client.rpc('submit_score',{p_id:id,p_secret:secret,p_name:r.name,p_crew:r.crew,p_mode:r.mode,p_role:r.role,p_rank:r.rank,p_score:r.score,p_rep:r.rep,p_houses:r.houses,p_season:r.season}).then(x=>x),top:async()=>{const {data,error}=await client.from('leaderboard_public').select('name,crew,mode,role,rank,score,rep,houses,season').gt('score',0).order('score',{ascending:false}).limit(50);if(error)throw error;return data||[]}};
+    const client=window.supabase.createClient('https://wjpqrxxeoifrpjfbzzns.supabase.co','sb_publishable_Ev0ej2eCPZ0sAR_svvuqnA_9WHp7pN5',{realtime:{params:{eventsPerSecond:20}}});window.__law={myCase:async id=>{const {data,error}=await client.from('cases').select('*').eq('client_id',id).order('created_at',{ascending:false}).limit(1);if(error)throw error;return data&&data[0]},roster:async city=>{let q=client.from('cases').select('id,client_id,client_name,city,fee,release_at,lawyer_id,lawyer_name,status').in('status',['open','taken','lost']).gt('release_at',new Date().toISOString()).order('created_at',{ascending:false}).limit(40);if(city)q=q.eq('city',city);const {data,error}=await q;if(error)throw error;return data||[]},open:(id,sec,n,city,fee,mins)=>client.rpc('open_case',{p_id:id,p_secret:sec,p_name:n,p_city:city,p_fee:fee,p_minutes:mins}).then(r=>{if(r.error)throw r.error;return r.data}),take:(id,sec,n,c)=>client.rpc('take_case',{p_id:id,p_secret:sec,p_name:n,p_case:c}).then(r=>{if(r.error)throw r.error;return r.data}),argue:(id,sec,c)=>client.rpc('argue_case',{p_id:id,p_secret:sec,p_case:c}).then(r=>{if(r.error)throw r.error;return r.data}),close:(id,sec)=>client.rpc('close_case',{p_id:id,p_secret:sec}).then(r=>{if(r.error)throw r.error}),hits:async()=>{const {data,error}=await client.from('hits').select('*').eq('status','open').order('created_at',{ascending:false}).limit(50);if(error)throw error;return data||[]},placeHit:(id,sec,n,t,tn,a,why)=>client.rpc('place_hit',{p_id:id,p_secret:sec,p_name:n,p_target:t,p_target_name:tn,p_amount:a,p_reason:why}).then(r=>{if(r.error)throw r.error;return r.data}),claimHit:(id,sec,n,h)=>client.rpc('claim_hit',{p_id:id,p_secret:sec,p_name:n,p_hit:h}).then(r=>{if(r.error)throw r.error;return r.data})};window.__turf={list:async()=>{const {data,error}=await client.from('city_turf').select('block,owner_id,owner_name,owner_crew,color,last_hit_by,updated_at').eq('city',CITY_ID);if(error)throw error;return data||[]},pacts:async id=>{if(!/^[0-9a-f-]{36}$/.test(id))return [];const {data,error}=await client.from('pacts').select('*').or('a.eq.'+id+',b.eq.'+id);if(error)throw error;return data||[]},claim:(id,sec,i,n,c,col,hit)=>client.rpc('claim_city_turf',{p_id:id,p_secret:sec,p_city:CITY_ID,p_block:i,p_name:n,p_crew:c,p_color:col,p_hit:hit}).then(r=>{if(r.error)throw r.error;return r.data}),act:(id,sec,o,me,on,a,t)=>client.rpc('pact_action',{p_id:id,p_secret:sec,p_other:o,p_my_name:me,p_other_name:on,p_action:a,p_terms:t}).then(r=>{if(r.error)throw r.error;return r.data})};window.__cloud={save:(c,d)=>client.rpc('cloud_save',{p_code:c,p_data:d}).then(r=>{if(r.error)throw r.error}),load:c=>client.rpc('cloud_load',{p_code:c}).then(r=>{if(r.error)throw r.error;return r.data})};window.__lb={submit:(id,secret,r)=>client.rpc('submit_score',{p_id:id,p_secret:secret,p_name:r.name,p_crew:r.crew,p_mode:r.mode,p_role:r.role,p_rank:r.rank,p_score:r.score,p_rep:r.rep,p_houses:r.houses,p_season:r.season}).then(x=>x),top:async()=>{const {data,error}=await client.from('leaderboard_public').select('name,crew,mode,role,rank,score,rep,houses,season').gt('score',0).order('score',{ascending:false}).limit(50);if(error)throw error;return data||[]}};
     const me=Math.random().toString(36).slice(2,12);
     const state={},cbs=[],peers=new Map();let lastSent='',lastT=0,ok=false;
-    const ch=client.channel('myworld-lobby',{config:{broadcast:{self:false}}});
+    const ch=client.channel(CITY_ID==='raleigh'?'myworld-lobby':'myworld-'+CITY_ID,{config:{broadcast:{self:false}}});
     const list=()=>[{peer:me,isMe:true,sameTab:true,kind:'viewer',guest:false,presence:state,updatedAt:Date.now()},...peers.values()];
     const fire=()=>{const l=list();for(const f of cbs)f({peers:l})};
     ch.on('broadcast',{event:'s'},m=>{const p=m&&m.payload;if(!p||typeof p.id!=='string'||p.id===me||!p.s||typeof p.s!=='object')return;peers.set(p.id,{peer:p.id,isMe:false,sameTab:false,kind:'viewer',guest:false,presence:p.s,updatedAt:Date.now()});fire()})
@@ -1273,6 +1331,7 @@ function onPeers(){
     if(typeof r.prevHp==='number'&&r.prevHp>0&&pr.hp<=0&&r.myHitT&&now-r.myHitT<5000){
       const st=+pr.st||0;const killedCop=pr.m==='cop'&&save.mode==='crook';const bounty=save.mode==='cop'?(st>0?250+st*250:0):killedCop?500:300+st*400;if(killedCop)addStars(2,'You took down a cop player. +2 stars');
       if(bounty){save.cash+=bounty;save.rep+=5;persist();toast(`You took out ${clip(pr.n)}${st?` (${st}★ bounty)`:''}. +${money(bounty)}.`,3)}
+      if(pr.pid&&hitOn(String(pr.pid)))claimHitOn(String(pr.pid),clip(pr.n));
     }
     if(save.mode==='cop'){const st=+pr.st||0;if(pr.m==='crook'&&st>(r.prevSt||0))radio(`${clip(pr.n)} is wanted (${st}★). Last seen near ${streetAt(pr.x,pr.y)||districtAt(pr.x,pr.y)}.`,5);
       if(pr.m==='cop'&&typeof r.prevHp==='number'&&r.prevHp>0&&pr.hp<=0)radio(`Officer down: ${clip(pr.n)} near ${streetAt(pr.x,pr.y)||districtAt(pr.x,pr.y)}.`,5);r.prevSt=st}
@@ -1294,7 +1353,7 @@ function sendPresence(dt){
   if(!room||!started)return;presT-=dt;if(presT>0)return;presT=.1;
   const f=player.inCar||player,pf=prof();
   room.presence({n:pf.name,c:pf.crew,col:pf.col,m:save.mode,rk:roleTag(),bs:isBoss(),x:Math.round(f.x),y:Math.round(f.y),a:Math.round((f.ang||0)*100)/100,
-    sc:scene==='city'?'c':'i',car:player.inCar?(player.inCar.cop?'cop':player.inCar.color):null,st:stars,hp:Math.round(Math.max(0,player.hp)),rep:save.rep,sco:lbScore(),pid:save.lbId||'',atk:turfWar&&turfWar.owner.kind==='player'?{b:turfWar.i,o:turfWar.owner.id,s:turfWar.sneak?1:0}:null,
+    sc:scene==='city'?'c':'i',car:player.inCar?(player.inCar.cop?'cop':player.inCar.color):null,st:stars,hp:Math.round(Math.max(0,player.hp)),rep:save.rep,sco:lbScore(),pid:save.lbId||'',law:save.lawyer&&save.lawyer.licensed?1:0,atk:turfWar&&turfWar.owner.kind==='player'?{b:turfWar.i,o:turfWar.owner.id,s:turfWar.sneak?1:0}:null,
     w:WEAPONS[curW].melee?null:curW,rl:ROLE_LABEL[save.role]||'',say:mySay,sayT:mySayT,dmg:dmgOut,cuff:cuffOut}).catch(()=>{});
 }
 function updateRemote(dt){
@@ -1339,7 +1398,7 @@ function drawRemotes(){
     if(p.car)drawCar({x:r.x,y:r.y,ang:r.a,kind:p.car==='cop'?'police':'traffic',cop:p.car==='cop',color:String(p.car).slice(0,9),hp:100},performance.now()/1000);
     else drawPerson({x:r.x,y:r.y,ang:r.a,walk:r.walk},/^#[0-9a-f]{6}$/i.test(p.col)?p.col:'#cccccc','#c68642',1.12,p.m==='cop'?'rgba(74,140,255,.7)':p.st>0?'rgba(255,75,92,.75)':'rgba(255,255,255,.35)',typeof p.w==='string'&&WEAPONS[p.w]?p.w:null);
     const role=p.m==='cop'?'⛉ '+clip(p.rk):p.bs?'♛ '+clip(p.rk).toUpperCase():clip(p.rk);
-    drawTag(r.x,r.y-18,clip(p.n),crewOf(p.c),role,roleColorFor(p.m,p.bs),p.m==='crook'?clamp(+p.st||0,0,5):0,false);
+    const hh=hitOn(String(p.pid||''));drawTag(r.x,r.y-18,clip(p.n),crewOf(p.c),role+(p.law?' · LAWYER':'')+(hh?`  ☠ ${money(hh.amount)}`:''),hh?'#ff4b5c':roleColorFor(p.m,p.bs),p.m==='crook'?clamp(+p.st||0,0,5):0,false);
     if(p.hp<100){ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(r.x-16,r.y+16,32,4);ctx.fillStyle='#5ed08b';ctx.fillRect(r.x-16,r.y+16,32*clamp(p.hp/100,0,1),4)}
     if(r.sayUntil>performance.now()&&p.say)drawBubble(r.x,r.y-50,String(p.say).slice(0,60));
   }
@@ -1495,7 +1554,9 @@ function draw(t){
     if(mySayUntil>performance.now()&&mySay)drawBubble(f.x,f.y-50,mySay)}
   ctx.strokeStyle='rgba(255,220,140,.8)';ctx.lineWidth=2;
   for(const b of bullets){ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(b.x-b.vx*.025,b.y-b.vy*.025);ctx.stroke()}
-  for(const fxi of fx){ctx.fillStyle=fxi.kind==='hit'?`rgba(200,30,40,${fxi.t*2.5})`:`rgba(255,220,140,${fxi.t*5})`;ctx.beginPath();ctx.arc(fxi.x,fxi.y,fxi.kind==='hit'?8:4,0,Math.PI*2);ctx.fill()}
+  for(const bm of bombs){ctx.fillStyle=Math.sin(bm.t*30)>0?'#ff4b5c':'#222';ctx.beginPath();ctx.arc(bm.x,bm.y,5,0,Math.PI*2);ctx.fill()}
+  for(const fxi of fx)if(fxi.kind==='boom'){const k=1-fxi.t/.6;ctx.fillStyle=`rgba(255,${Math.round(160-k*120)},40,${fxi.t*1.4})`;ctx.beginPath();ctx.arc(fxi.x,fxi.y,20+k*90,0,Math.PI*2);ctx.fill()}
+  for(const fxi of fx){if(fxi.kind==='boom')continue;ctx.fillStyle=fxi.kind==='hit'?`rgba(200,30,40,${fxi.t*2.5})`:`rgba(255,220,140,${fxi.t*5})`;ctx.beginPath();ctx.arc(fxi.x,fxi.y,fxi.kind==='hit'?8:4,0,Math.PI*2);ctx.fill()}
   ctx.restore();
   const m=curMission();if(!cineOn){const tg=(m&&missionActive?m.target():null)||sideTarget();if(tg)drawWaypoint(tg,t)}
   else if(save.mode==='cop'&&call&&!cineOn)drawWaypoint(callTarget(),t);
@@ -2314,8 +2375,17 @@ function renderEmpire(){
       const btn=(lbl,act,terms,go)=>{const b=document.createElement('button');b.className='small'+(go?' go':'');b.textContent=lbl;b.dataset.pa=act;b.dataset.pid=id;b.dataset.pn=name;b.dataset.pt=terms||0;if(!boss)b.disabled=true;d.appendChild(b)};
       if(p&&p.state==='offer'&&p.by_id!==save.lbId){btn('Accept peace','accept',0,1);btn('Refuse: war','war')}
       else{if(!p||p.state!=='truce'){btn('Offer peace','offer',0,1);btn('Peace + $1,000','offer',1000)}if(!p||p.state!=='war')btn('Declare war','war')}
+      if(!hitOn(id))btn('Put a hit · $2,000','hit',2000);
       el.appendChild(d)}
     if((save.crown||0)<3&&others.size){row('','Reach Boss rank to call sit-downs and declare war.')}}
+  {const L=lawyerState();const h=document.createElement('b');h.textContent='Side job: lawyer';h.style.marginTop='6px';el.appendChild(h);
+    if(!window.__law)row('Lawyering','Works on the public game link.');
+    else if(!L.licensed){row('License','Pass the bar to take cases from locked-up players. They pay you.');const d=document.createElement('div');d.className='btnrow';d.innerHTML=`<button class="small go" data-law="bar" ${save.cash<1000?'disabled':''}>Pass the bar · $1,000</button>`;el.appendChild(d)}
+    else{row('Record',`${L.won} won · ${L.lost} lost`);
+      if(L.caseId)row('Active case',`Argue ${L.client}'s case: hold the button at the precinct (courthouse).`);
+      else{const open=lawRows.filter(c=>c.status==='open'&&c.client_id!==save.lbId);if(!open.length)row('Open cases','Nobody needs a lawyer right now.');
+        for(const c of open){row(c.client_name,`${(CITY_DEFS[c.city]||{}).name||c.city} · ${mmss(Date.parse(c.release_at)-Date.now())} left · pays ${money(c.fee)}`);const d=document.createElement('div');d.className='btnrow';const b=document.createElement('button');b.className='small go';b.textContent=`Take the case · +${money(c.fee)}`;b.dataset.take=c.id;d.appendChild(b);el.appendChild(d)}}}}
+  {const open=hitRows.filter(h=>h.status==='open');if(open.length){const h=document.createElement('b');h.textContent='Open contracts';h.style.marginTop='6px';el.appendChild(h);for(const x of open.slice(0,8))row(x.target_name===((save.profile&&save.profile.name)||'')?`${x.target_name} (YOU)`:x.target_name,`${money(x.amount)} · ${x.reason||'no reason given'}`)}}
   row('Leaderboard score',lbScore().toLocaleString());
   if(!empireOn()){row('Seasons',`Finish your Chapter 1 story to start the never-ending seasons.`);return}
   row('Now',`Season ${seasonOf(i)}, Episode ${epOf(i)}`);
@@ -2328,7 +2398,10 @@ function renderEmpire(){
   row('Rival',e.rival?`${e.rival.name} from ${e.rival.city}`:'Nobody yet this season');
 }
 
-$('empBody').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;if(b.dataset.pa){if(b.dataset.pa==='offer'&&+b.dataset.pt>save.cash){toast(`You need ${money(+b.dataset.pt)} to put on the table.`,2.4);return}pactDo(b.dataset.pid,b.dataset.pn,b.dataset.pa,+b.dataset.pt);return}if(b.dataset.act==='in')bankIn();if(b.dataset.act==='out')bankOut();renderEmpire()});
+$('empBody').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;
+  if(b.dataset.law==='bar'){if(save.cash<1000)return;save.cash-=1000;lawyerState().licensed=true;persist();hudKey='';toast('You passed the bar. Locked-up players can hire you now.',3);renderEmpire();return}
+  if(b.dataset.take){takeCase(b.dataset.take);return}
+  if(b.dataset.pa==='hit'){placeHit(b.dataset.pid,b.dataset.pn,+b.dataset.pt,'Boss business').then(()=>renderEmpire());return}if(b.dataset.pa){if(b.dataset.pa==='offer'&&+b.dataset.pt>save.cash){toast(`You need ${money(+b.dataset.pt)} to put on the table.`,2.4);return}pactDo(b.dataset.pid,b.dataset.pn,b.dataset.pa,+b.dataset.pt);return}if(b.dataset.act==='in')bankIn();if(b.dataset.act==='out')bankOut();renderEmpire()});
 $('empBtn').addEventListener('click',openEmpire);$('empClose').addEventListener('click',closeEmpire);$('empModal').addEventListener('click',ev=>{if(ev.target.id==='empModal')closeEmpire()});
 
 
@@ -2467,6 +2540,102 @@ function turfTick(dt){
 }
 const turfObj=()=>!turfWar?null:turfWar.phase==='fight'?`Turf war: clear ${turfWar.owner.name}'s soldiers (${turfWar.foes.filter(a=>!a.dead).length} left)`:`Turf war: hold ${blockName(turfWar.i)} (${Math.max(0,Math.ceil(turfWar.t))}s)`;
 
+/* ================= bombs ================= */
+let bombs=[];
+function throwBomb(){
+  if(!started||!running()||scene!=='city')return;if(!(save.bombs>0)){toast('No bombs. Iron Works sells pipe bombs.',1.8);return}
+  save.bombs--;hudKey='';persist();const src=player.inCar||player;const a=player.inCar?driveAim(player.inCar):aimAngle();const sp=player.inCar?380:300;
+  bombs.push({x:src.x+Math.cos(a)*18,y:src.y+Math.sin(a)*18,vx:Math.cos(a)*sp+(player.inCar?Math.cos(player.inCar.ang)*player.inCar.speed*.5:0),vy:Math.sin(a)*sp+(player.inCar?Math.sin(player.inCar.ang)*player.inCar.speed*.5:0),t:1.2});
+}
+function updateBombs(dt){
+  for(const b of bombs){b.t-=dt;const nx=b.x+b.vx*dt,ny=b.y+b.vy*dt;if(solid(nx,ny)){b.vx*=-.3;b.vy*=-.3}else{b.x=nx;b.y=ny}b.vx*=Math.pow(.15,dt);b.vy*=Math.pow(.15,dt);if(b.t<=0)explode(b.x,b.y)}
+  bombs=bombs.filter(b=>b.t>0);
+}
+function explode(x,y){
+  fx.push({x,y,t:.6,kind:'boom'});shake=.6;const R=110,p={x,y};
+  for(const a of curActors()){if(a.dead||a.kind==='friend')continue;const d=dist(a,p);if(d<R)damageActor(a,Math.round(150*(1-d/R)+20),Math.atan2(a.y-y,a.x-x))}
+  for(const c of cars){const d=dist(c,p);if(d<R*.9){c.hp=(c.hp||100)-Math.round(90*(1-d/R)+20);if(c.hp<=0&&c.kind!=='police'&&c.kind!=='player'&&c.kind!=='perp'){c.kind='wreck';c.speed=0}}}
+  for(const q of peds){if(q.down<=0&&dist(q,p)<R)q.down=8}
+  const me=player.inCar||player,dm=dist(me,p);if(dm<R*.85){if(player.inCar)player.inCar.hp-=60*(1-dm/R);else hurtPlayer(70*(1-dm/R))}
+  for(const r of visibleRemotes()){const d=Math.hypot(r.x-x,r.y-y);if(d<R){dmgOut[r.peer]=(dmgOut[r.peer]||0)+Math.round(80*(1-d/R)+10);r.myHitT=performance.now();presT=0}}
+  noise(p,700);if(save.mode==='crook')addStars(policeNear(700)?2:1,'Explosion! The whole block heard that.');else{save.ia=Math.min(100,save.ia+10);checkIA()}
+}
+
+/* ================= jail, lawyers, hits, characters ================= */
+const jailActive=()=>!!(save.jail&&Date.now()<save.jail.until);
+let jailT=0,lawRows=[],hitRows=[],lawT=6,warnedCase={},hitWarned={};
+const mmss=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`};
+function sendToJail(by){
+  const st=Math.max(1,chaseMax||stars||1),mins=Math.round(4+st*4+heatLv()*2);
+  save.jail={until:Date.now()+mins*60000,mins,pd:false,caseId:null,status:'',lawyer:null,lawyerId:null,refund:0,by:by||''};persist();
+  setTimeout(()=>{started=false;showJail();try{cloudPush(true)}catch(e){}},3100);
+}
+function showJail(){cineOn=false;$('cine').hidden=true;$('jail').hidden=false;$('intro').hidden=true;renderJail();if(!jailT)jailT=setInterval(jailTickUI,1000);jailSync()}
+function hideJail(){$('jail').hidden=true;if(jailT){clearInterval(jailT);jailT=0}}
+async function jailSync(){
+  if(!save.jail||!window.__law)return;
+  try{if(save.jail.caseId){const c=await window.__law.myCase(save.lbId);if(c&&c.id===save.jail.caseId){
+      save.jail.status=c.status;save.jail.lawyer=c.lawyer_name;save.jail.lawyerId=c.lawyer_id;save.jail.until=Date.parse(c.release_at);persist()}}
+    lawRows=await window.__law.roster(CITY_ID)}catch(e){}
+  renderJail();
+}
+function releaseJail(msg){
+  const j=save.jail;if(!j)return;if(j.caseId&&j.status==='open'&&j.refund){save.cash+=j.refund}
+  if(window.__law&&j.caseId)window.__law.close(save.lbId,save.lbSecret).catch(()=>{});
+  save.jail=null;persist();hideJail();toast(msg||"You're out. Watch your back.",3);
+  if(save.mode){startGame(save.mode,false);const p=POLICE_DOOR;player.x=p.x;player.y=p.y+18;camInit=false}else $('intro').hidden=false;
+}
+function jailTickUI(){
+  if(!save.jail){hideJail();return}
+  if(Date.now()>=save.jail.until){releaseJail(save.jail.status==='won'?`Your lawyer ${save.jail.lawyer} got you off. You're free.`:"Time served. You're out.");return}
+  $('jailTime').textContent=`Time left: ${mmss(save.jail.until-Date.now())}`;
+  if(Date.now()%10000<1000)jailSync();
+}
+function renderJail(){
+  const j=save.jail;if(!j)return;
+  $('jailWho').textContent=`${(save.profile&&save.profile.name)||'You'} · ${CITY.name} County Jail`;
+  $('jailTime').textContent=`Time left: ${mmss(j.until-Date.now())}`;
+  const st=$('jailCase');st.textContent=!j.caseId?(j.pd?'Your public defender is on it. Do not expect much.':'No lawyer yet.'):j.status==='open'?`Your case is posted (${money(j.refund||0)}). Waiting for a lawyer to take it.`:j.status==='taken'?`${j.lawyer} took your case. They have to argue it at the courthouse.`:j.status==='won'?`${j.lawyer} won your case!`:j.status==='lost'?`${j.lawyer} LOST your case. Ten more minutes.`:'';
+  $('jHire').hidden=!!j.caseId||!window.__law;$('jNoLaw').hidden=!!window.__law;
+  $('jPD').disabled=j.pd;const bail=Math.max(1500,Math.round((save.cash+(save.bank||0))*.3));$('jBail').textContent=`Post bail · ${money(bail)}`;$('jBail').disabled=save.cash+(save.bank||0)<bail;
+  $('jHitRow').hidden=!(j.status==='lost'&&j.lawyerId&&!j.hitPlaced);
+  if(j.lawyer)$('jHitLbl').textContent=`Put a hit on ${j.lawyer}:`;
+  const r=$('jRoster');r.textContent='';const rows=lawRows.filter(c=>c.client_id!==save.lbId);
+  if(!rows.length){r.textContent=window.__law?'Nobody else from the streets is locked up right now.':'Other inmates show on the public game link.'}
+  for(const c of rows){const d=document.createElement('div');d.className='erow';const a=document.createElement('span');a.textContent=c.client_name;const b=document.createElement('b');b.textContent=`${mmss(Date.parse(c.release_at)-Date.now())} left · ${c.lawyer_name?'lawyer: '+c.lawyer_name:'no lawyer'}`;d.append(a,b);r.appendChild(d)}
+  $('jAlt').textContent=`Play your other character (${SLOT==='1'?'2':'1'})`;
+}
+function payFrom(n){let left=n;const c=Math.min(save.cash,left);save.cash-=c;left-=c;if(left>0)save.bank=Math.max(0,(save.bank||0)-left);persist()}
+async function hireLawyer(fee){
+  const j=save.jail;if(!j||!window.__law)return;if(save.cash+(save.bank||0)<fee){toast(`You need ${money(fee)} for that lawyer.`,2.4);return}
+  await lbEnsure();try{const id=await window.__law.open(save.lbId,save.lbSecret,(save.profile&&save.profile.name)||'Player',CITY_ID,fee,Math.max(1,Math.ceil((j.until-Date.now())/60000)));
+    payFrom(fee);j.caseId=id;j.status='open';j.refund=fee;persist();jailSync()}catch(e){$('jailCase').textContent='Could not post your case. Try again.'}
+}
+function publicDefender(){const j=save.jail;if(!j||j.pd)return;j.pd=true;persist();renderJail();
+  setTimeout(()=>{if(!save.jail)return;const cut=Math.random()<.5?.5:.2,left=save.jail.until-Date.now();save.jail.until-=Math.round(left*cut);persist();$('jailCase').textContent=`Public defender got ${Math.round(cut*100)}% knocked off your time.`;jailTickUI()},15000)}
+function postBail(){const bail=Math.max(1500,Math.round((save.cash+(save.bank||0))*.3));if(save.cash+(save.bank||0)<bail)return;payFrom(bail);releaseJail(`Bail posted: ${money(bail)}. You're out until your court date never comes.`)}
+async function placeHit(targetId,targetName,amount,reason){
+  if(!window.__law){toast('Hits work on the public game link.',2.2);return false}
+  if(save.cash+(save.bank||0)<amount){toast(`A hit that size costs ${money(amount)}.`,2.2);return false}
+  await lbEnsure();try{await window.__law.placeHit(save.lbId,save.lbSecret,(save.profile&&save.profile.name)||'Player',targetId,targetName,amount,reason);payFrom(amount);toast(`The word is out: ${money(amount)} on ${targetName}.`,3);hitsSync();return true}catch(e){toast('Nobody would take the contract. Try again later.',2.4);return false}
+}
+function switchSlot(){try{persist();cloudPush&&cloudPush(true)}catch(e){}try{localStorage.setItem('uws-slot',SLOT==='1'?'2':'1')}catch(e){}setTimeout(()=>location.reload(),400)}
+async function hitsSync(){if(!window.__law)return;try{hitRows=await window.__law.hits()}catch(e){}
+  for(const h of hitRows)if(h.target_id===save.lbId&&!hitWarned[h.id]){hitWarned[h.id]=1;radio(`Word on the street: ${h.by_name} put ${money(h.amount)} on your head.`,5)}}
+const hitOn=pid=>pid&&hitRows.find(h=>h.target_id===pid&&h.status==='open');
+async function claimHitOn(pid,name){const h=hitOn(pid);if(!h||!window.__law)return;await lbEnsure();try{const amt=await window.__law.claimHit(save.lbId,save.lbSecret,(save.profile&&save.profile.name)||'Player',h.id);save.cash+=amt;save.rep+=10;persist();hudKey='';toast(`Contract on ${name} complete. +${money(amt)}.`,3.4);hitsSync()}catch(e){}}
+/* lawyer side job */
+function lawyerState(){save.lawyer=save.lawyer||{licensed:false,won:0,lost:0,caseId:null,client:''};return save.lawyer}
+async function lawTick(dt){lawT-=dt;if(lawT>0)return;lawT=20;if(!window.__law||!started)return;
+  try{lawRows=await window.__law.roster(null)}catch(e){}hitsSync();
+  const L=lawyerState();if(L.licensed&&!L.caseId)for(const c of lawRows)if(c.status==='open'&&c.client_id!==save.lbId&&!warnedCase[c.id]){warnedCase[c.id]=1;radio(`New case: ${c.client_name} is locked up in ${(CITY_DEFS[c.city]||{}).name||c.city} and pays ${money(c.fee)}. Open Empire to take it.`,5)}}
+async function takeCase(id){const L=lawyerState();if(!window.__law||L.caseId)return;await lbEnsure();
+  try{const fee=await window.__law.take(save.lbId,save.lbSecret,(save.profile&&save.profile.name)||'Lawyer',id);const c=lawRows.find(x=>x.id===id);L.caseId=id;L.client=c?c.client_name:'your client';save.cash+=fee;persist();hudKey='';toast(`You took ${L.client}'s case. +${money(fee)}. Argue it at the courthouse (the precinct).`,3.6)}catch(e){toast('Someone else took that case.',2.2)}
+  try{lawRows=await window.__law.roster(null)}catch(e){}if(empOpen)renderEmpire()}
+async function argueCase(){const L=lawyerState();if(!L.caseId||!window.__law)return;await lbEnsure();
+  try{const r=await window.__law.argue(save.lbId,save.lbSecret,L.caseId);if(r==='won'){L.won++;save.rep+=12;toast(`Not guilty! ${L.client} walks. +12 rep.`,3.4)}else{L.lost++;toast(`You lost ${L.client}'s case. They might want you dead now.`,3.6)}}catch(e){toast('The judge threw it out. The case is closed.',2.4)}
+  L.caseId=null;L.client='';persist()}
+
 /* ================= leaderboard ================= */
 let lbOpen=false,lbFilter='all',lbT=8,lbRows=null;
 function lbIds(){if(!save.lbId){const h=n=>{const a=new Uint8Array(n);crypto.getRandomValues(a);return [...a].map(x=>x.toString(16).padStart(2,'0')).join('')};const x=h(16);save.lbId=`${x.slice(0,8)}-${x.slice(8,12)}-4${x.slice(13,16)}-a${x.slice(17,20)}-${x.slice(20,32)}`;save.lbSecret=h(16);persist()}}
@@ -2489,12 +2658,29 @@ function renderLb(){
   if(!rows.length)list.textContent='Nobody here yet.';
   $('lbNote').textContent=live?'Showing players online right now. Points come from rep, rank, properties, escapes, seasons and cash (cops: arrests, rep and promotions).':'All-time top 50. Your score saves every 45 seconds. Points come from rep, rank, properties, escapes, seasons and cash (cops: arrests, rep and promotions).';
 }
+
+$('jHire').addEventListener('click',e=>{const b=e.target.closest('button');if(b&&b.dataset.fee)hireLawyer(+b.dataset.fee)});
+$('jHitRow').addEventListener('click',async e=>{const b=e.target.closest('button');if(!b||!b.dataset.hit||!save.jail)return;const ok=await placeHit(save.jail.lawyerId,save.jail.lawyer,+b.dataset.hit,'Lost my case');if(ok){save.jail.hitPlaced=true;persist();renderJail()}});
+$('jPD').addEventListener('click',publicDefender);$('jBail').addEventListener('click',postBail);$('jAlt').addEventListener('click',switchSlot);
+$('slotBtn').addEventListener('click',switchSlot);
+(function(){const other=(()=>{try{return JSON.parse(localStorage.getItem(SLOT==='1'?'uws-v4-s2':'uws-v4')||'null')}catch(e){return null}})();
+  const nm=other&&other.profile&&other.profile.name;$('slotBtn').textContent=nm?`Switch to ${nm}${other.jail&&Date.now()<other.jail.until?` (in jail ${mmss(other.jail.until-Date.now())})`:''}`:`Make a second character`;
+  $('introCity').textContent=`${CITY.name}, ${CITY.st}. After midnight. Everybody wants a piece of this city. Pick who you are.`;$('mapTitle').textContent=`${CITY.name}, ${CITY.st}`;
+  if(save.jail&&Date.now()<save.jail.until)setTimeout(showJail,50);else if(save.jail){save.jail=null;persist()}})();
+/* travel between cities */
+function renderTravel(){const el=$('travelRow');el.textContent='';
+  for(const [id,c] of Object.entries(CITY_DEFS)){if(id===CITY_ID)continue;const cost=c.st===CITY.st?250:900;const b=document.createElement('button');b.className='small';b.textContent=`${c.name}, ${c.st} · ${money(cost)}`;b.dataset.city=id;b.dataset.cost=cost;el.appendChild(b)}}
+$('travelRow').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const cost=+b.dataset.cost;
+  if(stars>0||turfWar){toast('Not with the heat on you. Lose the cops first.',2.4);return}if(save.cash<cost){toast(`The ticket costs ${money(cost)}.`,2);return}
+  save.cash-=cost;save.city=b.dataset.city;save.turfAll=save.turfAll||{};save.turfAll[CITY_ID]=save.turf||{};persist();try{cloudPush(true)}catch(x){}
+  toast(`${cost>250?'Flying':'Riding'} to ${CITY_DEFS[save.city].name}…`,2);setTimeout(()=>location.reload(),900)});
+
 $('lbBtn').addEventListener('click',openLb);$('lbClose').addEventListener('click',closeLb);$('lbModal').addEventListener('click',ev=>{if(ev.target.id==='lbModal')closeLb()});
 $('lbTabs').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;lbFilter=b.dataset.f;for(const x of $('lbTabs').children)x.classList.toggle('go',x===b);renderLb()});
 
 /* ================= big map + location ================= */
 let mapOpen=false;
-function openMap(){if(!started||cineOn)return;mapOpen=true;for(const k in K)K[k]=0;firing=false;drawBigMap();$('mapModal').hidden=false}
+function openMap(){renderTravel();if(!started||cineOn)return;mapOpen=true;for(const k in K)K[k]=0;firing=false;drawBigMap();$('mapModal').hidden=false}
 function closeMap(){mapOpen=false;$('mapModal').hidden=true}
 $('mapBtn').addEventListener('click',openMap);$('mini').addEventListener('click',openMap);$('mapClose').addEventListener('click',closeMap);
 $('mapModal').addEventListener('click',e=>{if(e.target.id==='mapModal')closeMap()});
@@ -2542,7 +2728,7 @@ const running=()=>started&&!cineOn&&!shopOpen&&!mapOpen&&!growOpen&&!clubOpen&&!
 function frame(now){
   const dt=Math.min(.05,(now-last)/1000);last=now;const t=now/1000;FDT=dt;
   cineTick(dt);beatTick();
-  if(started){growTick(dt);clubTick(dt);empireTick(dt);crownTick(dt);lbTick(dt);cloudTick(dt);jobsTick(dt);turfTick(dt);if(empOpen){empRT-=dt;if(empRT<=0){empRT=1;renderEmpire()}}if(save.dancer){save.dancer.cd=Math.max(0,save.dancer.cd-dt);save.dancer.vipCd=Math.max(0,save.dancer.vipCd-dt)}}
+  if(started){growTick(dt);clubTick(dt);empireTick(dt);crownTick(dt);lbTick(dt);cloudTick(dt);jobsTick(dt);turfTick(dt);lawTick(dt);stage.classList.toggle('hasbombs',(save.bombs||0)>0);if(empOpen){empRT-=dt;if(empRT<=0){empRT=1;renderEmpire()}}if(save.dancer){save.dancer.cd=Math.max(0,save.dancer.cd-dt);save.dancer.vipCd=Math.max(0,save.dancer.vipCd-dt)}}
   if(running()){
     if(frozen>0)frozen-=dt;
     else{
@@ -2638,7 +2824,7 @@ if(save.mode&&save.flags.started){const c=$('continue');c.hidden=false;c.textCon
 $('newgame').addEventListener('click',()=>{started=false;$('intro').hidden=false;$('continue').hidden=true;cineOn=false;$('cine').hidden=true});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){for(const k in K)K[k]=0;firing=false}});
 resize();
-window.__uw={turfContext:()=>turfContext(),startTurfWar:c=>startTurfWar(c),get turfWar(){return turfWar},myBlocks:()=>myBlocks(),ownerOf:i=>ownerOf(i),turfSync:()=>turfSync(),get pactRows(){return pactRows},heatLv:()=>heatLv(),cornerOf:i=>cornerOf(i),bankIn:()=>bankIn(),bankOut:()=>bankOut(),atProperty:()=>atProperty(),jobsTick:d=>jobsTick(d),saveCode:()=>saveCode(),lbScore:()=>lbScore(),props:()=>props(),get stars(){return stars},copSees:()=>copSees(),growLevelUp:()=>growLevelUp(),growNext:()=>growNext(),context:()=>context(),renderLb:()=>renderLb(),episode:()=>episode(),empireState:()=>empireState(),scriptedLen:()=>scriptedLen(),resetEp:()=>{epCache=null},CROOK_EPS,COP_EPS,get missionActive(){return missionActive},get save(){return save},get player(){return player},get scene(){return scene},stashes,get actors(){return actors},get intActors(){return intActors},get cars(){return cars},get int(){return int},enterHouse,cineAdvance,get cineOn(){return cineOn},get call(){return call},startGame,setStars:n=>{stars=n},testPeers:l=>{peersList=l;myPeer='me1';onPeers()},BUYER:BUYER_DOOR,missionCount:()=>list().length,missionList:()=>list(),say,get remote(){return remote},get dmgOut(){return dmgOut}};
+window.__uw={throwBomb:()=>throwBomb(),explode:(x,y)=>explode(x,y),get bombs(){return bombs},busted:b=>busted(b),get jail(){return save.jail},releaseJail:m=>releaseJail(m),CITY_ID,SLOT,turfContext:()=>turfContext(),startTurfWar:c=>startTurfWar(c),get turfWar(){return turfWar},myBlocks:()=>myBlocks(),ownerOf:i=>ownerOf(i),turfSync:()=>turfSync(),get pactRows(){return pactRows},heatLv:()=>heatLv(),cornerOf:i=>cornerOf(i),bankIn:()=>bankIn(),bankOut:()=>bankOut(),atProperty:()=>atProperty(),jobsTick:d=>jobsTick(d),saveCode:()=>saveCode(),lbScore:()=>lbScore(),props:()=>props(),get stars(){return stars},copSees:()=>copSees(),growLevelUp:()=>growLevelUp(),growNext:()=>growNext(),context:()=>context(),renderLb:()=>renderLb(),episode:()=>episode(),empireState:()=>empireState(),scriptedLen:()=>scriptedLen(),resetEp:()=>{epCache=null},CROOK_EPS,COP_EPS,get missionActive(){return missionActive},get save(){return save},get player(){return player},get scene(){return scene},stashes,get actors(){return actors},get intActors(){return intActors},get cars(){return cars},get int(){return int},enterHouse,cineAdvance,get cineOn(){return cineOn},get call(){return call},startGame,setStars:n=>{stars=n},testPeers:l=>{peersList=l;myPeer='me1';onPeers()},BUYER:BUYER_DOOR,missionCount:()=>list().length,missionList:()=>list(),say,get remote(){return remote},get dmgOut(){return dmgOut}};
 requestAnimationFrame(frame);
 })();
 </script>
