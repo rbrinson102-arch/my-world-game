@@ -214,6 +214,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
 .proj div{background:var(--raised);border-radius:6px;padding:8px}.proj label{display:block;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .proj b{font-family:var(--mono);font-size:14px}
 .muted2{margin:0;color:var(--muted);font-size:12.5px}
+.erow{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:6px 0;font-size:13.5px}.erow span{color:var(--muted);flex:none}.erow b{text-align:right;font-weight:600}
 .track{position:relative;height:54px;border-radius:6px;background:repeating-linear-gradient(90deg,var(--raised) 0 18px,var(--asphalt) 18px 20px);border:1px solid var(--line);overflow:hidden}
 .zone{position:absolute;top:0;bottom:0;background:rgba(255,95,210,.25);border-inline:2px solid #ff5fd2}
 .needle{position:absolute;top:-2px;bottom:-2px;width:3px;margin-left:-1.5px;background:var(--fg);box-shadow:0 0 10px var(--fg)}
@@ -227,7 +228,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
 <div class="wrap">
   <header class="top">
     <h1>My <span>World</span></h1>
-    <p>Early access · Chapter 1: District 7. Fictional game.</p>
+    <p>Prototype v0.8 · Endless seasons: District 7. Fictional game.</p>
   </header>
 
   <div class="stage" id="stage">
@@ -242,7 +243,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
         <div class="sub" id="rep">Rep 0</div>
       </div>
       <div class="tr"><canvas id="mini" width="236" height="236"></canvas>
-        <div class="row2"><button class="pill off" id="onlineBtn"><i></i><span id="onlineN">Solo</span></button><button class="pill" id="mapBtn">Map</button><button class="pill" id="talkBtn">Talk</button></div></div>
+        <div class="row2"><button class="pill off" id="onlineBtn"><i></i><span id="onlineN">Solo</span></button><button class="pill" id="mapBtn">Map</button><button class="pill" id="empBtn">Empire</button><button class="pill" id="talkBtn">Talk</button></div></div>
       <div class="loc" id="loc"></div>
       <div class="players" id="players" hidden><h4>On the street now</h4><div id="plist"></div><p id="pnote"></p></div>
       <div class="chat" id="chat" hidden>
@@ -300,6 +301,14 @@ canvas#mini{cursor:pointer;pointer-events:auto}
         <div class="track" id="btrack"><div class="zone" id="bzone"></div><div class="needle" id="bneedle"></div></div>
         <div class="bpips" id="bpips"></div>
         <button class="primary" id="beatHit">Hit</button>
+      </div>
+    </div>
+    <div class="modal" id="empModal" hidden>
+      <div class="panelbox">
+        <h2>Your empire</h2>
+        <div id="empBody" style="display:flex;flex-direction:column;gap:8px"></div>
+        <p class="muted2">After Chapter 1 the story keeps going in seasons of 6 episodes. Every season a new rival comes for you. Houses you take pay you. The feds build a case. A front business cleans your money. Keep your crew loyal or someone talks.</p>
+        <button class="primary" id="empClose">Back to the streets</button>
       </div>
     </div>
     <div class="modal" id="mapModal" hidden>
@@ -398,7 +407,7 @@ const ROOFS=['#2a2f3d','#30283a','#2b3532','#38302a','#262c38','#33303a','#2e2a2
 const blocks=[];
 for(let by=0;by<N;by++)for(let bx=0;bx<N;bx++){const det=[];for(let i=0;i<4;i++)det.push([seeded()*3.2+.2,seeded()*3.2+.2,seeded()*.5+.3]);blocks.push({bx,by,kind:'plain',roof:ROOFS[Math.floor(seeded()*ROOFS.length)],det})}
 const blk=(bx,by)=>blocks[by*N+bx];
-blk(1,1).kind='police'; blk(4,1).kind='hospital'; blk(4,3).kind='guns'; blk(3,3).kind='club'; blk(0,5).kind='docks'; blk(2,4).kind='grow'; blk(4,4).kind='buyer';
+blk(1,1).kind='police'; blk(4,1).kind='hospital'; blk(4,3).kind='guns'; blk(3,3).kind='club'; blk(0,5).kind='docks'; blk(2,4).kind='grow'; blk(4,4).kind='buyer'; blk(1,5).kind='carwash'; blk(5,3).kind='cardroom';
 const doorOf=b=>({x:(b.bx*BS+3)*T,y:(b.by*BS+5)*T+14});
 const STASH_DEF=[[3,2,'Rico'],[0,3,'Big Tee'],[1,4,'Mama Lux'],[2,0,'Deacon'],[5,2,'Silk'],[3,5,'Knox'],[0,0,'Duchess'],[5,4,'Baron'],[5,5,'Rico']];
 const stashes=STASH_DEF.map(([bx,by,boss],i)=>{const b=blk(bx,by);b.kind='stash';const d=doorOf(b);return{id:i,b,x:d.x,y:d.y,boss,value:0,out:0,inside:0,bossHome:false,cooldown:0,alert:false,calm:0,main:i===8,corner:i===0,owned:false}});
@@ -416,7 +425,7 @@ const VSTREETS=['1st St','MLK Blvd','Iron St','Church St','Bridge St','Market St
 const DISTRICT_NAMES=[['Northline','Midtown'],['Southgate','Harbor Row']];
 const districtAt=(x,y)=>DISTRICT_NAMES[Math.floor(y/(BS*T))<3?0:1][Math.floor(x/(BS*T))<3?0:1];
 function streetAt(x,y){const tx=Math.floor(x/T),ty=Math.floor(y/T),lx=tx%BS,ly=ty%BS,k=clamp(Math.floor(ty/BS),0,N-1),j=clamp(Math.floor(tx/BS),0,N-1);if(ly>=6&&lx>=6)return HSTREETS[k]+' & '+VSTREETS[j];if(ly>=6)return HSTREETS[k];if(lx>=6)return VSTREETS[j];return null}
-function placeName(b){return({police:'Precinct',hospital:'Hospital',guns:'Iron Works',club:'Club Velvet',docks:'Dockside Warehouse',grow:'Grow house',buyer:'The Plug'})[b.kind]||null}
+function placeName(b){return({police:'Precinct',hospital:'Hospital',guns:'Iron Works',club:'Club Velvet',docks:'Dockside Warehouse',grow:'Grow house',buyer:'The Plug',carwash:'Sparkle Car Wash',cardroom:'Harbor Card Room'})[b.kind]||null}
 
 const city=document.createElement('canvas'); city.width=WORLD; city.height=WORLD;
 (function(){
@@ -429,7 +438,7 @@ const city=document.createElement('canvas'); city.width=WORLD; city.height=WORLD
   for(let k=0;k<N;k++)for(let j=0;j<N;j++){const x0=(BS*j+6)*T,y0=(BS*k+6)*T;c.fillStyle='#16191f';c.fillRect(x0,y0,2*T,2*T);c.fillStyle='rgba(255,255,255,.07)';for(let i=0;i<5;i++){c.fillRect(x0+6+i*18,y0-14,10,12);c.fillRect(x0-14,y0+6+i*18,12,10)}}
   for(const b of blocks){
     const x=(b.bx*BS+1)*T,y=(b.by*BS+1)*T,w=4*T,h=4*T;
-    let roof=b.roof;if(b.kind==='police')roof='#1d2c4a';if(b.kind==='hospital')roof='#cfd3da';if(b.kind==='stash')roof='#2a2418';if(b.kind==='guns')roof='#2c1d1d';if(b.kind==='club')roof='#2a1533';if(b.kind==='docks')roof='#1c2a2e';if(b.kind==='grow')roof='#1d2e20';if(b.kind==='buyer')roof='#2f2a1a';
+    let roof=b.roof;if(b.kind==='police')roof='#1d2c4a';if(b.kind==='hospital')roof='#cfd3da';if(b.kind==='stash')roof='#2a2418';if(b.kind==='guns')roof='#2c1d1d';if(b.kind==='club')roof='#2a1533';if(b.kind==='docks')roof='#1c2a2e';if(b.kind==='grow')roof='#1d2e20';if(b.kind==='buyer')roof='#2f2a1a';if(b.kind==='carwash')roof='#16303d';if(b.kind==='cardroom')roof='#2d1a1a';
     c.fillStyle='rgba(0,0,0,.45)';c.fillRect(x+6,y+8,w,h);c.fillStyle=roof;c.fillRect(x,y,w,h);
     c.strokeStyle='rgba(255,255,255,.07)';c.lineWidth=3;c.strokeRect(x+4,y+4,w-8,h-8);
     if(b.kind==='plain')for(const [dx,dy,s] of b.det){c.fillStyle='rgba(255,255,255,.06)';c.fillRect(x+dx*T*1.1,y+dy*T*1.1,T*s,T*s*.7);c.fillStyle='rgba(0,0,0,.3)';c.fillRect(x+dx*T*1.1+3,y+dy*T*1.1+3,T*s-6,4)}
@@ -439,7 +448,7 @@ const city=document.createElement('canvas'); city.width=WORLD; city.height=WORLD
     if(b.kind==='guns'){c.fillStyle='#ff4b5c';c.font='700 30px Anton, Impact, sans-serif';c.fillText('IRON',x+w/2,y+h/2-18);c.fillText('WORKS',x+w/2,y+h/2+18)}
     if(b.kind==='stash'){c.fillStyle='rgba(255,178,62,.85)';c.font='700 64px Anton, Impact, sans-serif';c.fillText('$',x+w/2,y+h/2+2)}
     const two=(a,b2,col)=>{c.fillStyle=col;c.font='700 30px Anton, Impact, sans-serif';c.fillText(a,x+w/2,y+h/2-18);c.fillText(b2,x+w/2,y+h/2+18)};
-    if(b.kind==='club')two('CLUB','VELVET','#ff5fd2');if(b.kind==='docks')two('DOCKSIDE','WAREHOUSE','#5fd0c8');if(b.kind==='grow')two('GROW','HOUSE','#7ad06a');if(b.kind==='buyer')two('THE','PLUG','#ffd36a');
+    if(b.kind==='club')two('CLUB','VELVET','#ff5fd2');if(b.kind==='docks')two('DOCKSIDE','WAREHOUSE','#5fd0c8');if(b.kind==='grow')two('GROW','HOUSE','#7ad06a');if(b.kind==='buyer')two('THE','PLUG','#ffd36a');if(b.kind==='carwash')two('SPARKLE','CAR WASH','#6ac8ff');if(b.kind==='cardroom')two('HARBOR','CARD ROOM','#ff8a5f');
     const d=doorOf(b);c.fillStyle=b.kind==='stash'?'#a87420':b.kind==='guns'?'#a33b3b':'#3a3f4a';c.fillRect(d.x-12,(b.by*BS+5)*T-6,24,8);
   }
   // street name plates painted on the road, plus building names
@@ -544,7 +553,7 @@ addEventListener('keydown',e=>{
   if(k==='m'&&started&&!cineOn){e.preventDefault();mapOpen?closeMap():openMap();return}
   if(k==='escape'&&mapOpen){closeMap();return}
   if(beat){if(k===' '||k==='e'||k==='enter'||k==='f'){e.preventDefault();beatHit()}return}
-  if(k==='escape'&&(growOpen||clubOpen)){closeGrow();closeClub();return}
+  if(k==='escape'&&(growOpen||clubOpen||empOpen)){closeGrow();closeClub();closeEmpire();return}
   if(cineOn){if(k===' '||k==='e'||k==='enter'){e.preventDefault();cineAdvance()}return}
   if(!running())return;
   if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();
@@ -737,6 +746,7 @@ function leaveHouse(){
     addStars(s.main?3:2);toast(`+${money(s.value)} · +${rep} rep. The alarm's ringing. Lose the cops!`,3);
     s.alert=true;
   }
+  if(s.hq&&intActors.some(a=>a.kind==='boss'&&a.dead)){save.flags.hqDown=s.id}
   if(s.main&&intActors.some(a=>a.kind==='boss'&&a.dead)){save.flags.ricoDown=true;s.owned=true;actors=actors.filter(a=>!(a.kind==='guard'&&a.s===s))}
   persist();int=null;intActors=[];
 }
@@ -1117,10 +1127,10 @@ const COP=[
 ];
 function callTarget(){if(!call)return null;if(call.car&&call.car.kind==='perp')return call.car;return call.perps.find(p=>actors.includes(p)&&!p.dead)||null}
 function list(){return save.mode==='cop'?COP:(ROLE_MISSIONS[save.role]||CROOK)}
-function curMission(){return list()[save.m]||null}
+function curMission(){if(!save.mode)return null;if(save.m<scriptedLen())return list()[save.m]||null;return episode()}
 function startMission(){
   const m=curMission();if(!m){missionActive=false;return}
-  titleCard(`${save.mode==='cop'?'Shift':'Mission'} ${save.m+1}`,m.title);
+  titleCard(m.label||`${save.mode==='cop'?'Shift':'Mission'} ${save.m+1}`,m.title);
   setTimeout(()=>cine(m.intro(),()=>{m.start&&m.start();missionActive=true;persist()}),1600);
 }
 function missionTick(){
@@ -1131,12 +1141,12 @@ function missionTick(){
     return;
   }
   if(m.tick&&frozen<=0)m.tick();
-  const o=m.obj();$('obj').classList.toggle('show',!!o);$('objT').textContent=`${save.mode==='cop'?'Shift':'Mission'} ${save.m+1} · ${m.title}`;$('objB').textContent=o;
+  const o=m.obj();$('obj').classList.toggle('show',!!o);$('objT').textContent=`${m.label||`${save.mode==='cop'?'Shift':'Mission'} ${save.m+1}`} · ${m.title}`;$('objB').textContent=o;
   if(frozen<=0&&m.check()){
     missionActive=false;
-    const next=()=>{if(m.done)m.done();save.m++;persist();if(curMission())setTimeout(startMission,900);else{big('win','Chapter complete','Free roam unlocked.',3)}};
+    const next=()=>{if(m.done)m.done();save.m++;persist();if(save.m===scriptedLen()){big('win','Chapter 1 complete','Season 1 starts now. The story never ends.',3.2);setTimeout(startMission,3600)}else if(curMission())setTimeout(startMission,900)};
     const out=m.outro?m.outro():null;
-    big('win','Mission passed',save.mode==='cop'?'':'+ respect',2.2);
+    big('win',m.label?'Episode complete':'Mission passed',m.label?m.label:save.mode==='cop'?'':'+ respect',2.2);
     setTimeout(()=>{out?cine(out,next):next()},2300);
   }
 }
@@ -1427,7 +1437,7 @@ function drawMini(){
   mctx.fillStyle='#262b35';for(let k=0;k<N;k++){mctx.fillRect(0,(BS*k+6)*T*sc,S,2*T*sc);mctx.fillRect((BS*k+6)*T*sc,0,2*T*sc,S)}
   for(const b of blocks){mctx.fillStyle=b.kind==='police'?'#4a8cff':b.kind==='hospital'?'#e6e6e6':b.kind==='guns'?'#a33b3b':'#3a4050';mctx.fillRect((b.bx*BS+1)*T*sc,(b.by*BS+1)*T*sc,4*T*sc,4*T*sc)}
   mctx.font='700 20px Anton, Impact, sans-serif';mctx.textAlign='center';mctx.textBaseline='middle';
-  for(const b of blocks){const ic=({police:'P',hospital:'+',guns:'G',club:'V',docks:'D',grow:'H',buyer:'B'})[b.kind]||null;if(!ic)continue;mctx.fillStyle=b.kind==='hospital'?'#e43f4f':'#fff';mctx.fillText(ic,(b.bx*BS+3)*T*sc,(b.by*BS+3)*T*sc+1)}
+  for(const b of blocks){const ic=({police:'P',hospital:'+',guns:'G',club:'V',docks:'D',grow:'H',buyer:'B',carwash:'W',cardroom:'C'})[b.kind]||null;if(!ic)continue;mctx.fillStyle=b.kind==='hospital'?'#e43f4f':'#fff';mctx.fillText(ic,(b.bx*BS+3)*T*sc,(b.by*BS+3)*T*sc+1)}
   if(save.mode==='crook'){for(const s of stashes){if(s.cooldown>0)continue;mctx.fillStyle=s.owned?'#5ed08b':'#ffb23e';mctx.beginPath();mctx.arc(s.x*sc,(s.y-2*T)*sc,6,0,Math.PI*2);mctx.fill()}
     mctx.fillStyle='#8fb8ff';mctx.beginPath();mctx.arc(POOKIE.x*sc,POOKIE.y*sc,4,0,Math.PI*2);mctx.fill()}
   for(const c of cars){if(c.owned){mctx.fillStyle='#5fd0c8';mctx.fillRect(c.x*sc-4,c.y*sc-4,8,8)}if(c.kind==='police'||c.kind==='perp'||c.kind==='patrol'){mctx.fillStyle=c.kind==='perp'?'#ffb23e':c.kind==='patrol'?'#4a8cff':'#ff4b5c';mctx.beginPath();mctx.arc(c.x*sc,c.y*sc,4,0,Math.PI*2);mctx.fill()}}
@@ -1459,7 +1469,7 @@ const ROLE_RANKS={
   owner:r=>r>=150?'Nightlife boss':'Club owner',
   dancer:()=>save.dancer&&save.dancer.fans>=150?'Star':save.dancer&&save.dancer.fans>=40?'Headliner':'Dancer'
 };
-const CLUB_DOOR=doorOf(blk(3,3)),DOCKS_DOOR=doorOf(blk(0,5)),GROW_DOOR=doorOf(blk(2,4)),BUYER_DOOR=doorOf(blk(4,4));
+const CLUB_DOOR=doorOf(blk(3,3)),DOCKS_DOOR=doorOf(blk(0,5)),GROW_DOOR=doorOf(blk(2,4)),BUYER_DOOR=doorOf(blk(4,4)),WASH_DOOR=doorOf(blk(1,5)),CARD_DOOR=doorOf(blk(5,3));
 function roleState(){
   save.smug=save.smug||{truck:0,cargo:null,runs:0,boxRuns:0};
   save.grow=save.grow||{slots:[null,null,null,null,null,null],lights:false,heat:0,bags:0,sold:0,earned:0,harvested:0};
@@ -1920,6 +1930,287 @@ const COP_END=[
 CROOK.splice(CROOK.findIndex(m=>m.title==='Take the Throne'),0,...GANG_MID);CROOK.push(GANG_END);COP.push(...COP_END);
 
 
+/* ================= endless seasons: the story director ================= */
+const NAMES1=['Dante','Keisha','Marcus','Tony','Nia','Rell','Shay','Vince','Bobby','Carmen','Jay','Tasha','Omar','Sal','Lena','Quan','Rocco','Gina','Dee','Manny','Andre','Lucia','Terrell','Frankie'];
+const NICKS=['Slim','Biscuit','Two-Tone','Smoke','Lucky','Boogie','Stretch','Peanut','Sticks','Ice','Junior','Glass','Cash','Brick'];
+const CITIES=['Baltimore','Miami','Atlanta','Detroit','Newark','Houston','Chicago','Philly','New Orleans','Cleveland'];
+const KIN=[['your mother','Mama'],['your little brother','Lil Bro'],['your sister','Sis'],['your uncle','Unc'],['your cousin','Cuz']];
+function empireState(){
+  save.empire=save.empire||{fed:0,terr:[],front:false,crew:[],rival:null,eps:{},incomeT:90,caseFile:0,partner:null,copRank:0};
+  const e=save.empire;
+  if(save.mode==='crook'&&e.crew.length<3){const r=mulberry(Date.now()%100000);let g=0;while(e.crew.length<3&&g++<50){const nm=`${NAMES1[Math.floor(r()*NAMES1.length)]} "${NICKS[Math.floor(r()*NICKS.length)]}"`;if(!e.crew.some(c=>c.name.split(' ')[0]===nm.split(' ')[0]))e.crew.push({name:nm,loyalty:55+Math.floor(r()*35)})}}
+  if(save.flags.ricoDown&&!e.terr.includes(8))e.terr.push(8);
+  return e;
+}
+const scriptedLen=()=>(save.mode==='cop'?COP:(ROLE_MISSIONS[save.role]||CROOK)).length;
+const empireOn=()=>!!save.mode&&save.m>=scriptedLen();
+const epIdx=()=>save.m-scriptedLen();
+const seasonOf=i=>Math.floor(i/6)+1, epOf=i=>i%6+1;
+const doorPt=b=>{const d=doorOf(b);return{x:d.x,y:d.y+16}};
+const randomSpot=r=>doorPt(pick(blocks.filter(b=>b.kind==='plain')));
+const ownedHouses=()=>stashes.filter(s=>s.owned);
+const crewName=()=>pick(save.empire.crew).name;
+function fightAt(p,pt,n,msg,radius){
+  if(!p.spawned&&go(pt,radius||300)){p.spawned=true;spawnThugsAt(pt,n,msg);persist()}
+  else if(p.spawned&&thugs.length===0&&!p.cleared)spawnThugsAt(pt,n,msg);
+  if(p.spawned&&thugs.length&&thugs.every(t=>t.dead)&&!p.cleared){p.cleared=true;persist()}
+}
+const fightObj=(p,before,during)=>!p.spawned?before:`${during} (${thugs.filter(t=>!t.dead).length} left)`;
+const fightTarget=(p,pt)=>!p.spawned?pt:(thugs.find(t=>!t.dead)||null);
+
+/* ---- crook episodes ---- */
+const CROOK_EPS={
+  outsiders:{when:()=>true,gen:r=>({rival:`${NAMES1[Math.floor(r()*NAMES1.length)]} "${NICKS[Math.floor(r()*NICKS.length)]}"`,city:CITIES[Math.floor(r()*CITIES.length)]}),
+    make:p=>({title:'New Crew in Town',
+      intro:()=>[{who:'Pookie',text:`Word on the corner: ${p.rival} came up from ${p.city} with money and a crew. Buying up blocks like he owns them.`},
+                 {who:crewName(),text:`He's not here to share. Either we make peace now or we make an example.`,choices:[
+                   {label:`Offer a truce ($${(1500*seasonOf(epIdx())).toLocaleString()})`,fn:()=>{const c=1500*seasonOf(epIdx());save.cash=Math.max(0,save.cash-c);p.choice='truce';save.empire.rival={name:p.rival,city:p.city,heat:30};persist()}},
+                   {label:'Send a message',fn:()=>{p.choice='war';p.pt=randomSpot();save.empire.rival={name:p.rival,city:p.city,heat:70};persist()}}]}],
+      tick:()=>{if(p.choice==='war')fightAt(p,p.pt,2+seasonOf(epIdx()),`${p.rival}'s people are on this block!`)},
+      obj:()=>p.choice==='war'?fightObj(p,`Hit ${p.rival}'s new corner`,`Run ${p.rival}'s crew off the block`):'',
+      target:()=>p.choice==='war'?fightTarget(p,p.pt):null,
+      check:()=>p.choice==='truce'||(p.choice==='war'&&p.cleared),
+      outro:()=>p.choice==='truce'?[{who:'Pookie',text:`${p.rival} took the money. Truces in this city last as long as the money does.`}]:[{who:'Pookie',text:`Message delivered. ${p.rival} knows your name now.`}]})},
+  re_up:{when:()=>true,gen:r=>({supplier:`Mr. ${NAMES1[Math.floor(r()*NAMES1.length)]}`}),
+    make:p=>{const s=seasonOf(epIdx()),cost=2000*s,pay=Math.round(cost*2.4);return{title:'The Re-Up',
+      intro:()=>[{who:p.supplier,text:`I hear you're the one to talk to now. I've got a shipment sitting at the docks.`,cam:DOCKS_DOOR},
+                 {who:p.supplier,text:`${money(cost)} up front. Move it through your people and it's worth ${money(pay)}.`,choices:[
+                   {label:`Buy in (${money(cost)})`,fn:()=>{if(save.cash>=cost){save.cash-=cost;p.choice='buy'}else{p.choice='broke'}persist()}},
+                   {label:'Pass',fn:()=>{p.choice='pass';persist()}}]}],
+      tick:()=>{if(p.choice==='buy'&&!p.picked&&go(DOCKS_DOOR,110)){p.picked=true;persist();toast('Product loaded. Get it to one of your houses.',2.6)}
+                if(p.choice==='buy'&&p.picked&&!p.home){const h=ownedHouses()[0];if(h?go(h,110):go(doorPt(blk(2,2)),110)){p.home=true;save.cash+=pay;save.empire.fed+=6;persist();toast(`Your people moved it. +${money(pay)}.`,3)}}},
+      obj:()=>p.choice!=='buy'?'':!p.picked?'Pick up the shipment at the docks':`Bring it to ${ownedHouses()[0]?ownedHouses()[0].boss+"'s old house":'your block'}`,
+      target:()=>p.choice!=='buy'?null:!p.picked?DOCKS_DOOR:(ownedHouses()[0]||doorPt(blk(2,2))),
+      check:()=>p.choice==='pass'||p.choice==='broke'||!!p.home,
+      outro:()=>p.choice==='broke'?[{who:p.supplier,text:`Come back when your money's long enough to talk to me.`}]:p.home?[{who:crewName(),text:`Everything moved. ${p.supplier} wants to do it again.`}]:[]}}},
+  take_corner:{when:()=>stashes.some(s=>!s.owned&&s.cooldown<=0&&!s.hq),gen:r=>{const opts=stashes.filter(s=>!s.owned&&!s.hq);return{sid:opts.length?opts[Math.floor(r()*opts.length)].id:0}},
+    make:p=>{const s=stashes[p.sid];return{title:'Take a Corner',
+      intro:()=>[{who:crewName(),text:`${s.boss}'s house is the last thing standing between our blocks. Take it and it's ours.`,cam:s},
+                 {who:crewName(),text:`Rob it clean and we move our people in the same night.`}],
+      start:()=>{p.base=s.cooldown>0;persist()},
+      obj:()=>scene==='interior'?'Crack the safe and get out':`Hit ${s.boss}'s stash and take the house`,
+      target:()=>scene==='interior'?(int.cracked?int.exit:int.safe):s,
+      check:()=>scene==='city'&&s.cooldown>0&&!p.base,
+      done:()=>{s.owned=true;if(!save.empire.terr.includes(s.id))save.empire.terr.push(s.id);actors=actors.filter(a=>!(a.kind==='guard'&&a.s===s));toast(`${s.boss}'s house is yours now. It pays you every cycle.`,3)}}}},
+  corner_war:{when:()=>ownedHouses().length>0,gen:r=>{const o=ownedHouses();return{sid:o[Math.floor(r()*o.length)].id}},
+    make:p=>{const s=stashes[p.sid],rv=save.empire.rival?save.empire.rival.name:'A rival crew';return{title:'Corner War',
+      intro:()=>[{who:crewName(),text:`${rv} is hitting the house we took from ${s.boss}. Our people are pinned down.`,cam:s},
+                 {who:crewName(),text:`Get there before they clean it out.`}],
+      start:()=>{p.t=120;persist()},
+      tick:()=>{if(!p.spawned){p.t-=FDT;if(p.t<=0&&!p.lost){p.lost=true;s.owned=false;save.empire.terr=save.empire.terr.filter(i=>i!==s.id);rollStash(s);spawnOutsideGuards(s);persist();toast(`Too late. ${rv} took the house.`,3)}}
+                fightAt(p,s,2+seasonOf(epIdx()),`${rv}'s shooters are at your house!`,260)},
+      obj:()=>p.lost?'':fightObj(p,`Defend your house (${Math.max(0,Math.ceil(p.t))}s)`,'Clear them out'),
+      target:()=>p.lost?null:fightTarget(p,s),check:()=>p.lost||p.cleared,
+      outro:()=>p.lost?[{who:crewName(),text:`We lost the house. We'll take it back.`}]:[{who:crewName(),text:`House is still ours. ${rv} lost people tonight.`}],
+      done:()=>{if(!p.lost)save.empire.crew.forEach(c=>c.loyalty=Math.min(100,c.loyalty+5))}}}},
+  the_hit:{when:()=>!!save.empire.rival,gen:r=>({lt:`${NAMES1[Math.floor(r()*NAMES1.length)]}`}),
+    make:p=>{const rv=save.empire.rival.name;if(!p.pt)p.pt=randomSpot();return{title:'The Hit',
+      intro:()=>[{who:'Pookie',text:`${rv}'s right hand, ${p.lt}, eats at the same spot every night. Same table, three guards.`,cam:p.pt},
+                 {who:crewName(),text:`Cut off the hand and the head panics.`}],
+      tick:()=>fightAt(p,p.pt,3+seasonOf(epIdx()),`${p.lt} and his guards are here!`),
+      obj:()=>fightObj(p,`Find ${p.lt}`,`Take out ${p.lt}'s people`),target:()=>fightTarget(p,p.pt),check:()=>!!p.cleared,
+      done:()=>{save.cash+=1500*seasonOf(epIdx());save.empire.fed+=8;save.rep+=10},
+      outro:()=>[{who:'Pookie',text:`${rv} is sleeping in a different house every night now. That's what fear looks like.`}]}}},
+  rat:{when:()=>save.empire.fed>=35&&save.empire.crew.length>=3,gen:r=>({rat:Math.floor(r()*3)}),
+    make:p=>{const crew=save.empire.crew.slice(0,3);if(p.rat>=crew.length)p.rat=0;return{title:`Who's the Rat?`,
+      intro:()=>[{who:'Your lawyer',text:`The feds knew about the last two moves before you made them. Somebody close is talking.`},
+                 {who:'Your lawyer',text:`Three people knew. ${crew.map(c=>c.name).join(', ')}.`},
+                 {who:'You',text:`(${crew[p.rat].name} has been missing meetings. Or is that what someone wants you to think?)`,choices:crew.map((c,i)=>({label:`It's ${c.name}`,fn:()=>{p.pick=i;p.right=i===p.rat;
+                   if(p.right){save.empire.fed=Math.max(0,save.empire.fed-30);save.empire.crew.splice(i,1)}else{save.empire.fed+=12;save.empire.crew.splice(i,1)}persist()}}))}],
+      obj:()=>'',target:()=>null,check:()=>p.pick!==undefined,
+      outro:()=>p.right?[{who:'Your lawyer',text:`Their case just lost its star witness. You got the right one.`}]:[{who:'Your lawyer',text:`Whoever you cut loose, the leaks didn't stop. The rat is still in the room.`}]}}},
+  wire:{when:()=>save.empire.fed>=20,gen:()=>({}),
+    make:p=>({title:'The Wire',
+      intro:()=>[{who:'Cousin at the phone company',text:`I saw the paperwork. Feds have a wire on three of your phones.`},
+                 {who:'You',text:`(Every call your people made this month is on tape.)`,choices:[
+                   {label:'Burn every phone ($1,000)',fn:()=>{save.cash=Math.max(0,save.cash-1000);save.empire.fed=Math.max(0,save.empire.fed-15);p.c=1;persist()}},
+                   {label:'Feed them a fake meet',fn:()=>{p.c=2;p.ok=Math.random()<.55;save.empire.fed=p.ok?Math.max(0,save.empire.fed-30):save.empire.fed+20;persist()}},
+                   {label:'Ignore it',fn:()=>{p.c=3;save.empire.fed+=15;persist()}}]}],
+      obj:()=>'',target:()=>null,check:()=>!!p.c,
+      outro:()=>p.c===2?[{who:'Cousin',text:p.ok?`They sat on an empty warehouse all night. Their judge is not happy with them.`:`They didn't buy it. Now they know you know.`}]:[]})},
+  family:{when:()=>true,gen:r=>({k:Math.floor(r()*KIN.length),need:2000+Math.floor(r()*3)*1000}),
+    make:p=>{const [who,short]=KIN[p.k];return{title:'Sunday Dinner',
+      intro:()=>[{who:short,text:who==='your mother'?`I raised you better than this life. Come home. Walk away while you still can.`:who==='your little brother'?`Everybody on the block knows who you are now. Let me in. I can handle it.`:`I'm in trouble. I owe somebody ${money(p.need)} and they're not patient.`},
+                 {who:'You',text:`(Family or business. In this life it's never both.)`,choices:who==='your mother'?[
+                   {label:'Promise her you will',fn:()=>{p.c='promise';save.rep=Math.max(0,save.rep-5);save.empire.fed=Math.max(0,save.empire.fed-5);persist()}},
+                   {label:'Tell her this is who you are',fn:()=>{p.c='business';save.rep+=5;persist()}}]
+                 :who==='your little brother'?[
+                   {label:'Bring him in',fn:()=>{p.c='in';if(!save.empire.crew.some(c=>c.name.startsWith(short)))save.empire.crew.push({name:`${short} (your brother)`,loyalty:95});persist()}},
+                   {label:'Keep him out of it',fn:()=>{p.c='out';persist()}}]
+                 :[{label:`Pay it (${money(p.need)})`,fn:()=>{p.c='pay';save.cash=Math.max(0,save.cash-p.need);save.empire.crew.forEach(c=>c.loyalty=Math.min(100,c.loyalty+5));persist()}},
+                   {label:`Handle it yourself`,fn:()=>{p.c='handle';p.pt=randomSpot();persist()}}]}],
+      tick:()=>{if(p.c==='handle')fightAt(p,p.pt,2,`The people ${short} owes are waiting.`)},
+      obj:()=>p.c==='handle'?fightObj(p,`Go settle ${short}'s debt your way`,'Settle it'):'',target:()=>p.c==='handle'?fightTarget(p,p.pt):null,
+      check:()=>!!p.c&&(p.c!=='handle'||p.cleared)}}},
+  front:{when:()=>!save.empire.front,gen:()=>({}),
+    make:p=>({title:'Clean Money',
+      intro:()=>[{who:'Your accountant',text:`You can't spend money you can't explain. Every dollar you touch is a dollar the feds can count.`,cam:WASH_DOOR},
+                 {who:'Your accountant',text:`Sparkle Car Wash is for sale. Cash business. Buy it and your money comes out clean.`}],
+      tick:()=>{if(!save.empire.front&&save.cash>=6000&&go(WASH_DOOR,90)){save.cash-=6000;save.empire.front=true;persist();toast('Sparkle Car Wash is yours. Your money comes out clean now.',3)}},
+      obj:()=>save.empire.front?'Done':`Buy Sparkle Car Wash for $6,000 (${money(save.cash)})`,target:()=>WASH_DOOR,check:()=>!!save.empire.front,
+      outro:()=>[{who:'Your accountant',text:`Congratulations. You're a businessman now. The feds hate businessmen.`}]})},
+  skim:{when:()=>seasonOf(epIdx())>=1,gen:()=>({}),
+    make:p=>({title:'The Back Room',
+      intro:()=>[{who:'Harbor Card Room manager',text:`The count room does forty thousand a night. Nobody counts the counters.`,cam:CARD_DOOR},
+                 {who:'Harbor Card Room manager',text:`Your crew watches the door, you get a piece of the count. How big a piece is up to you.`,choices:[
+                   {label:'Skim heavy',fn:()=>{p.c='heavy';persist()}},{label:'Skim light',fn:()=>{p.c='light';persist()}},{label:'Run it straight',fn:()=>{p.c='straight';persist()}}]}],
+      tick:()=>{if(p.c&&!p.got&&go(CARD_DOOR,90)){p.got=true;const s=seasonOf(epIdx());const amt=p.c==='heavy'?3000*s:p.c==='light'?1200*s:600*s;save.cash+=amt;if(p.c==='heavy')save.empire.fed+=14;else if(p.c==='straight')save.rep+=8;persist();toast(`Collected ${money(amt)} from the count room.`,2.6)}},
+      obj:()=>p.c&&!p.got?'Collect at the Harbor Card Room':'',target:()=>p.c&&!p.got?CARD_DOOR:null,check:()=>!!p.got,
+      outro:()=>p.c==='heavy'?[{who:'Manager',text:`The bosses upstairs noticed the numbers were light. They'll be asking questions.`}]:[]})},
+  young_gun:{when:()=>save.empire.crew.length<4,gen:r=>({n:NAMES1[Math.floor(r()*NAMES1.length)]}),
+    make:p=>({title:'Young Gun',
+      intro:()=>[{who:p.n,text:`I've been watching how you move. I want in. I'll do whatever you need.`},
+                 {who:'You',text:`(Hungry. Smart. Reminds you of you. That's what scares you.)`,choices:[
+                   {label:'Bring him in',fn:()=>{p.c='in';if(!save.empire.crew.some(c=>c.name===p.n))save.empire.crew.push({name:p.n,loyalty:85});persist()}},
+                   {label:'Send him home',fn:()=>{p.c='out';save.flags.youngRival=p.n;persist()}}]}],
+      obj:()=>'',target:()=>null,check:()=>!!p.c,
+      outro:()=>p.c==='out'?[{who:'Pookie',text:`That kid you sent home? He's working for somebody else now.`}]:[]})},
+  betrayal:{when:()=>save.empire.crew.some(c=>c.loyalty<65),gen:()=>({}),
+    make:p=>{const c=save.empire.crew.slice().sort((a,b)=>a.loyalty-b.loyalty)[0];if(!p.name)p.name=c.name;if(!p.pt)p.pt=randomSpot();const amt=1500*seasonOf(epIdx());return{title:'Light Count',
+      intro:()=>[{who:crewName(),text:`The count's been light three weeks running. ${p.name} has been buying jewelry.`},
+                 {who:crewName(),text:`He's laying low at a house off ${streetAt(p.pt.x,p.pt.y+T)||districtAt(p.pt.x,p.pt.y)}.`,cam:p.pt}],
+      tick:()=>fightAt(p,p.pt,2,`${p.name} brought backup.`),
+      obj:()=>fightObj(p,`Find ${p.name}`,`Deal with ${p.name} and his people`),target:()=>fightTarget(p,p.pt),check:()=>!!p.cleared,
+      done:()=>{save.empire.crew=save.empire.crew.filter(x=>x.name!==p.name);save.cash+=amt;save.empire.crew.forEach(x=>x.loyalty=Math.min(100,x.loyalty+8))},
+      outro:()=>[{who:crewName(),text:`Got the money back. Everybody saw what happens.`}]}}},
+  raid:{when:()=>save.empire.fed>=55&&ownedHouses().length>0,gen:r=>{const o=ownedHouses();return{sid:o[Math.floor(r()*o.length)].id}},
+    make:p=>{const s=stashes[p.sid];return{title:'Federal Raid',
+      intro:()=>[{who:'Your lawyer',text:`A clerk owes me a favor. There's a federal warrant for ${s.boss}'s old house. They hit it in two minutes.`,cam:s},
+                 {who:'Your lawyer',text:`Get there first and get the product out, or lose the house.`}],
+      start:()=>{p.t=110;persist()},
+      tick:()=>{if(!p.done){p.t-=FDT;if(go(s,100)){p.done='saved';save.empire.fed=Math.max(0,save.empire.fed-10);addStars(2,'Feds pulling up. Get out of there!');persist()}else if(p.t<=0){p.done='lost';s.owned=false;save.empire.terr=save.empire.terr.filter(i=>i!==s.id);rollStash(s);spawnOutsideGuards(s);save.empire.fed=Math.max(0,save.empire.fed-15);persist()}}},
+      obj:()=>!p.done?`Clear out the house before the raid (${Math.max(0,Math.ceil(p.t))}s)`:p.done==='saved'&&stars>0?'Lose the feds':'',
+      target:()=>!p.done?s:null,check:()=>p.done==='lost'||(p.done==='saved'&&stars===0),
+      outro:()=>p.done==='lost'?[{who:'Your lawyer',text:`They took the house and everything in it. At least nobody was inside.`}]:[{who:'Your lawyer',text:`They kicked in the door to an empty house. Their warrant just became a joke.`}]}}},
+  getout:{when:()=>seasonOf(epIdx())>=2,gen:()=>({}),
+    make:p=>({title:'The Way Out',
+      intro:()=>[{who:'An old friend',text:`I'm opening a restaurant in another state. Clean. I need a partner. You could just leave.`},
+                 {who:'You',text:`(Everybody in this life says they'll get out. Almost nobody does.)`,choices:[
+                   {label:'Put money in, stay in the game',fn:()=>{p.c=1;save.cash=Math.max(0,save.cash-2000);save.empire.fed=Math.max(0,save.empire.fed-20);persist()}},
+                   {label:'Not yet',fn:()=>{p.c=2;save.rep+=5;persist()}}]}],
+      obj:()=>'',target:()=>null,check:()=>!!p.c})},
+  lawyer:{when:()=>save.empire.fed>=85,gen:()=>({}),
+    make:p=>{const s=seasonOf(epIdx()),fee=4000*s;return{title:'Indictment',
+      intro:()=>[{who:'Your lawyer',text:`It's happening. A grand jury just handed down an indictment with your name on it.`},
+                 {who:'Your lawyer',text:`I can fight it. It costs ${money(fee)}. Or you take the plea, or you disappear for a while.`,choices:[
+                   {label:`Fight it (${money(fee)})`,fn:()=>{save.cash=Math.max(0,save.cash-fee);save.empire.fed=30;p.c=1;persist()}},
+                   {label:'Take the plea',fn:()=>{save.cash=Math.round(save.cash*.5);save.empire.fed=20;save.empire.crew.forEach(c=>c.loyalty=Math.max(0,c.loyalty-20));p.c=2;persist()}},
+                   {label:'Disappear for a while',fn:()=>{ownedHouses().forEach(h=>{h.owned=false;rollStash(h);spawnOutsideGuards(h)});save.empire.terr=[];save.empire.fed=40;p.c=3;persist()}}]}],
+      obj:()=>'',target:()=>null,check:()=>!!p.c,
+      outro:()=>[{who:'Your lawyer',text:p.c===1?`Mistrial. You walk. They'll try again.`:p.c===2?`Eighteen months suspended. Your crew is asking who's really in charge now.`:`By the time you come back, someone else is running your blocks.`}]}}},
+  finale:{when:()=>true,gen:r=>{const opts=stashes.filter(s=>!s.owned);return{sid:opts.length?opts[Math.floor(r()*opts.length)].id:3}},
+    make:p=>{const s=stashes[p.sid];if(!save.empire.rival){save.empire.rival={name:`${pick(NAMES1)} "${pick(NICKS)}"`,city:pick(CITIES),heat:60};persist()}const rv=save.empire.rival.name;
+      const setup=()=>{s.owned=false;s.hq=true;s.cooldown=0;s.inside=3+seasonOf(epIdx());s.out=2;s.bossHome=true;s.value=5000*seasonOf(epIdx());s.boss=rv.split(' ')[0];actors=actors.filter(a=>!(a.kind==='guard'&&a.s===s));spawnOutsideGuards(s)};
+      return{title:`Season Finale: ${rv}`,
+      intro:()=>[{who:'Pookie',text:`${rv} moved into ${s.boss}'s old house. Four shooters inside. He's in there himself tonight.`,cam:s},
+                 {who:crewName(),text:`This is how the season ends. Him or us.`}],
+      start:()=>{setup()},
+      obj:()=>p.won?(stars>0?'Lose the cops':'Lay low'):scene==='interior'?`Take out ${rv}`:`Hit ${rv}'s house`,
+      target:()=>p.won?null:scene==='interior'?(intActors.find(a=>a.kind==='boss'&&!a.dead)||int.exit):s,
+      tick:()=>{if(!p.won&&save.flags.hqDown===p.sid){p.won=true;persist()}if(!p.won&&scene==='city'&&(!s.hq||s.owned||s.cooldown>0||!s.bossHome))setup()},
+      check:()=>p.won&&scene==='city'&&stars===0,
+      done:()=>{s.hq=false;s.owned=true;if(!save.empire.terr.includes(s.id))save.empire.terr.push(s.id);save.empire.rival=null;save.flags.hqDown=null;save.rep+=25;save.cash+=4000*seasonOf(epIdx())},
+      outro:()=>[{who:'Pookie',text:`${rv} is finished. His house is yours. His corners are yours.`},{who:'Narrator',text:`End of Season ${seasonOf(epIdx())}. Next season: someone new always comes for the crown.`}]}}}
+};
+/* ---- cop episodes ---- */
+const COP_EPS={
+  c_wire:{when:()=>true,gen:()=>({pts:[0,1,2].map(()=>randomSpot()),i:0}),
+    make:p=>({title:'Up on the Wire',
+      intro:()=>[{who:'Lt. Daniels',text:`We finally got a judge to sign off. Three payphones, three wiretaps. Plant them without getting made.`}],
+      tick:()=>{if(p.i<3&&go(p.pts[p.i],70)){p.i++;persist();toast(`Wire ${p.i} of 3 planted.`,1.8)}},
+      obj:()=>`Plant the wiretaps (${p.i}/3)`,target:()=>p.i<3?p.pts[p.i]:null,check:()=>p.i>=3,
+      done:()=>{save.empire.caseFile+=25;save.rep+=8;save.cash+=500},
+      outro:()=>[{who:'Lt. Daniels',text:`We're up. Every call they make, we hear it.`}]})},
+  c_raid:{when:()=>true,gen:r=>({sid:Math.floor(r()*8)}),
+    make:p=>{const s=stashes[p.sid];return{title:'Kick the Door',
+      intro:()=>[{who:'Lt. Daniels',text:`The wire gave us ${s.boss}'s stash. Warrant's signed. You're first through the door.`,cam:s}],
+      tick:()=>fightAt(p,s,2+seasonOf(epIdx()),`Shots fired at the stash house!`,260),
+      obj:()=>fightObj(p,`Raid ${s.boss}'s stash`,'Clear the house'),target:()=>fightTarget(p,s),check:()=>!!p.cleared,
+      done:()=>{save.empire.caseFile+=20;save.cash+=800;save.rep+=10}}}},
+  c_chase:{when:()=>true,gen:()=>({}),
+    make:p=>({title:'Pursuit',
+      intro:()=>[{who:'Dispatch',text:`All units: the crew from the wire is moving product. Black van leaving the docks right now.`}],
+      start:()=>{p.base=save.arrests;if(call)endCall();setTimeout(docksCall,800)},
+      tick:()=>{if(!call&&save.arrests<=p.base&&!p.fail)docksCall()},
+      obj:()=>call?(call.car&&call.car.kind==='perp'?'Stop the van':'Cuff the crew'):'Head to the docks',target:()=>callTarget()||DOCKS_DOOR,
+      check:()=>save.arrests>p.base&&!call,done:()=>{save.empire.caseFile+=15}})},
+  c_source:{when:()=>true,gen:()=>({}),
+    make:p=>({title:'Street Source',
+      intro:()=>[{who:'Pookie',text:`(text) Meet me on my corner. I got something for you. Come alone.`,cam:POOKIE}],
+      obj:()=>`Meet Pookie on his corner`,target:()=>POOKIE,check:()=>go(POOKIE,70),
+      outro:()=>[{who:'Pookie',text:`I know where they count the money. It'll cost you.`,choices:[
+        {label:'Pay him $300',fn:()=>{save.cash=Math.max(0,save.cash-300);save.empire.caseFile+=15;persist()}},
+        {label:'Lean on him',fn:()=>{save.empire.caseFile+=8;save.rep+=3;persist()}}]}]})},
+  c_partner:{when:()=>true,gen:r=>({n:NAMES1[Math.floor(r()*NAMES1.length)]}),
+    make:p=>({title:'Partners',
+      intro:()=>[{who:`Det. ${p.n}`,text:`Nobody counted that seizure but us. Forty grand. Nobody's going to miss five.`},
+                 {who:'You',text:`(Your partner is holding out a stack of cash.)`,choices:[
+                   {label:'Report him',fn:()=>{p.c=1;save.rep+=15;persist()}},
+                   {label:'Take the cut',fn:()=>{p.c=2;save.cash+=5000;save.ia=Math.min(100,save.ia+25);save.flags.crooked=true;persist();setTimeout(checkIA,300)}},
+                   {label:'Look away',fn:()=>{p.c=3;save.ia=Math.min(100,save.ia+8);persist()}}]}],
+      obj:()=>'',target:()=>null,check:()=>!!p.c})},
+  c_finale:{when:()=>true,gen:r=>({sid:Math.floor(r()*8)}),
+    make:p=>{const s=stashes[p.sid];return{title:'Season Finale: The Takedown',
+      intro:()=>[{who:'Lt. Daniels',text:`The case is made. The man at the top is inside ${s.boss}'s house tonight with his crew.`,cam:s},
+                 {who:'Lt. Daniels',text:`You go in, you bring him out. This is the whole season right here.`}],
+      start:()=>{s.cooldown=0;s.inside=3+seasonOf(epIdx());s.bossHome=true;s.hq=true;persist()},
+      tick:()=>{if(!p.won&&save.flags.hqDown===p.sid){p.won=true;persist()}if(!p.won&&scene==='city'){if(!s.hq||s.cooldown>0||!s.bossHome){s.cooldown=0;s.inside=3+seasonOf(epIdx());s.bossHome=true;s.hq=true}if(go(s,60)&&enterCdCity<=0){enterCdCity=3;enterHouse(s)}}if(enterCdCity>0)enterCdCity-=FDT},
+      obj:()=>p.won?'Report back to the precinct':scene==='interior'?'Take down the boss':`Raid ${s.boss}'s house`,
+      target:()=>p.won?POLICE_DOOR:scene==='interior'?(intActors.find(a=>a.kind==='boss'&&!a.dead)||int.exit):s,
+      check:()=>p.won&&go(POLICE_DOOR,90),
+      done:()=>{s.hq=false;save.flags.hqDown=null;save.empire.caseFile=0;save.empire.copRank++;save.rep+=25;save.cash+=3000},
+      outro:()=>[{who:'Lt. Daniels',text:`Front page tomorrow. There'll be another one by the weekend. There always is.`},{who:'Narrator',text:`End of Season ${seasonOf(epIdx())}. You've been promoted to ${['Detective','Sergeant','Lieutenant','Captain','Commander'][Math.min(4,save.empire.copRank)]}.`}]}}}
+};
+function chooseEp(idx){
+  const cop=save.mode==='cop',lib=cop?COP_EPS:CROOK_EPS,e=empireState(),ep=epOf(idx);
+  if(ep===6)return cop?'c_finale':'finale';
+  if(!cop&&ep===1)return 'outsiders';
+  if(!cop&&e.fed>=85)return 'lawyer';
+  const used=Object.keys(e.eps).filter(k=>seasonOf(+k)===seasonOf(idx)).map(k=>e.eps[k].tid);
+  const pool=Object.keys(lib).filter(k=>!['finale','outsiders','lawyer','c_finale'].includes(k)&&lib[k].when()&&!used.includes(k));
+  return pick(pool.length?pool:Object.keys(lib).filter(k=>lib[k].when()&&!['finale','c_finale','outsiders','lawyer'].includes(k)));
+}
+let epCache=null,enterCdCity=0;
+function episode(){
+  const idx=epIdx();if(epCache&&epCache.idx===idx&&epCache.mode===save.mode)return epCache.m;
+  const e=empireState();
+  if(!e.eps[idx]){const tid=chooseEp(idx);const r=mulberry(idx*7919+Date.now()%997);e.eps[idx]={tid,p:(save.mode==='cop'?COP_EPS:CROOK_EPS)[tid].gen(r)};persist()}
+  const rec=e.eps[idx],lib=save.mode==='cop'?COP_EPS:CROOK_EPS;
+  if(!lib[rec.tid]){delete e.eps[idx];return episode()}
+  const m=lib[rec.tid].make(rec.p);m.label=`Season ${seasonOf(idx)} · Episode ${epOf(idx)}`;
+  epCache={idx,mode:save.mode,m};return m;
+}
+/* ---- passive empire: income, the feds, the front ---- */
+function empireTick(dt){
+  if(!started||!empireOn()||cineOn)return;const e=empireState();
+  if(save.mode==='crook'){
+    e.incomeT-=dt;
+    if(e.incomeT<=0){e.incomeT=90;const n=e.terr.length;
+      if(n){const amt=n*350*seasonOf(epIdx());save.cash+=amt;e.fed+=n*2*(e.front?.4:1);toast(`Your houses paid ${money(amt)}.${e.front?' The car wash cleaned it.':''}`,2.6)}
+      if(e.front)e.fed=Math.max(0,e.fed-3);
+      e.crew.forEach(c=>c.loyalty=Math.max(0,Math.min(100,c.loyalty+(n?1:-2))));
+      e.fed=Math.min(100,e.fed);persist();hudKey=''}
+  }
+}
+let empOpen=false,empRT=0;
+function closeEmpire(){empOpen=false;$('empModal').hidden=true}
+function openEmpire(){if(!started||cineOn)return;for(const k in K)K[k]=0;firing=false;empOpen=true;renderEmpire();$('empModal').hidden=false}
+function renderEmpire(){
+  const e=empireState(),i=epIdx(),el=$('empBody');el.textContent='';
+  const row=(k,v)=>{const d=document.createElement('div');d.className='erow';const a=document.createElement('span');a.textContent=k;const b=document.createElement('b');b.textContent=v;d.append(a,b);el.appendChild(d)};
+  if(!empireOn()){row('Status',`Finish your Chapter 1 story to start the never-ending seasons.`);return}
+  row('Now',`Season ${seasonOf(i)}, Episode ${epOf(i)}`);
+  if(save.mode==='cop'){row('Case file',`${Math.min(100,Math.round(e.caseFile))}%`);row('Rank',['Detective','Sergeant','Lieutenant','Captain','Commander'][Math.min(4,e.copRank)]);row('Internal Affairs',`${Math.round(save.ia)}%`);return}
+  row('Territory',e.terr.length?e.terr.map(id=>STASH_DEF[id][2]+(id===8?"'s main house":"'s old house")).join(', '):'None yet');
+  row('Income',e.terr.length?`${money(e.terr.length*350*seasonOf(i))} every 90 seconds`:'Take houses to get paid');
+  row('Federal case',`${Math.round(e.fed)}%${e.fed>=85?' · indictment coming':e.fed>=55?' · raids likely':''}`);
+  row('Front business',e.front?'Sparkle Car Wash (cleans your money)':'None. The feds see every dollar.');
+  row('Crew',e.crew.map(c=>`${c.name} (loyalty ${c.loyalty})`).join(' · ')||'Nobody');
+  row('Rival',e.rival?`${e.rival.name} from ${e.rival.city}`:'Nobody yet this season');
+}
+
+$('empBtn').addEventListener('click',openEmpire);$('empClose').addEventListener('click',closeEmpire);$('empModal').addEventListener('click',ev=>{if(ev.target.id==='empModal')closeEmpire()});
+
 /* ================= big map + location ================= */
 let mapOpen=false;
 function openMap(){if(!started||cineOn)return;mapOpen=true;for(const k in K)K[k]=0;firing=false;drawBigMap();$('mapModal').hidden=false}
@@ -1934,7 +2225,7 @@ function drawBigMap(){
   DISTRICT_NAMES.forEach((row,ry)=>row.forEach((nm,rx)=>g.fillText(nm.toUpperCase(),(rx*3+1.5)*BS*T*sc,(ry*3+1.5)*BS*T*sc)));
   for(const b of blocks){
     const x=(b.bx*BS+1)*T*sc,y=(b.by*BS+1)*T*sc,w=4*T*sc;const s=stashes.find(s=>s.b===b);
-    g.fillStyle=b.kind==='police'?'#1d2c4a':b.kind==='hospital'?'#cfd3da':b.kind==='guns'?'#4a1f1f':b.kind==='club'?'#3a1a44':b.kind==='docks'?'#1c3438':b.kind==='grow'?'#1f3a22':b.kind==='buyer'?'#3a3218':s?(s.owned?'#1f3a2a':'#3a2c14'):'#2a2f3a';g.fillRect(x,y,w,w);
+    g.fillStyle=b.kind==='police'?'#1d2c4a':b.kind==='hospital'?'#cfd3da':b.kind==='guns'?'#4a1f1f':b.kind==='club'?'#3a1a44':b.kind==='docks'?'#1c3438':b.kind==='grow'?'#1f3a22':b.kind==='buyer'?'#3a3218':b.kind==='carwash'?'#16303d':b.kind==='cardroom'?'#3a1c1c':s?(s.owned?'#1f3a2a':'#3a2c14'):'#2a2f3a';g.fillRect(x,y,w,w);
     let label=placeName(b),col='#fff';
     if(s&&save.mode==='crook'){label=s.owned?'Your house':`${s.boss}'s ${s.main?'main':'stash'}`;col=s.owned?'#5ed08b':s.cooldown>0?'#8e94a4':'#ffb23e'}
     if(b.kind==='hospital')col='#c81e2e';
@@ -1963,12 +2254,12 @@ function updateLoc(){
 }
 
 /* ================= loop ================= */
-let last=performance.now(),actLabel=null,miniT=0,started=false;
-const running=()=>started&&!cineOn&&!shopOpen&&!mapOpen&&!growOpen&&!clubOpen&&!beat;
+let last=performance.now(),actLabel=null,miniT=0,started=false,FDT=1/60;
+const running=()=>started&&!cineOn&&!shopOpen&&!mapOpen&&!growOpen&&!clubOpen&&!beat&&!empOpen;
 function frame(now){
-  const dt=Math.min(.05,(now-last)/1000);last=now;const t=now/1000;
+  const dt=Math.min(.05,(now-last)/1000);last=now;const t=now/1000;FDT=dt;
   cineTick(dt);beatTick();
-  if(started){growTick(dt);clubTick(dt);if(save.dancer){save.dancer.cd=Math.max(0,save.dancer.cd-dt);save.dancer.vipCd=Math.max(0,save.dancer.vipCd-dt)}}
+  if(started){growTick(dt);clubTick(dt);empireTick(dt);if(empOpen){empRT-=dt;if(empRT<=0){empRT=1;renderEmpire()}}if(save.dancer){save.dancer.cd=Math.max(0,save.dancer.cd-dt);save.dancer.vipCd=Math.max(0,save.dancer.vipCd-dt)}}
   if(running()){
     if(frozen>0)frozen-=dt;
     else{
@@ -2019,7 +2310,8 @@ function startGame(mode,fresh,role){
   save.role=role||save.role||(mode==='cop'?'cop':'gang');roleState();
   save.mode=mode;save.flags.started=true;persist();
   scene='city';int=null;intActors=[];actors=[];cars=[];peds=[];bullets=[];stars=0;calm=0;call=null;callCd=6;thugs=[];missionActive=false;
-  stashes.forEach(s=>{s.owned=s.main&&!!save.flags.ricoDown;s.cooldown=0;rollStash(s);spawnOutsideGuards(s)});
+  epCache=null;save.flags.hqDown=null;stashes.forEach(s=>{s.hq=false;s.boss=STASH_DEF[s.id][2]});empireState();
+  stashes.forEach(s=>{s.owned=(s.main&&!!save.flags.ricoDown)||(save.mode==='crook'&&save.empire.terr.includes(s.id));s.cooldown=0;rollStash(s);spawnOutsideGuards(s)});
   curW=save.weapons.pistol?'pistol':'fist';
   if(mode==='cop'){
     save.weapons.pistol=true;if(!save.ammo.pistol)save.ammo.pistol=60;curW='pistol';
@@ -2054,11 +2346,11 @@ FITS.forEach(c=>{const b=document.createElement('button');b.type='button';b.styl
 // Dre leaves after mission 1
 setInterval(()=>{if(save.mode==='crook'&&(save.m>0||save.role!=='gang'))actors=actors.filter(a=>a.kind!=='friend')},2000);
 document.querySelectorAll('.mode').forEach(b=>b.addEventListener('click',()=>{readProfile();const r=b.dataset.role;startGame(r==='cop'?'cop':'crook',true,r)}));
-if(save.mode&&save.flags.started){const c=$('continue');c.hidden=false;c.textContent=`Continue as ${(ROLE_LABEL[save.role||(save.mode==='cop'?'cop':'gang')]||save.mode).toLowerCase()} · ${save.mode==='cop'?'shift':'mission'} ${Math.min(save.m+1,list().length)}`;c.addEventListener('click',()=>{readProfile();startGame(save.mode,false)})}
+if(save.mode&&save.flags.started){const c=$('continue');c.hidden=false;c.textContent=`Continue as ${(ROLE_LABEL[save.role||(save.mode==='cop'?'cop':'gang')]||save.mode).toLowerCase()} · ${save.m>=scriptedLen()?`season ${seasonOf(save.m-scriptedLen())}, episode ${epOf(save.m-scriptedLen())}`:`${save.mode==='cop'?'shift':'mission'} ${save.m+1}`}`;c.addEventListener('click',()=>{readProfile();startGame(save.mode,false)})}
 $('newgame').addEventListener('click',()=>{started=false;$('intro').hidden=false;$('continue').hidden=true;cineOn=false;$('cine').hidden=true});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){for(const k in K)K[k]=0;firing=false}});
 resize();
-window.__uw={get save(){return save},get player(){return player},get scene(){return scene},stashes,get actors(){return actors},get intActors(){return intActors},get cars(){return cars},get int(){return int},enterHouse,cineAdvance,get cineOn(){return cineOn},get call(){return call},startGame,setStars:n=>{stars=n},testPeers:l=>{peersList=l;myPeer='me1';onPeers()},BUYER:BUYER_DOOR,missionCount:()=>list().length,missionList:()=>list(),say,get remote(){return remote},get dmgOut(){return dmgOut}};
+window.__uw={episode:()=>episode(),empireState:()=>empireState(),scriptedLen:()=>scriptedLen(),resetEp:()=>{epCache=null},CROOK_EPS,COP_EPS,get missionActive(){return missionActive},get save(){return save},get player(){return player},get scene(){return scene},stashes,get actors(){return actors},get intActors(){return intActors},get cars(){return cars},get int(){return int},enterHouse,cineAdvance,get cineOn(){return cineOn},get call(){return call},startGame,setStars:n=>{stars=n},testPeers:l=>{peersList=l;myPeer='me1';onPeers()},BUYER:BUYER_DOOR,missionCount:()=>list().length,missionList:()=>list(),say,get remote(){return remote},get dmgOut(){return dmgOut}};
 requestAnimationFrame(frame);
 })();
 </script>
