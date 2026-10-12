@@ -1075,8 +1075,7 @@ function makeNet(){
     return{me,connected:()=>ok,presence(p){Object.assign(state,p);return Promise.resolve()},onPeers(f){cbs.push(f);setTimeout(fire,0);return()=>{}}};
   }catch(e){return null}
 }
-room=makeNet();
-if(room)room.onPeers(ch=>{peersList=ch.peers;myPeer=room.me;onPeers()});
+(function initNet(tries){const r=makeNet();if(r){room=r;r.onPeers(ch=>{peersList=ch.peers;myPeer=r.me;onPeers()})}else if(tries<60)setTimeout(()=>initNet(tries+1),250)})(0);
 function onPeers(){
   const now=performance.now(),live=new Set();
   for(const p of peersList){
