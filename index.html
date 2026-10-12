@@ -235,7 +235,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
 <div class="wrap">
   <header class="top">
     <h1>My <span>Block</span></h1>
-    <p>Prototype v1.4 · Fronts and heists: District 7. Fictional game.</p>
+    <p>Prototype v1.5 · Crews: District 7. Fictional game.</p>
   </header>
 
   <div class="stage" id="stage">
@@ -342,7 +342,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
     <div class="modal" id="lbModal" hidden>
       <div class="panelbox">
         <h2>Leaderboard</h2>
-        <div class="btnrow" id="lbTabs"><button class="small go" data-f="all">Everyone</button><button class="small" data-f="crook">Crooks</button><button class="small" data-f="cop">Cops</button></div>
+        <div class="btnrow" id="lbTabs"><button class="small go" data-f="all">Everyone</button><button class="small" data-f="crook">Crooks</button><button class="small" data-f="cop">Cops</button><button class="small" data-f="crews">Crews</button></div>
         <div class="stat2" id="lbMe"></div>
         <div id="lbList"></div>
         <b>Where players are</b>
@@ -420,6 +420,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
         <li>Drive-by: shoot from your car (aim with the mouse, or FIRE auto-aims on phones). Iron Works sells assault rifles, the street sweeper and pipe bombs (G or BOMB).</li>
         <li>Get busted and you go to county jail for real minutes. Hire a player lawyer, use the public defender, post bail, or play your second character while you wait. Lose your case? Put a hit on your lawyer.</li>
         <li>Anyone can work as a lawyer on the side (Empire → pass the bar). Travel between Raleigh, Durham, Charlotte and Chicago from the map.</li>
+        <li>Crews: start one ($5,000) or join with an invite code. Shared crew bank, crew radio, crewmates show green on the map, no friendly fire, and you never war on your own crew's blocks. Ranks has a crew board.</li>
         <li>Every robbery plays different: dark houses, dogs, count rooms with cash on the tables, witnesses who run for the door, silent alarms, floor vaults and house parties. Buy Pookie's intel to know what you're walking into.</li>
         <li>Buy a front (car wash, barbershop, laundromat, tire shop). Stock product in the back, collect the register, and keep the heat down. One owner per city.</li>
         <li>Escort and Pimp are playable lives now. Escorts take dates from their phone and dodge vice stings. Pimps recruit, protect their people and keep the cut fair, or people walk.</li>
@@ -1352,13 +1353,13 @@ function spawnThugs(){
 const FITS=['#ffb23e','#e04f5f','#4f8fe0','#5ed08b','#b07ae0','#f2f2f2','#2d2d2d'];
 let room=null,myPeer=null,peersList=[],presT=0,mySay='',mySayT=0,mySayUntil=0,lastHitBy=null,lastHitT=0,iaWarnT=0;
 const remote=new Map(),dmgOut={},cuffOut={},seenDmg={},seenCuff={};
-const prof=()=>save.profile||{name:'Player',crew:'',col:FITS[0]};
+const prof=()=>{const p=save.profile||{name:'Player',crew:'',col:FITS[0]};return (typeof myCrew!=='undefined'&&myCrew)?Object.assign({},p,{crew:myCrew.tag}):p};
 const isBoss=()=>save.mode==='crook'&&((save.crown||0)>=3||save.flags.ricoDown||save.rep>=150||save.role==='owner');
 const roleTag=()=>save.mode==='cop'?RANKS_COP(save.arrests):(save.crown||0)>=3?CROWN[save.crown].n:ROLE_RANKS[save.role]?ROLE_RANKS[save.role](save.rep):save.rep>=300?'Kingpin':isBoss()?'Boss':RANKS_CROOK(save.rep);
 function makeNet(){
   try{
     if(!window.supabase||!window.supabase.createClient)return null;
-    const client=window.supabase.createClient('https://wjpqrxxeoifrpjfbzzns.supabase.co','sb_publishable_Ev0ej2eCPZ0sAR_svvuqnA_9WHp7pN5',{realtime:{params:{eventsPerSecond:20}}});window.__fronts={list:async()=>{const {data,error}=await client.from('fronts').select('biz,owner_id,owner_name,updated_at').eq('city',CITY_ID);if(error)throw error;return data||[]},buy:(id,sec,city,biz,n)=>client.rpc('buy_front',{p_id:id,p_secret:sec,p_city:city,p_biz:biz,p_name:n}).then(r=>{if(r.error)throw r.error;return r.data}),sell:(id,sec,city,biz)=>client.rpc('sell_front',{p_id:id,p_secret:sec,p_city:city,p_biz:biz}).then(r=>{if(r.error)throw r.error;return r.data})};window.__law={myCase:async id=>{const {data,error}=await client.from('cases').select('*').eq('client_id',id).order('created_at',{ascending:false}).limit(1);if(error)throw error;return data&&data[0]},roster:async city=>{let q=client.from('cases').select('id,client_id,client_name,city,fee,release_at,lawyer_id,lawyer_name,status').in('status',['open','taken','lost']).gt('release_at',new Date().toISOString()).order('created_at',{ascending:false}).limit(40);if(city)q=q.eq('city',city);const {data,error}=await q;if(error)throw error;return data||[]},open:(id,sec,n,city,fee,mins)=>client.rpc('open_case',{p_id:id,p_secret:sec,p_name:n,p_city:city,p_fee:fee,p_minutes:mins}).then(r=>{if(r.error)throw r.error;return r.data}),take:(id,sec,n,c)=>client.rpc('take_case',{p_id:id,p_secret:sec,p_name:n,p_case:c}).then(r=>{if(r.error)throw r.error;return r.data}),argue:(id,sec,c)=>client.rpc('argue_case',{p_id:id,p_secret:sec,p_case:c}).then(r=>{if(r.error)throw r.error;return r.data}),close:(id,sec)=>client.rpc('close_case',{p_id:id,p_secret:sec}).then(r=>{if(r.error)throw r.error}),hits:async()=>{const {data,error}=await client.from('hits').select('*').eq('status','open').order('created_at',{ascending:false}).limit(50);if(error)throw error;return data||[]},placeHit:(id,sec,n,t,tn,a,why)=>client.rpc('place_hit',{p_id:id,p_secret:sec,p_name:n,p_target:t,p_target_name:tn,p_amount:a,p_reason:why}).then(r=>{if(r.error)throw r.error;return r.data}),claimHit:(id,sec,n,h)=>client.rpc('claim_hit',{p_id:id,p_secret:sec,p_name:n,p_hit:h}).then(r=>{if(r.error)throw r.error;return r.data}),bust:(id,sec,n,c)=>client.rpc('bust_out',{p_id:id,p_secret:sec,p_name:n,p_case:c}).then(r=>{if(r.error)throw r.error;return r.data})};window.__turf={list:async()=>{const {data,error}=await client.from('city_turf').select('block,owner_id,owner_name,owner_crew,color,last_hit_by,updated_at').eq('city',CITY_ID);if(error)throw error;return data||[]},pacts:async id=>{if(!/^[0-9a-f-]{36}$/.test(id))return [];const {data,error}=await client.from('pacts').select('*').or('a.eq.'+id+',b.eq.'+id);if(error)throw error;return data||[]},claim:(id,sec,i,n,c,col,hit)=>client.rpc('claim_city_turf',{p_id:id,p_secret:sec,p_city:CITY_ID,p_block:i,p_name:n,p_crew:c,p_color:col,p_hit:hit}).then(r=>{if(r.error)throw r.error;return r.data}),act:(id,sec,o,me,on,a,t)=>client.rpc('pact_action',{p_id:id,p_secret:sec,p_other:o,p_my_name:me,p_other_name:on,p_action:a,p_terms:t}).then(r=>{if(r.error)throw r.error;return r.data})};window.__cloud={save:(c,d)=>client.rpc('cloud_save',{p_code:c,p_data:d}).then(r=>{if(r.error)throw r.error}),load:c=>client.rpc('cloud_load',{p_code:c}).then(r=>{if(r.error)throw r.error;return r.data}),setCode:(o,n,d)=>client.rpc('set_save_code',{p_old:o,p_new:n,p_data:d}).then(r=>{if(r.error)throw r.error;return r.data})};window.__lb={home:(id,sec,c,r,co,gc)=>client.rpc('set_home',{p_id:id,p_secret:sec,p_city:c,p_region:r,p_country:co,p_game_city:gc}).then(x=>{if(x.error)throw x.error}),places:async()=>{const {data,error}=await client.from('player_places').select('*').limit(50);if(error)throw error;return data||[]},submit:(id,secret,r)=>client.rpc('submit_score',{p_id:id,p_secret:secret,p_name:r.name,p_crew:r.crew,p_mode:r.mode,p_role:r.role,p_rank:r.rank,p_score:r.score,p_rep:r.rep,p_houses:r.houses,p_season:r.season}).then(x=>x),top:async()=>{const {data,error}=await client.from('leaderboard_public').select('name,crew,mode,role,rank,score,rep,houses,season').gt('score',0).order('score',{ascending:false}).limit(50);if(error)throw error;return data||[]}};
+    const client=window.supabase.createClient('https://wjpqrxxeoifrpjfbzzns.supabase.co','sb_publishable_Ev0ej2eCPZ0sAR_svvuqnA_9WHp7pN5',{realtime:{params:{eventsPerSecond:20}}});window.__crew={mine:async id=>{const {data:m,error}=await client.from('crew_members').select('crew_id,role').eq('player_id',id).maybeSingle();if(error)throw error;if(!m||!m.crew_id)return null;const {data:c}=await client.from('crews').select('id,name,tag,boss_id,boss_name,bank,active').eq('id',m.crew_id).maybeSingle();if(!c||!c.active)return null;const {data:mem}=await client.from('crew_members').select('player_id,name,role').eq('crew_id',c.id).order('joined_at');return Object.assign(c,{role:m.role,members:mem||[]})},board:async()=>{const {data,error}=await client.from('crew_board').select('*');if(error)throw error;return data||[]},create:(id,sec,n,t,p)=>client.rpc('create_crew',{p_id:id,p_secret:sec,p_name:n,p_tag:t,p_player:p}).then(r=>{if(r.error)throw r.error;return r.data}),join:(id,sec,t,c,p)=>client.rpc('join_crew',{p_id:id,p_secret:sec,p_tag:t,p_code:c,p_player:p}).then(r=>{if(r.error)throw r.error;return r.data}),leave:(id,sec)=>client.rpc('leave_crew',{p_id:id,p_secret:sec}).then(r=>{if(r.error)throw r.error;return r.data}),kick:(id,sec,m)=>client.rpc('kick_member',{p_id:id,p_secret:sec,p_member:m}).then(r=>{if(r.error)throw r.error;return r.data}),bank:(id,sec,a)=>client.rpc('crew_bank',{p_id:id,p_secret:sec,p_amount:a}).then(r=>{if(r.error)throw r.error;return r.data}),code:(id,sec)=>client.rpc('my_crew_code',{p_id:id,p_secret:sec}).then(r=>{if(r.error)throw r.error;return r.data})};window.__fronts={list:async()=>{const {data,error}=await client.from('fronts').select('biz,owner_id,owner_name,updated_at').eq('city',CITY_ID);if(error)throw error;return data||[]},buy:(id,sec,city,biz,n)=>client.rpc('buy_front',{p_id:id,p_secret:sec,p_city:city,p_biz:biz,p_name:n}).then(r=>{if(r.error)throw r.error;return r.data}),sell:(id,sec,city,biz)=>client.rpc('sell_front',{p_id:id,p_secret:sec,p_city:city,p_biz:biz}).then(r=>{if(r.error)throw r.error;return r.data})};window.__law={myCase:async id=>{const {data,error}=await client.from('cases').select('*').eq('client_id',id).order('created_at',{ascending:false}).limit(1);if(error)throw error;return data&&data[0]},roster:async city=>{let q=client.from('cases').select('id,client_id,client_name,city,fee,release_at,lawyer_id,lawyer_name,status').in('status',['open','taken','lost']).gt('release_at',new Date().toISOString()).order('created_at',{ascending:false}).limit(40);if(city)q=q.eq('city',city);const {data,error}=await q;if(error)throw error;return data||[]},open:(id,sec,n,city,fee,mins)=>client.rpc('open_case',{p_id:id,p_secret:sec,p_name:n,p_city:city,p_fee:fee,p_minutes:mins}).then(r=>{if(r.error)throw r.error;return r.data}),take:(id,sec,n,c)=>client.rpc('take_case',{p_id:id,p_secret:sec,p_name:n,p_case:c}).then(r=>{if(r.error)throw r.error;return r.data}),argue:(id,sec,c)=>client.rpc('argue_case',{p_id:id,p_secret:sec,p_case:c}).then(r=>{if(r.error)throw r.error;return r.data}),close:(id,sec)=>client.rpc('close_case',{p_id:id,p_secret:sec}).then(r=>{if(r.error)throw r.error}),hits:async()=>{const {data,error}=await client.from('hits').select('*').eq('status','open').order('created_at',{ascending:false}).limit(50);if(error)throw error;return data||[]},placeHit:(id,sec,n,t,tn,a,why)=>client.rpc('place_hit',{p_id:id,p_secret:sec,p_name:n,p_target:t,p_target_name:tn,p_amount:a,p_reason:why}).then(r=>{if(r.error)throw r.error;return r.data}),claimHit:(id,sec,n,h)=>client.rpc('claim_hit',{p_id:id,p_secret:sec,p_name:n,p_hit:h}).then(r=>{if(r.error)throw r.error;return r.data}),bust:(id,sec,n,c)=>client.rpc('bust_out',{p_id:id,p_secret:sec,p_name:n,p_case:c}).then(r=>{if(r.error)throw r.error;return r.data})};window.__turf={list:async()=>{const {data,error}=await client.from('city_turf').select('block,owner_id,owner_name,owner_crew,color,last_hit_by,updated_at').eq('city',CITY_ID);if(error)throw error;return data||[]},pacts:async id=>{if(!/^[0-9a-f-]{36}$/.test(id))return [];const {data,error}=await client.from('pacts').select('*').or('a.eq.'+id+',b.eq.'+id);if(error)throw error;return data||[]},claim:(id,sec,i,n,c,col,hit)=>client.rpc('claim_city_turf',{p_id:id,p_secret:sec,p_city:CITY_ID,p_block:i,p_name:n,p_crew:c,p_color:col,p_hit:hit}).then(r=>{if(r.error)throw r.error;return r.data}),act:(id,sec,o,me,on,a,t)=>client.rpc('pact_action',{p_id:id,p_secret:sec,p_other:o,p_my_name:me,p_other_name:on,p_action:a,p_terms:t}).then(r=>{if(r.error)throw r.error;return r.data})};window.__cloud={save:(c,d)=>client.rpc('cloud_save',{p_code:c,p_data:d}).then(r=>{if(r.error)throw r.error}),load:c=>client.rpc('cloud_load',{p_code:c}).then(r=>{if(r.error)throw r.error;return r.data}),setCode:(o,n,d)=>client.rpc('set_save_code',{p_old:o,p_new:n,p_data:d}).then(r=>{if(r.error)throw r.error;return r.data})};window.__lb={home:(id,sec,c,r,co,gc)=>client.rpc('set_home',{p_id:id,p_secret:sec,p_city:c,p_region:r,p_country:co,p_game_city:gc}).then(x=>{if(x.error)throw x.error}),places:async()=>{const {data,error}=await client.from('player_places').select('*').limit(50);if(error)throw error;return data||[]},submit:(id,secret,r)=>client.rpc('submit_score',{p_id:id,p_secret:secret,p_name:r.name,p_crew:r.crew,p_mode:r.mode,p_role:r.role,p_rank:r.rank,p_score:r.score,p_rep:r.rep,p_houses:r.houses,p_season:r.season}).then(x=>x),top:async()=>{const {data,error}=await client.from('leaderboard_public').select('name,crew,mode,role,rank,score,rep,houses,season').gt('score',0).order('score',{ascending:false}).limit(50);if(error)throw error;return data||[]}};
     const me=Math.random().toString(36).slice(2,12);
     const state={},cbs=[],peers=new Map();let lastSent='',lastT=0,ok=false;
     const ch=client.channel(CITY_ID==='raleigh'?'myworld-lobby':'myworld-'+CITY_ID,{config:{broadcast:{self:false}}});
@@ -1386,6 +1387,7 @@ function onPeers(){
     if(!r){r={x:pr.x,y:pr.y,a:pr.a||0,walk:0,peer:p.peer};remote.set(p.peer,r)}
     r.tx=pr.x;r.ty=pr.y;r.ta=+pr.a||0;r.p=pr;r.guest=p.guest;
     if(pr.sayT&&pr.sayT!==r.sayT){r.sayT=pr.sayT;r.sayUntil=now+5500}
+    if(pr.csT&&pr.csT!==r.csT){if(r.csT!==undefined&&myCrew&&pr.c===myCrew.tag&&pr.cs)radio(`[${myCrew.tag}] ${clip(pr.n)}: ${String(pr.cs).slice(0,80)}`,6);r.csT=pr.csT}
     if(typeof r.prevHp==='number'&&r.prevHp>0&&pr.hp<=0&&r.myHitT&&now-r.myHitT<5000){
       const st=+pr.st||0;const killedCop=pr.m==='cop'&&save.mode==='crook';const bounty=save.mode==='cop'?(st>0?250+st*250:0):killedCop?500:300+st*400;if(killedCop)addStars(2,'You took down a cop player. +2 stars');
       if(bounty){save.cash+=bounty;save.rep+=5;persist();toast(`You took out ${clip(pr.n)}${st?` (${st}★ bounty)`:''}. +${money(bounty)}.`,3)}
@@ -1412,7 +1414,7 @@ function sendPresence(dt){
   const f=player.inCar||player,pf=prof();
   room.presence({n:pf.name,c:pf.crew,col:pf.col,m:save.mode,rk:roleTag(),bs:isBoss(),x:Math.round(f.x),y:Math.round(f.y),a:Math.round((f.ang||0)*100)/100,
     sc:scene==='city'?'c':'i',car:player.inCar?(player.inCar.cop?'cop':player.inCar.color):null,st:stars,hp:Math.round(Math.max(0,player.hp)),rep:save.rep,sco:lbScore(),pid:save.lbId||'',law:save.lawyer&&save.lawyer.licensed?1:0,atk:turfWar&&turfWar.owner.kind==='player'?{b:turfWar.i,o:turfWar.owner.id,s:turfWar.sneak?1:0}:null,
-    w:WEAPONS[curW].melee?null:curW,rl:ROLE_LABEL[save.role]||'',say:mySay,sayT:mySayT,dmg:dmgOut,cuff:cuffOut}).catch(()=>{});
+    w:WEAPONS[curW].melee?null:curW,rl:ROLE_LABEL[save.role]||'',say:mySay,sayT:mySayT,cs:crewMsg,csT:crewMsgT,dmg:dmgOut,cuff:cuffOut}).catch(()=>{});
 }
 function updateRemote(dt){
   for(const r of remote.values()){
@@ -1425,6 +1427,7 @@ function visibleRemotes(){return [...remote.values()].filter(r=>r.p&&r.p.sc==='c
 function nearRemoteCrook(){if(save.mode!=='cop')return null;let best=null,bd=38;for(const r of visibleRemotes()){if(!(r.p.st>0)||r.p.car||r.p.m!=='crook')continue;const d=dist(r,player);if(d<bd){bd=d;best=r}}return best}
 function remoteHitCheck(b){
   for(const r of visibleRemotes()){
+    if(myCrew&&r.p.c===myCrew.tag)continue;
     if(Math.hypot(r.x-b.x,r.y-b.y)<(r.p.car?16:12)){
       dmgOut[r.peer]=(dmgOut[r.peer]||0)+Math.round(b.dmg);r.myHitT=performance.now();b.life=0;presT=0;
       if(save.mode==='cop'&&!(r.p.st>0)&&performance.now()-iaWarnT>3000){iaWarnT=performance.now();save.ia=Math.min(100,save.ia+8);save.flags.crooked=save.flags.crooked||save.ia>=30;toast(`${clip(r.p.n)} isn't wanted. Shooting them puts IA heat on you.`,2.6);checkIA()}
@@ -1642,7 +1645,7 @@ function drawMini(){
   for(const c of cars){if(c.owned){mctx.fillStyle='#5fd0c8';mctx.fillRect(c.x*sc-4,c.y*sc-4,8,8)}if(c.kind==='police'||c.kind==='perp'||c.kind==='patrol'){mctx.fillStyle=c.kind==='perp'?'#ffb23e':c.kind==='patrol'?'#4a8cff':'#ff4b5c';mctx.beginPath();mctx.arc(c.x*sc,c.y*sc,4,0,Math.PI*2);mctx.fill()}}
   for(const a of actors){if(a.dead)continue;if(a.kind==='perp'||a.kind==='thug'){mctx.fillStyle='#ff4b5c';mctx.beginPath();mctx.arc(a.x*sc,a.y*sc,3.5,0,Math.PI*2);mctx.fill()}}
   const m=curMission();const tg=(m&&missionActive?m.target():null)||(save.mode==='cop'?callTarget():sideTarget());
-  for(const r of remote.values()){if(!r.p||r.p.sc!=='c')continue;mctx.fillStyle=r.p.m==='cop'?'#4a8cff':r.p.st>0?'#ff4b5c':'#ffd36a';mctx.beginPath();mctx.arc(r.x*sc,r.y*sc,5,0,Math.PI*2);mctx.fill();mctx.strokeStyle='#000';mctx.lineWidth=1;mctx.stroke()}
+  for(const r of remote.values()){if(!r.p||r.p.sc!=='c')continue;mctx.fillStyle=myCrew&&r.p.c===myCrew.tag?'#5ed08b':r.p.m==='cop'?'#4a8cff':r.p.st>0?'#ff4b5c':'#ffd36a';mctx.beginPath();mctx.arc(r.x*sc,r.y*sc,5,0,Math.PI*2);mctx.fill();mctx.strokeStyle='#000';mctx.lineWidth=1;mctx.stroke()}
   if(tg&&scene==='city'){mctx.strokeStyle='#ffb23e';mctx.lineWidth=2;mctx.beginPath();mctx.arc(tg.x*sc,tg.y*sc,7,0,Math.PI*2);mctx.stroke()}
   const f=player.inCar||player;mctx.fillStyle='#fff';mctx.beginPath();mctx.arc(f.x*sc,f.y*sc,5,0,Math.PI*2);mctx.fill();mctx.restore();
 }
@@ -2508,6 +2511,7 @@ function renderEmpire(){
       if(!hitOn(id))btn('Put a hit · $2,000','hit',2000);
       el.appendChild(d)}
     if((save.crown||0)<3&&others.size){row('','Reach Boss rank to call sit-downs and declare war.')}}
+  renderCrewSection(el,row);
   if(save.role==='pimp'&&save.pimp){const p=save.pimp;const h=document.createElement('b');h.textContent='Your people';h.style.marginTop='6px';el.appendChild(h);
     row('Cut',`${p.cut}% · vice heat ${Math.round(p.heat)}%`);for(const w of p.stable)row(w.name,`loyalty ${Math.round(w.loyalty)}`);if(!p.stable.length)row('Nobody yet','Recruit at Club Velvet.');
     const d=document.createElement('div');d.className='btnrow';d.innerHTML=[30,40,50,60,70].map(c=>`<button class="small${c===p.cut?' go':''}" data-cut="${c}">${c}%</button>`).join('')+`<button class="small" data-act="lay" ${save.cash<1000||p.heat<10?'disabled':''}>Pay off vice · $1,000</button>`;el.appendChild(d)}
@@ -2536,6 +2540,7 @@ function renderEmpire(){
 }
 
 $('empBody').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;
+  if(b.dataset.crew){const a=b.dataset.crew;if(a==='create')crewDo('create',{name:$('crName').value,tag:$('crTag').value});else if(a==='join')crewDo('join',{tag:$('jTag').value,code:$('jCode').value});else if(a==='msg'){sendCrewMsg($('crMsg').value);$('crMsg').value=''}else crewDo(a,{id:b.dataset.id,name:b.dataset.name,amt:b.dataset.amt});return}
   if(b.dataset.act==='move'){moveProgress();return}
   if(b.dataset.cut){save.pimp.cut=+b.dataset.cut;persist();renderEmpire();return}
   if(b.dataset.act==='lay'){if(save.cash<1000)return;save.cash-=1000;save.pimp.heat=Math.max(0,save.pimp.heat-40);persist();hudKey='';toast('Vice found something else to do this week.',2.4);renderEmpire();return}
@@ -2649,6 +2654,7 @@ function turfContext(){
   if(save.mode!=='crook'||scene!=='city'||player.inCar||stars>0||turfWar)return null;
   const i=blockIdx(player.x,player.y);if(!takeable(i)||dist(player,cornerOf(i))>48)return null;
   const o=ownerOf(i);if(o.kind==='me')return null;
+  if(o.kind==='player'&&myCrew&&o.crew===myCrew.tag)return null;
   if(o.kind==='player'){const p=pactWith(o.id);if(p&&p.state==='truce')return{t:'turf',label:`Hit ${o.name}'s block behind their back · $300`,i,sneak:true};
     return{t:'turf',label:`${p&&p.state==='war'?'War: take':'Start a war: take'} ${o.name}'s block · $300`,i}}
   return{t:'turf',label:`Take this block from ${o.name} · $300`,i};
@@ -2855,13 +2861,53 @@ function frontsTick(dt){frontT-=dt;if(frontT<=0){frontT=25;frontSync()}
   if(fedCut&&save.empire){save.empire.fed=Math.max(0,(save.empire.fed||0)-fedCut)}persist()}
 function shakeDown(k){const o=frontOwner(k)||'the owner';shakeCd[k]=Date.now()+300000;const amt=ri(3,9)*100;save.cash+=amt;hudKey='';persist();addStars(2,`You robbed ${o}'s register. +${money(amt)}.`)}
 
+/* ================= crews ================= */
+let myCrew=null,crewBoard=[],crewT=5,crewMsg='',crewMsgT=0,crewCode='';
+async function crewSync(){if(!window.__crew||!save.lbId)return;
+  try{const c=await window.__crew.mine(save.lbId);const was=myCrew&&myCrew.id;myCrew=c;
+    if(c&&c.id!==was){crewCode='';try{crewCode=await window.__crew.code(save.lbId,save.lbSecret)||''}catch(e){}}
+    if(was&&!c)radio('You are no longer in a crew.',3);
+    crewBoard=await window.__crew.board()}catch(e){}
+  if(empOpen)renderEmpire()}
+function crewTick(dt){crewT-=dt;if(crewT<=0){crewT=30;crewSync()}}
+async function crewDo(action,args){if(!window.__crew){toast('Crews work on the full game link.',2.4);return}await lbEnsure();const me=(save.profile&&save.profile.name)||'Player';
+  try{
+    if(action==='create'){const name=String(args.name||'').trim().slice(0,24),tag=String(args.tag||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4);
+      if(name.length<3||tag.length<2){toast('Crew name needs 3+ letters and a 2-4 letter tag.',2.6);return}if(save.cash<5000){toast('Starting a crew costs $5,000.',2.4);return}
+      const r=await window.__crew.create(save.lbId,save.lbSecret,name,tag,me);if(!String(r).startsWith('ok')){toast(r==='taken'?'That name or tag is taken.':String(r),2.6);return}
+      save.cash-=5000;crewCode=String(r).split(':')[1]||'';save.profile.crew=tag;persist();hudKey='';toast(`${name} [${tag}] is official. Give your invite code to people you trust.`,3.6)}
+    if(action==='join'){const r=await window.__crew.join(save.lbId,save.lbSecret,String(args.tag||'').toUpperCase(),String(args.code||'').toUpperCase().trim(),me);if(r!=='ok'){toast(String(r),2.6);return}toast('You are in. Your crew can see you on the map now.',3)}
+    if(action==='leave'){await window.__crew.leave(save.lbId,save.lbSecret);toast('You left the crew.',2.2)}
+    if(action==='kick'){const r=await window.__crew.kick(save.lbId,save.lbSecret,args.id);toast(r==='ok'?`${args.name} is out.`:String(r),2.4)}
+    if(action==='dep'){const amt=+args.amt;if(save.cash<amt){toast(`You need ${money(amt)} on you.`,2);return}const nb=await window.__crew.bank(save.lbId,save.lbSecret,amt);save.cash-=amt;persist();hudKey='';toast(`Put ${money(amt)} in the crew bank. Bank: ${money(nb)}.`,2.6)}
+    if(action==='wd'){const amt=+args.amt;const nb=await window.__crew.bank(save.lbId,save.lbSecret,-amt);save.cash+=amt;persist();hudKey='';toast(`Took ${money(amt)} from the crew bank. Left: ${money(nb)}.`,2.6)}
+  }catch(e){toast((e&&e.message)||'That did not go through.',2.6)}
+  await crewSync()}
+function sendCrewMsg(t){t=String(t||'').trim().slice(0,80);if(!t||!myCrew)return;crewMsg=t;crewMsgT=Date.now();toast(`[${myCrew.tag}] you: ${t}`,2.6)}
+function renderCrewSection(el,row){
+  const h=document.createElement('b');h.textContent='Crew';h.style.marginTop='6px';el.appendChild(h);
+  if(!window.__crew){row('Crews','Work on the full game link.');return}
+  if(!myCrew){
+    row('No crew yet','Start one ($5,000) or join with a tag and invite code from a boss.');
+    const d=document.createElement('div');d.className='ecode';d.innerHTML='<input id="crName" maxlength="24" placeholder="Crew name"><input id="crTag" maxlength="4" placeholder="TAG" style="max-width:70px"><button class="small go" data-crew="create">Start · $5,000</button>';el.appendChild(d);
+    const j=document.createElement('div');j.className='ecode';j.innerHTML='<input id="jTag" maxlength="4" placeholder="TAG" style="max-width:70px"><input id="jCode" maxlength="6" placeholder="Invite code"><button class="small" data-crew="join">Join</button>';el.appendChild(j);
+  } else {
+    const boss=myCrew.role==='boss';row(`${myCrew.name} [${myCrew.tag}]`,`${boss?'You run it':'Boss: '+myCrew.boss_name} · bank ${money(myCrew.bank)}`);
+    if(crewCode)row('Invite code',`${crewCode} · give it only to people you trust`);
+    for(const m of myCrew.members||[]){row(m.name+(m.role==='boss'?' (boss)':''),m.player_id===save.lbId?'you':'');if(boss&&m.player_id!==save.lbId){const d=document.createElement('div');d.className='btnrow';d.innerHTML=`<button class="small" data-crew="kick" data-id="${m.player_id}" data-name="">Kick</button>`;d.querySelector('button').dataset.name=m.name;el.appendChild(d)}}
+    const d=document.createElement('div');d.className='btnrow';d.innerHTML=`<button class="small go" data-crew="dep" data-amt="1000">Put in $1,000</button><button class="small go" data-crew="dep" data-amt="5000">Put in $5,000</button>${boss?'<button class="small" data-crew="wd" data-amt="1000">Take out $1,000</button><button class="small" data-crew="wd" data-amt="5000">Take out $5,000</button>':''}<button class="small" data-crew="leave">Leave crew</button>`;el.appendChild(d);
+    const r=document.createElement('div');r.className='ecode';r.innerHTML='<input id="crMsg" maxlength="80" placeholder="Crew radio: only your crew hears it"><button class="small go" data-crew="msg">Send</button>';el.appendChild(r);
+  }
+  if(crewBoard.length){const t=document.createElement('div');t.className='muted2';t.textContent='Top crews: '+crewBoard.slice(0,5).map((c,i)=>`#${i+1} ${c.name} [${c.tag}] ${c.members} members · ${Number(c.score).toLocaleString()}`).join('  ·  ');el.appendChild(t)}
+}
+
 /* ================= leaderboard ================= */
 let lbOpen=false,lbFilter='all',lbT=8,lbRows=null;
 function lbIds(){if(!save.lbId){const h=n=>{const a=new Uint8Array(n);crypto.getRandomValues(a);return [...a].map(x=>x.toString(16).padStart(2,'0')).join('')};const x=h(16);save.lbId=`${x.slice(0,8)}-${x.slice(8,12)}-4${x.slice(13,16)}-a${x.slice(17,20)}-${x.slice(20,32)}`;save.lbSecret=h(16);persist()}}
 function lbRow(){const pf=save.profile||{};return{name:(pf.name||'Player').slice(0,16),crew:(pf.crew||'').slice(0,4),mode:save.mode,role:(save.role||'').slice(0,12),rank:String(roleTag()).slice(0,20),score:lbScore(),rep:save.rep,houses:Math.min(9,props()),season:save.m>=scriptedLen()?seasonOf(save.m-scriptedLen()):0}}
 function lbSubmit(){if(!window.__lb||!save.mode||!started)return;lbIds();window.__lb.submit(save.lbId,save.lbSecret,lbRow()).then(homeSend).catch(()=>{})}
 function lbTick(dt){lbT-=dt;if(lbT<=0){lbT=45;lbSubmit()}}
-async function openLb(){if(!started||cineOn)return;for(const k in K)K[k]=0;firing=false;lbOpen=true;$('lbModal').hidden=false;lbRows=null;renderLb();lbSubmit();
+async function openLb(){if(!started||cineOn)return;crewSync();for(const k in K)K[k]=0;firing=false;lbOpen=true;$('lbModal').hidden=false;lbRows=null;renderLb();lbSubmit();
   if(window.__lb){try{lbRows=await window.__lb.top()}catch(e){lbRows=[]}if(lbOpen)renderLb();
     try{const pl=await window.__lb.places();const el=$('lbPlaces');el.textContent='';for(const p of pl.slice(0,15)){const d=document.createElement('div');d.textContent=`${[p.city,p.region,p.country].filter(Boolean).join(', ')||'Unknown'} · ${p.players} player${p.players===1?'':'s'}`;el.appendChild(d)}if(!pl.length)el.textContent='No one has shared where they play yet.'}catch(e){}}
   else $('lbPlaces').textContent='Shows on the full game link.'}
@@ -2870,6 +2916,9 @@ function renderLb(){
   const list=$('lbList');list.textContent='';const me=lbRow();let rows,live=!window.__lb;
   if(live){rows=[Object.assign({},me,{me:true})];for(const r of remote.values())if(r.p)rows.push({name:clip(r.p.n),crew:crewOf(r.p.c),mode:r.p.m,rank:clip(r.p.rk),score:+r.p.sco||0,rep:+r.p.rep||0})}
   else{if(!lbRows){list.textContent='Loading…';return}rows=lbRows.map(r=>Object.assign({},r,{me:r.name===me.name&&r.mode===me.mode}));if(!rows.some(r=>r.me))rows.push(Object.assign({},me,{me:true,pending:true}))}
+  if(lbFilter==='crews'){const cb=crewBoard;if(!cb.length){list.textContent=window.__crew?'No crews yet. Start one in Empire.':'Crews show on the full game link.';$('lbMe').textContent=myCrew?`Your crew: ${myCrew.name} [${myCrew.tag}]`:'You are not in a crew.';return}
+    $('lbMe').textContent=myCrew?`Your crew: ${myCrew.name} [${myCrew.tag}]`:'You are not in a crew.';
+    cb.forEach((c,i)=>{const d=document.createElement('div');d.className='lbrow'+(myCrew&&c.tag===myCrew.tag?' me':'');const n=document.createElement('span');n.textContent=`#${i+1}`;const w=document.createElement('div');const bb=document.createElement('b');bb.textContent=`[${c.tag}] ${c.name}`;const sm=document.createElement('small');sm.textContent=`Boss ${c.boss_name||'?'} · ${c.members} members`;w.append(bb,sm);const e=document.createElement('em');e.textContent=Number(c.score).toLocaleString();d.append(n,w,e);list.appendChild(d)});return}
   rows=rows.filter(r=>lbFilter==='all'||r.mode===lbFilter).sort((a,b)=>b.score-a.score);
   const pos=rows.findIndex(r=>r.me);
   $('lbMe').textContent=pos>=0?`You: #${pos+1} · ${me.score.toLocaleString()} points · ${me.rank}`:`You: ${me.score.toLocaleString()} points`;
@@ -2953,7 +3002,7 @@ const running=()=>started&&!cineOn&&!shopOpen&&!mapOpen&&!growOpen&&!clubOpen&&!
 function frame(now){
   const dt=Math.min(.05,(now-last)/1000);last=now;const t=now/1000;FDT=dt;
   cineTick(dt);beatTick();
-  if(started){growTick(dt);clubTick(dt);empireTick(dt);crownTick(dt);lbTick(dt);cloudTick(dt);jobsTick(dt);turfTick(dt);lawTick(dt);frontsTick(dt);escortTick(dt);pimpTick(dt);escortBadCheck();stage.classList.toggle('hasbombs',(save.bombs||0)>0);if(empOpen){empRT-=dt;if(empRT<=0){empRT=1;renderEmpire()}}if(save.dancer){save.dancer.cd=Math.max(0,save.dancer.cd-dt);save.dancer.vipCd=Math.max(0,save.dancer.vipCd-dt)}}
+  if(started){growTick(dt);clubTick(dt);empireTick(dt);crownTick(dt);lbTick(dt);cloudTick(dt);jobsTick(dt);turfTick(dt);lawTick(dt);frontsTick(dt);crewTick(dt);escortTick(dt);pimpTick(dt);escortBadCheck();stage.classList.toggle('hasbombs',(save.bombs||0)>0);if(empOpen){empRT-=dt;if(empRT<=0){empRT=1;renderEmpire()}}if(save.dancer){save.dancer.cd=Math.max(0,save.dancer.cd-dt);save.dancer.vipCd=Math.max(0,save.dancer.vipCd-dt)}}
   if(running()){
     if(frozen>0)frozen-=dt;
     else{
@@ -3056,7 +3105,7 @@ if(save.mode&&save.flags.started){const c=$('continue');c.hidden=false;c.textCon
 $('newgame').addEventListener('click',()=>{started=false;$('intro').hidden=false;$('continue').hidden=true;cineOn=false;$('cine').hidden=true});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){for(const k in K)K[k]=0;firing=false}});
 resize();
-window.__uw={get int(){return int},buyFront:k=>buyFront(k),openFront:k=>openFront(k),frontAction:a=>frontAction(a),frontsTickNow:()=>{frontTick=0;frontsTick(0)},fstate:k=>fstate(k),escortTick:d=>escortTick(d),pimpTick:d=>pimpTick(d),pimpRecruit:()=>pimpRecruit(),moveProgress:()=>moveProgress(),throwBomb:()=>throwBomb(),explode:(x,y)=>explode(x,y),get bombs(){return bombs},busted:b=>busted(b),get jail(){return save.jail},releaseJail:m=>releaseJail(m),CITY_ID,SLOT,turfContext:()=>turfContext(),startTurfWar:c=>startTurfWar(c),get turfWar(){return turfWar},myBlocks:()=>myBlocks(),ownerOf:i=>ownerOf(i),turfSync:()=>turfSync(),get pactRows(){return pactRows},heatLv:()=>heatLv(),cornerOf:i=>cornerOf(i),bankIn:()=>bankIn(),bankOut:()=>bankOut(),atProperty:()=>atProperty(),jobsTick:d=>jobsTick(d),saveCode:()=>saveCode(),lbScore:()=>lbScore(),props:()=>props(),get stars(){return stars},copSees:()=>copSees(),growLevelUp:()=>growLevelUp(),growNext:()=>growNext(),context:()=>context(),renderLb:()=>renderLb(),episode:()=>episode(),empireState:()=>empireState(),scriptedLen:()=>scriptedLen(),resetEp:()=>{epCache=null},CROOK_EPS,COP_EPS,get missionActive(){return missionActive},get save(){return save},get player(){return player},get scene(){return scene},stashes,get actors(){return actors},get intActors(){return intActors},get cars(){return cars},get int(){return int},enterHouse,cineAdvance,get cineOn(){return cineOn},get call(){return call},startGame,setStars:n=>{stars=n},testPeers:l=>{peersList=l;myPeer='me1';onPeers()},BUYER:BUYER_DOOR,missionCount:()=>list().length,missionList:()=>list(),say,get remote(){return remote},get dmgOut(){return dmgOut}};
+window.__uw={crewDo:(a,x)=>crewDo(a,x),crewSync:()=>crewSync(),get myCrew(){return myCrew},sendCrewMsg:t=>sendCrewMsg(t),get int(){return int},buyFront:k=>buyFront(k),openFront:k=>openFront(k),frontAction:a=>frontAction(a),frontsTickNow:()=>{frontTick=0;frontsTick(0)},fstate:k=>fstate(k),escortTick:d=>escortTick(d),pimpTick:d=>pimpTick(d),pimpRecruit:()=>pimpRecruit(),moveProgress:()=>moveProgress(),throwBomb:()=>throwBomb(),explode:(x,y)=>explode(x,y),get bombs(){return bombs},busted:b=>busted(b),get jail(){return save.jail},releaseJail:m=>releaseJail(m),CITY_ID,SLOT,turfContext:()=>turfContext(),startTurfWar:c=>startTurfWar(c),get turfWar(){return turfWar},myBlocks:()=>myBlocks(),ownerOf:i=>ownerOf(i),turfSync:()=>turfSync(),get pactRows(){return pactRows},heatLv:()=>heatLv(),cornerOf:i=>cornerOf(i),bankIn:()=>bankIn(),bankOut:()=>bankOut(),atProperty:()=>atProperty(),jobsTick:d=>jobsTick(d),saveCode:()=>saveCode(),lbScore:()=>lbScore(),props:()=>props(),get stars(){return stars},copSees:()=>copSees(),growLevelUp:()=>growLevelUp(),growNext:()=>growNext(),context:()=>context(),renderLb:()=>renderLb(),episode:()=>episode(),empireState:()=>empireState(),scriptedLen:()=>scriptedLen(),resetEp:()=>{epCache=null},CROOK_EPS,COP_EPS,get missionActive(){return missionActive},get save(){return save},get player(){return player},get scene(){return scene},stashes,get actors(){return actors},get intActors(){return intActors},get cars(){return cars},get int(){return int},enterHouse,cineAdvance,get cineOn(){return cineOn},get call(){return call},startGame,setStars:n=>{stars=n},testPeers:l=>{peersList=l;myPeer='me1';onPeers()},BUYER:BUYER_DOOR,missionCount:()=>list().length,missionList:()=>list(),say,get remote(){return remote},get dmgOut(){return dmgOut}};
 requestAnimationFrame(frame);
 })();
 </script>
