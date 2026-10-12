@@ -194,7 +194,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
 .modes{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 @media (max-width:640px){.modes{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 .mode .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
-.mode.smug strong{color:#5fd0c8}.mode.grow strong{color:#7ad06a}.mode.owner strong{color:#ff5fd2}.mode.dancer strong{color:#ffa0e0}
+.mode.smug strong{color:#5fd0c8}.mode.grow strong{color:#7ad06a}.mode.owner strong{color:#ff5fd2}.mode.dancer strong{color:#ffa0e0}.mode.escort strong{color:#ff8fb1}.mode.pimp strong{color:#c58fff}
 .panelbox{width:min(520px,100%);max-height:100%;overflow-y:auto;background:var(--asphalt);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px}
 .panelbox h2{font-family:var(--display);font-weight:400;font-size:26px;margin:0;text-transform:uppercase}
 .panelbox .stat2{font-family:var(--mono);font-size:12.5px;color:var(--amber)}
@@ -216,6 +216,9 @@ canvas#mini{cursor:pointer;pointer-events:auto}
 .proj div{background:var(--raised);border-radius:6px;padding:8px}.proj label{display:block;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .proj b{font-family:var(--mono);font-size:14px}
 #jail{background:rgba(7,9,14,.97);z-index:30}
+.prof3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.prof3 span{grid-column:1/-1;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}.prof3 input,.ecode input{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px;color:var(--fg);font:inherit;font-size:14px;min-width:0}
+.movebox{border:1px solid var(--amber-dim);border-radius:8px;padding:10px;font-size:13.5px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ecode{display:flex;gap:6px}.ecode input{flex:1;text-transform:uppercase}
 .muted2{margin:0;color:var(--muted);font-size:12.5px}
 .lbrow{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:13.5px}.lbrow.me{background:rgba(255,178,62,.1)}.lbrow b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lbrow small{display:block;color:var(--muted);font-size:11.5px}.lbrow em{font-style:normal;font-family:var(--mono);color:var(--amber)}.lbrow span{font-family:var(--mono);color:var(--muted)}
 .erow{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:6px 0;font-size:13.5px}.erow span{color:var(--muted);flex:none}.erow b{text-align:right;font-weight:600}
@@ -232,7 +235,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
 <div class="wrap">
   <header class="top">
     <h1>My <span>Block</span></h1>
-    <p>Prototype v1.2 · Cities, jail and lawyers: District 7. Fictional game.</p>
+    <p>Prototype v1.3 · The life: District 7. Fictional game.</p>
   </header>
 
   <div class="stage" id="stage">
@@ -319,7 +322,8 @@ canvas#mini{cursor:pointer;pointer-events:auto}
           <div class="btnrow"><button class="small go" data-fee="500">Lawyer · $500</button><button class="small go" data-fee="1500">Lawyer · $1,500</button><button class="small go" data-fee="3000">Lawyer · $3,000</button></div></div>
         <p class="muted2" id="jNoLaw" hidden>Real lawyers work on the public game link.</p>
         <div id="jHitRow" hidden><p class="muted2" id="jHitLbl">Put a hit on your lawyer:</p><div class="btnrow"><button class="small" data-hit="1000">Hit · $1,000</button><button class="small" data-hit="3000">Hit · $3,000</button></div></div>
-        <div class="btnrow"><button class="small" id="jPD">Public defender · free</button><button class="small" id="jBail">Post bail</button></div>
+        <div class="btnrow"><button class="small" id="jPD">Public defender · free</button><button class="small" id="jBail">Post bail</button><button class="small" id="jEscape">Try to escape · 35%</button></div>
+        <p class="muted2">Other players can also bust you out from the precinct.</p>
         <button class="primary" id="jAlt">Play your other character</button>
         <b>Locked up with you</b>
         <div id="jRoster"></div>
@@ -331,6 +335,8 @@ canvas#mini{cursor:pointer;pointer-events:auto}
         <div class="btnrow" id="lbTabs"><button class="small go" data-f="all">Everyone</button><button class="small" data-f="crook">Crooks</button><button class="small" data-f="cop">Cops</button></div>
         <div class="stat2" id="lbMe"></div>
         <div id="lbList"></div>
+        <b>Where players are</b>
+        <div id="lbPlaces" class="muted2"></div>
         <p class="muted2" id="lbNote"></p>
         <button class="primary" id="lbClose">Back to the streets</button>
       </div>
@@ -369,6 +375,10 @@ canvas#mini{cursor:pointer;pointer-events:auto}
           <label for="pname">Street name<input id="pname" maxlength="16" autocomplete="off" placeholder="What they call you"></label>
           <label for="pcrew">Crew tag<input id="pcrew" maxlength="4" autocomplete="off" placeholder="D7"></label>
         </div>
+        <div class="prof3"><span>Where are you playing from? (optional, city only)</span>
+          <input id="hcity" maxlength="40" autocomplete="off" placeholder="City"><input id="hregion" maxlength="40" autocomplete="off" placeholder="State / region"><input id="hcountry" maxlength="40" autocomplete="off" placeholder="Country"></div>
+        <div class="movebox" id="moveBox" hidden><b>Your friends are on the full game link.</b> Turf, cloud saves, lawyers and the leaderboard are shared there. <button class="small go" id="moveBtn">Move my progress there</button></div>
+        <div class="movebox" id="importBox" hidden><span id="importTxt"></span> <button class="small go" id="importBtn">Bring it in</button></div>
         <div class="swatches" id="swatches"><span>Your fit</span></div>
         <div class="modes">
           <button class="mode crook" data-role="gang"><span class="tag">Start $200</span><strong>Gang member</strong><small>Fresh out of county. Get strapped, rob Rico's stash houses and take his district.</small></button>
@@ -376,6 +386,8 @@ canvas#mini{cursor:pointer;pointer-events:auto}
           <button class="mode grow" data-role="grower"><span class="tag">Start $600 + house</span><strong>Grower</strong><small>Your uncle left you a grow house. Plant, water, harvest, and sell to The Plug before the cops raid it.</small></button>
           <button class="mode owner" data-role="owner"><span class="tag">Start $3,000 + club</span><strong>Club owner</strong><small>You own Club Velvet. Book DJs, hire security, handle fights, and deal with Rico wanting a cut.</small></button>
           <button class="mode dancer" data-role="dancer"><span class="tag">Start $100</span><strong>Dancer</strong><small>Work the stage at Velvet for tips and fans. Overhear the wrong conversation. Save up to buy in.</small></button>
+          <button class="mode escort" data-role="escort"><span class="tag">Start $150</span><strong>Escort</strong><small>Your phone rings, you set the price. Dodge vice stings and bad dates, build a client list and run your own agency.</small></button>
+          <button class="mode pimp" data-role="pimp"><span class="tag">Start $1,000</span><strong>Pimp</strong><small>Recruit at Velvet, protect your people, keep the cut fair or they walk. Vice is always watching.</small></button>
           <button class="mode cop" data-role="cop"><span class="tag">Start $200 + cruiser</span><strong>Cop</strong><small>Rookie officer. Answer dispatch, chase getaway cars, cuff suspects and wanted players.</small></button>
         </div>
         <button class="primary" id="continue" hidden>Continue</button>
@@ -398,6 +410,8 @@ canvas#mini{cursor:pointer;pointer-events:auto}
         <li>Drive-by: shoot from your car (aim with the mouse, or FIRE auto-aims on phones). Iron Works sells assault rifles, the street sweeper and pipe bombs (G or BOMB).</li>
         <li>Get busted and you go to county jail for real minutes. Hire a player lawyer, use the public defender, post bail, or play your second character while you wait. Lose your case? Put a hit on your lawyer.</li>
         <li>Anyone can work as a lawyer on the side (Empire → pass the bar). Travel between Raleigh, Durham, Charlotte and Chicago from the map.</li>
+        <li>Escort and Pimp are playable lives now. Escorts take dates from their phone and dodge vice stings. Pimps recruit, protect their people and keep the cut fair, or people walk.</li>
+        <li>Locked up? Try to escape (35%), or have another player bust you out from the precinct (40%).</li>
         <li>Stash your cash at any property you own. Getting busted or killed can't touch the stash.</li>
         <li>Every day you get 3 jobs worth $750 each, plus a $1,500 bonus for finishing all 3.</li>
         <li>Your progress backs up online. Your save code is in Empire: type it on any phone or computer to keep playing where you left off.</li>
@@ -451,10 +465,10 @@ function cityTile(tx,ty){ if(tx<0||ty<0||tx>=TILES||ty>=TILES) return 3; const l
 const DIRS=[[1,0],[0,1],[-1,0],[0,-1]];
 const seeded=mulberry(7);
 const CITY_DEFS={
-  raleigh:{name:'Raleigh',st:'NC',h:['Rico Ave','Harbor Rd','Grand Blvd','Lincoln St','Arcade Way','Dockside Dr'],v:['1st St','MLK Blvd','Iron St','Church St','Bridge St','Market St'],d:[['Northline','Midtown'],['Southgate','Harbor Row']],roofs:['#2a2f3d','#30283a','#2b3532','#38302a','#262c38','#33303a','#2e2a2a']},
-  durham:{name:'Durham',st:'NC',h:['Main St','Chapel Hill St','Fayetteville St','Alston Ave','Roxboro St','Holloway St'],v:['Duke St','Gregson St','Mangum St','Dillard St','Elm St','Driver St'],d:[['Downtown','Bull City'],['Southside','East End']],roofs:['#2e2a33','#332b26','#2a3030','#3a2e28','#2b2a36','#30302a','#2c2626']},
-  charlotte:{name:'Charlotte',st:'NC',h:['Trade St','Tryon St','Independence Blvd','Beatties Ford Rd','Freedom Dr','Wilkinson Blvd'],v:['Graham St','Church St','College St','Brevard St','Davidson St','Caldwell St'],d:[['Uptown','NoDa'],['West End','South End']],roofs:['#26303a','#2c2c38','#2a3532','#34302c','#232b36','#30303a','#2a2a30']},
-  chicago:{name:'Chicago',st:'IL',h:['Madison St','Roosevelt Rd','Division St','Chicago Ave','63rd St','79th St'],v:['Michigan Ave','State St','Halsted St','Ashland Ave','Pulaski Rd','Cicero Ave'],d:[['The Loop','North Side'],['West Side','South Side']],roofs:['#2c2c2c','#33302c','#28303a','#3a2a2a','#2a2e2a','#302a36','#262a2e']}
+  raleigh:{name:'Raleigh',st:'NC',mult:1,h:['Rico Ave','Harbor Rd','Grand Blvd','Lincoln St','Arcade Way','Dockside Dr'],v:['1st St','MLK Blvd','Iron St','Church St','Bridge St','Market St'],d:[['Northline','Midtown'],['Southgate','Harbor Row']],roofs:['#2a2f3d','#30283a','#2b3532','#38302a','#262c38','#33303a','#2e2a2a']},
+  durham:{name:'Durham',st:'NC',mult:.9,h:['Main St','Chapel Hill St','Fayetteville St','Alston Ave','Roxboro St','Holloway St'],v:['Duke St','Gregson St','Mangum St','Dillard St','Elm St','Driver St'],d:[['Downtown','Bull City'],['Southside','East End']],roofs:['#2e2a33','#332b26','#2a3030','#3a2e28','#2b2a36','#30302a','#2c2626']},
+  charlotte:{name:'Charlotte',st:'NC',mult:1.15,h:['Trade St','Tryon St','Independence Blvd','Beatties Ford Rd','Freedom Dr','Wilkinson Blvd'],v:['Graham St','Church St','College St','Brevard St','Davidson St','Caldwell St'],d:[['Uptown','NoDa'],['West End','South End']],roofs:['#26303a','#2c2c38','#2a3532','#34302c','#232b36','#30303a','#2a2a30']},
+  chicago:{name:'Chicago',st:'IL',mult:1.5,h:['Madison St','Roosevelt Rd','Division St','Chicago Ave','63rd St','79th St'],v:['Michigan Ave','State St','Halsted St','Ashland Ave','Pulaski Rd','Cicero Ave'],d:[['The Loop','North Side'],['West Side','South Side']],roofs:['#2c2c2c','#33302c','#28303a','#3a2a2a','#2a2e2a','#302a36','#262a2e']}
 };
 const SLOT=(()=>{try{return localStorage.getItem('uws-slot')==='2'?'2':'1'}catch(e){return '1'}})();
 const SAVE_KEY=SLOT==='1'?'uws-v4':'uws-v4-s2';
@@ -660,7 +674,7 @@ const CROWN=[
   {n:'Kingpin',req:()=>[['300 rep',save.rep>=300],['Own 3 properties',props()>=3],['Own a front business (Sparkle Car Wash)',!!(save.empire&&save.empire.front)]]},
   {n:'The Crown',req:()=>[['600 rep',save.rep>=600],['Own 5 properties',props()>=5],['Win a season finale',((save.empire&&save.empire.finales)||0)>=1]]}
 ];
-function props(){return stashes.filter(s=>s.owned).length+Math.floor(myBlocks()/2)+(save.grow&&save.grow.lvl>=3?1:0)+(save.role==='owner'?1:0)+(save.smug&&save.smug.truck>=1?1:0)+(save.empire&&save.empire.front?1:0)}
+function props(){return stashes.filter(s=>s.owned).length+Math.floor(myBlocks()/2)+(save.grow&&save.grow.lvl>=3?1:0)+(save.role==='owner'?1:0)+(save.smug&&save.smug.truck>=1?1:0)+(save.pimp&&save.pimp.stable&&save.pimp.stable.length>=3?1:0)+(save.empire&&save.empire.front?1:0)}
 let crownT=1;
 function crownTick(dt){if(save.mode!=='crook')return;crownT-=dt;if(crownT>0)return;crownT=1;save.crown=save.crown||0;
   if(save.crown<3&&(save.flags.ricoDown||save.rep>=150)){save.crown=3;persist();hudKey='';titleCard('Boss','Your Boss rank is locked in.');toast('Boss status saved to your rank. Next up: Kingpin.',3);return}
@@ -748,7 +762,7 @@ function context(){
   const rp=nearRemoteCrook();if(rp)return{t:'cuffp',label:`Hold: cuff ${clip(rp.p.n)}`,hold:1,r:rp};
   const p=nearPerp();if(p)return{t:'arrest',label:'Hold: cuff',hold:.8,p};
   if(save.mode==='crook'&&stars>0&&scene==='city'&&hideoutNear())return{t:'hide',label:'Hold: hide out',hold:3};
-  if(dist(player,CLUB_DOOR)<46)return{t:'club',label:'Enter Club Velvet'};
+  if(dist(player,CLUB_DOOR)<46&&save.role!=='pimp')return{t:'club',label:'Enter Club Velvet'};
   if(save.role==='grower'&&dist(player,GROW_DOOR)<46)return{t:'grow',label:'Tend the grow'};
   if(save.grow&&save.grow.lvl>=4&&!save.grow.job&&dist(player,BUYER_DOOR)<46)return{t:'order',label:'Take a distro order'};
   if(save.grow&&save.grow.job&&dist(player,save.grow.job)<60)return{t:'drop',label:`Hold: drop ${save.grow.job.bags} bags`,hold:1.5};
@@ -760,6 +774,8 @@ function context(){
   if(save.mode==='crook'){const s=nearStash();if(s&&s.cooldown<=0&&!s.owned)return{t:'enter',label:'Kick in door',s}}
   if(save.mode==='crook'&&stars===0&&atProperty()){if(save.cash>=100)return{t:'bank',label:`Stash ${money(save.cash)}`};if(save.bank>0)return{t:'unbank',label:`Take out ${money(save.bank)}`}}
   if(save.lawyer&&save.lawyer.caseId&&scene==='city'&&!player.inCar&&dist(player,POLICE_DOOR)<55)return{t:'argue',label:`Hold: argue ${save.lawyer.client}'s case`,hold:4};
+  if(save.role==='escort'&&save.escort&&save.escort.job&&scene==='city'&&!player.inCar&&dist(player,save.escort.job)<60&&stars===0)return{t:'date',label:'Hold: meet your date',hold:2};
+  if(save.role==='pimp'&&scene==='city'&&!player.inCar&&dist(player,CLUB_DOOR)<70&&stars===0&&save.pimp)return{t:'recruit',label:'Recruit at Velvet · $500'};
   const tc=turfContext();if(tc)return tc;
   const c=nearCar();if(c)return{t:'car',label:c.owned?'Get in your truck':c.kind==='police'?'Jack cop car':save.mode==='cop'?'Take car':'Jack car',c};
   return null;
@@ -778,6 +794,7 @@ function actPress(){
   if(cx.t==='sell'){sellBags();return}
   if(cx.t==='bank'){bankIn();return}
   if(cx.t==='turf'){startTurfWar(cx);return}
+  if(cx.t==='recruit'){pimpRecruit();return}
   if(cx.t==='unbank'){bankOut();return}
   if(cx.t==='order'){const b=pick(blocks.filter(x=>x.kind==='plain'&&Math.hypot(doorOf(x).x-BUYER_DOOR.x,doorOf(x).y-BUYER_DOOR.y)>700)),d=doorPt(b),n=ri(8,16);save.grow.job={x:d.x,y:d.y,bags:n,pay:n*220,label:`the dealer on ${streetAt(d.x,d.y+T)||districtAt(d.x,d.y)}`};persist();toast(`Order: ${n} bags to ${save.grow.job.label} for ${money(n*220)}. Follow the arrow.`,3.2);return}
   if(cx.t==='tow'){if(save.cash<200){toast('Towing costs $200.');return}save.cash-=200;spawnTruck();persist();toast('Your truck is back at the docks.',2);return}
@@ -802,7 +819,7 @@ function updateHold(dt){
   const cx=context();
   if(holdKind&&K.act&&cx&&cx.t===holdKind){
     holdT+=dt;const need=cx.hold;
-    $('prog').classList.add('show');$('progL').textContent=({safe:'Cracking the safe',cuffp:'Cuffing player',arrest:'Cuffing suspect',load:'Loading cargo',unload:'Unloading',hide:'Laying low',spray:'Respraying',drop:'Dropping off',argue:'Arguing in court'})[holdKind]||'';$('progBar').style.width=Math.min(100,holdT/need*100)+'%';
+    $('prog').classList.add('show');$('progL').textContent=({safe:'Cracking the safe',cuffp:'Cuffing player',arrest:'Cuffing suspect',load:'Loading cargo',unload:'Unloading',hide:'Laying low',spray:'Respraying',drop:'Dropping off',argue:'Arguing in court',date:'On a date'})[holdKind]||'';$('progBar').style.width=Math.min(100,holdT/need*100)+'%';
     if(holdKind==='safe'){int.alarm=true;alertInterior()}
     if(holdT>=need){
       if(holdKind==='safe'){int.cracked=true;const s=int.stash;toast(`Safe open: ${money(s.value)}. Now get out!`,2.6);shake=.2}
@@ -810,6 +827,7 @@ function updateHold(dt){
       if(holdKind==='load'){const k=newContract();save.smug.cargo=k;persist();toast(`Loaded. Deliver to ${k.label} for ${money(k.pay)}.${k.hot?' Extra patrols are out.':''}`,3)}
       if(holdKind==='unload'){const k=save.smug.cargo;save.cash+=k.pay;save.smug.runs++;if(save.smug.truck===1)save.smug.boxRuns++;save.rep+=4+Math.round(k.pay/500);save.smug.cargo=null;persist();hudKey='';toast(`Delivered to ${k.label}. +${money(k.pay)}.`,2.6)}
       if(holdKind==='argue'){argueCase()}
+      if(holdKind==='date'){escortDate()}
       if(holdKind==='drop'){const g=save.grow,j=g.job;if(g.bags<j.bags)toast(`You only have ${g.bags} bags. This order needs ${j.bags}.`,2.6);else{g.bags-=j.bags;save.cash+=j.pay;g.earned+=j.pay;g.sold+=j.bags;g.heat+=4;save.rep+=3+Math.round(j.bags/3);g.job=null;persist();hudKey='';toast(`Order delivered. +${money(j.pay)}.`,2.6);if(Math.random()<.25)setTimeout(()=>addStars(2,'That was an undercover buy. Run!'),900)}}
       if(holdKind==='hide'||holdKind==='spray'){
         if(copSees())toast('They can see you. Break line of sight first.',2.2);
@@ -1268,7 +1286,7 @@ function missionTick(){
   if((!m||!missionActive)&&turfWar){$('obj').classList.add('show');$('objT').textContent='Turf war';$('objB').textContent=turfObj();return}
   if(!m||!missionActive){
     $('obj').classList.toggle('show',!m&&!!save.mode);
-    if(!m){$('objT').textContent='Free roam';$('objB').textContent=save.mode==='cop'?'Answer calls. Make arrests.':({smuggler:'Run loads from the docks.',grower:growHint(),owner:'Run nights at Velvet.',dancer:'Work the stage. Stack tips.'})[save.role]||'Rob stash houses. Stack cash.'}
+    if(!m){$('objT').textContent='Free roam';$('objB').textContent=save.mode==='cop'?'Answer calls. Make arrests.':({smuggler:'Run loads from the docks.',grower:growHint(),owner:'Run nights at Velvet.',dancer:'Work the stage. Stack tips.',escort:save.escort&&save.escort.job?`Meet your date at ${save.escort.job.label}`:'Wait for your phone to ring. Dates pay.',pimp:pimpHint()})[save.role]||'Rob stash houses. Stack cash.'}
     return;
   }
   if(turfWar){const o=turfObj();$('obj').classList.add('show');$('objT').textContent='Turf war';$('objB').textContent=o;if(m.tick&&frozen<=0)m.tick();return}
@@ -1300,7 +1318,7 @@ const roleTag=()=>save.mode==='cop'?RANKS_COP(save.arrests):(save.crown||0)>=3?C
 function makeNet(){
   try{
     if(!window.supabase||!window.supabase.createClient)return null;
-    const client=window.supabase.createClient('https://wjpqrxxeoifrpjfbzzns.supabase.co','sb_publishable_Ev0ej2eCPZ0sAR_svvuqnA_9WHp7pN5',{realtime:{params:{eventsPerSecond:20}}});window.__law={myCase:async id=>{const {data,error}=await client.from('cases').select('*').eq('client_id',id).order('created_at',{ascending:false}).limit(1);if(error)throw error;return data&&data[0]},roster:async city=>{let q=client.from('cases').select('id,client_id,client_name,city,fee,release_at,lawyer_id,lawyer_name,status').in('status',['open','taken','lost']).gt('release_at',new Date().toISOString()).order('created_at',{ascending:false}).limit(40);if(city)q=q.eq('city',city);const {data,error}=await q;if(error)throw error;return data||[]},open:(id,sec,n,city,fee,mins)=>client.rpc('open_case',{p_id:id,p_secret:sec,p_name:n,p_city:city,p_fee:fee,p_minutes:mins}).then(r=>{if(r.error)throw r.error;return r.data}),take:(id,sec,n,c)=>client.rpc('take_case',{p_id:id,p_secret:sec,p_name:n,p_case:c}).then(r=>{if(r.error)throw r.error;return r.data}),argue:(id,sec,c)=>client.rpc('argue_case',{p_id:id,p_secret:sec,p_case:c}).then(r=>{if(r.error)throw r.error;return r.data}),close:(id,sec)=>client.rpc('close_case',{p_id:id,p_secret:sec}).then(r=>{if(r.error)throw r.error}),hits:async()=>{const {data,error}=await client.from('hits').select('*').eq('status','open').order('created_at',{ascending:false}).limit(50);if(error)throw error;return data||[]},placeHit:(id,sec,n,t,tn,a,why)=>client.rpc('place_hit',{p_id:id,p_secret:sec,p_name:n,p_target:t,p_target_name:tn,p_amount:a,p_reason:why}).then(r=>{if(r.error)throw r.error;return r.data}),claimHit:(id,sec,n,h)=>client.rpc('claim_hit',{p_id:id,p_secret:sec,p_name:n,p_hit:h}).then(r=>{if(r.error)throw r.error;return r.data})};window.__turf={list:async()=>{const {data,error}=await client.from('city_turf').select('block,owner_id,owner_name,owner_crew,color,last_hit_by,updated_at').eq('city',CITY_ID);if(error)throw error;return data||[]},pacts:async id=>{if(!/^[0-9a-f-]{36}$/.test(id))return [];const {data,error}=await client.from('pacts').select('*').or('a.eq.'+id+',b.eq.'+id);if(error)throw error;return data||[]},claim:(id,sec,i,n,c,col,hit)=>client.rpc('claim_city_turf',{p_id:id,p_secret:sec,p_city:CITY_ID,p_block:i,p_name:n,p_crew:c,p_color:col,p_hit:hit}).then(r=>{if(r.error)throw r.error;return r.data}),act:(id,sec,o,me,on,a,t)=>client.rpc('pact_action',{p_id:id,p_secret:sec,p_other:o,p_my_name:me,p_other_name:on,p_action:a,p_terms:t}).then(r=>{if(r.error)throw r.error;return r.data})};window.__cloud={save:(c,d)=>client.rpc('cloud_save',{p_code:c,p_data:d}).then(r=>{if(r.error)throw r.error}),load:c=>client.rpc('cloud_load',{p_code:c}).then(r=>{if(r.error)throw r.error;return r.data})};window.__lb={submit:(id,secret,r)=>client.rpc('submit_score',{p_id:id,p_secret:secret,p_name:r.name,p_crew:r.crew,p_mode:r.mode,p_role:r.role,p_rank:r.rank,p_score:r.score,p_rep:r.rep,p_houses:r.houses,p_season:r.season}).then(x=>x),top:async()=>{const {data,error}=await client.from('leaderboard_public').select('name,crew,mode,role,rank,score,rep,houses,season').gt('score',0).order('score',{ascending:false}).limit(50);if(error)throw error;return data||[]}};
+    const client=window.supabase.createClient('https://wjpqrxxeoifrpjfbzzns.supabase.co','sb_publishable_Ev0ej2eCPZ0sAR_svvuqnA_9WHp7pN5',{realtime:{params:{eventsPerSecond:20}}});window.__law={myCase:async id=>{const {data,error}=await client.from('cases').select('*').eq('client_id',id).order('created_at',{ascending:false}).limit(1);if(error)throw error;return data&&data[0]},roster:async city=>{let q=client.from('cases').select('id,client_id,client_name,city,fee,release_at,lawyer_id,lawyer_name,status').in('status',['open','taken','lost']).gt('release_at',new Date().toISOString()).order('created_at',{ascending:false}).limit(40);if(city)q=q.eq('city',city);const {data,error}=await q;if(error)throw error;return data||[]},open:(id,sec,n,city,fee,mins)=>client.rpc('open_case',{p_id:id,p_secret:sec,p_name:n,p_city:city,p_fee:fee,p_minutes:mins}).then(r=>{if(r.error)throw r.error;return r.data}),take:(id,sec,n,c)=>client.rpc('take_case',{p_id:id,p_secret:sec,p_name:n,p_case:c}).then(r=>{if(r.error)throw r.error;return r.data}),argue:(id,sec,c)=>client.rpc('argue_case',{p_id:id,p_secret:sec,p_case:c}).then(r=>{if(r.error)throw r.error;return r.data}),close:(id,sec)=>client.rpc('close_case',{p_id:id,p_secret:sec}).then(r=>{if(r.error)throw r.error}),hits:async()=>{const {data,error}=await client.from('hits').select('*').eq('status','open').order('created_at',{ascending:false}).limit(50);if(error)throw error;return data||[]},placeHit:(id,sec,n,t,tn,a,why)=>client.rpc('place_hit',{p_id:id,p_secret:sec,p_name:n,p_target:t,p_target_name:tn,p_amount:a,p_reason:why}).then(r=>{if(r.error)throw r.error;return r.data}),claimHit:(id,sec,n,h)=>client.rpc('claim_hit',{p_id:id,p_secret:sec,p_name:n,p_hit:h}).then(r=>{if(r.error)throw r.error;return r.data}),bust:(id,sec,n,c)=>client.rpc('bust_out',{p_id:id,p_secret:sec,p_name:n,p_case:c}).then(r=>{if(r.error)throw r.error;return r.data})};window.__turf={list:async()=>{const {data,error}=await client.from('city_turf').select('block,owner_id,owner_name,owner_crew,color,last_hit_by,updated_at').eq('city',CITY_ID);if(error)throw error;return data||[]},pacts:async id=>{if(!/^[0-9a-f-]{36}$/.test(id))return [];const {data,error}=await client.from('pacts').select('*').or('a.eq.'+id+',b.eq.'+id);if(error)throw error;return data||[]},claim:(id,sec,i,n,c,col,hit)=>client.rpc('claim_city_turf',{p_id:id,p_secret:sec,p_city:CITY_ID,p_block:i,p_name:n,p_crew:c,p_color:col,p_hit:hit}).then(r=>{if(r.error)throw r.error;return r.data}),act:(id,sec,o,me,on,a,t)=>client.rpc('pact_action',{p_id:id,p_secret:sec,p_other:o,p_my_name:me,p_other_name:on,p_action:a,p_terms:t}).then(r=>{if(r.error)throw r.error;return r.data})};window.__cloud={save:(c,d)=>client.rpc('cloud_save',{p_code:c,p_data:d}).then(r=>{if(r.error)throw r.error}),load:c=>client.rpc('cloud_load',{p_code:c}).then(r=>{if(r.error)throw r.error;return r.data}),setCode:(o,n,d)=>client.rpc('set_save_code',{p_old:o,p_new:n,p_data:d}).then(r=>{if(r.error)throw r.error;return r.data})};window.__lb={home:(id,sec,c,r,co,gc)=>client.rpc('set_home',{p_id:id,p_secret:sec,p_city:c,p_region:r,p_country:co,p_game_city:gc}).then(x=>{if(x.error)throw x.error}),places:async()=>{const {data,error}=await client.from('player_places').select('*').limit(50);if(error)throw error;return data||[]},submit:(id,secret,r)=>client.rpc('submit_score',{p_id:id,p_secret:secret,p_name:r.name,p_crew:r.crew,p_mode:r.mode,p_role:r.role,p_rank:r.rank,p_score:r.score,p_rep:r.rep,p_houses:r.houses,p_season:r.season}).then(x=>x),top:async()=>{const {data,error}=await client.from('leaderboard_public').select('name,crew,mode,role,rank,score,rep,houses,season').gt('score',0).order('score',{ascending:false}).limit(50);if(error)throw error;return data||[]}};
     const me=Math.random().toString(36).slice(2,12);
     const state={},cbs=[],peers=new Map();let lastSent='',lastT=0,ok=false;
     const ch=client.channel(CITY_ID==='raleigh'?'myworld-lobby':'myworld-'+CITY_ID,{config:{broadcast:{self:false}}});
@@ -1599,13 +1617,15 @@ function doorCard(){
 }
 
 /* ================= roles: smuggler, grower, club owner, dancer ================= */
-const ROLE_LABEL={gang:'Gang member',smuggler:'Smuggler',grower:'Grower',owner:'Club owner',dancer:'Dancer',cop:'Cop'};
-const START_CASH={gang:200,smuggler:500,grower:600,owner:3000,dancer:100,cop:200};
+const ROLE_LABEL={gang:'Gang member',smuggler:'Smuggler',grower:'Grower',owner:'Club owner',dancer:'Dancer',escort:'Escort',pimp:'Pimp',cop:'Cop'};
+const START_CASH={gang:200,smuggler:500,grower:600,owner:3000,dancer:100,escort:150,pimp:1000,cop:200};
 const ROLE_RANKS={
   smuggler:r=>r>=300?'Plug':r>=150?'Connect':r>=60?'Transporter':r>=20?'Runner':'Driver',
   grower:r=>r>=300?'Kingpin':r>=150?'Supplier':r>=60?'Grower':'Gardener',
   owner:r=>r>=150?'Nightlife boss':'Club owner',
-  dancer:()=>save.dancer&&save.dancer.fans>=150?'Star':save.dancer&&save.dancer.fans>=40?'Headliner':'Dancer'
+  dancer:()=>save.dancer&&save.dancer.fans>=150?'Star':save.dancer&&save.dancer.fans>=40?'Headliner':'Dancer',
+  escort:()=>{const d=save.escort?save.escort.dates:0;return d>=60?'Madam':d>=30?'VIP':d>=10?'Private':'Street'},
+  pimp:()=>{const p=save.pimp||{};const n=(p.stable||[]).length,e=p.earned||0;return e>=40000&&n>=5?'Mack':e>=12000&&n>=3?'Big Pimp':n>=1?'Pimp':'Hustler'}
 };
 const CLUB_DOOR=doorOf(blk(3,3)),DOCKS_DOOR=doorOf(blk(0,5)),GROW_DOOR=doorOf(blk(2,4)),BUYER_DOOR=doorOf(blk(4,4)),WASH_DOOR=doorOf(blk(1,5)),CARD_DOOR=doorOf(blk(5,3));
 function roleState(){
@@ -1613,6 +1633,8 @@ function roleState(){
   save.grow=save.grow||{slots:[null,null,null],lights:false,heat:0,bags:0,sold:0,earned:0,harvested:0,lvl:0,distT:120};
   save.club=save.club||{hype:30,dj:1,sec:1,dancers:2,cover:20,night:false,t:0,nights:0,fight:null,tax:false};
   save.dancer=save.dancer||{fans:0,tips:0,cd:0,vipCd:0,sets:0};
+  save.escort=save.escort||{dates:0,earned:0,cd:20,job:null,stings:0};
+  save.pimp=save.pimp||{stable:[],cut:50,earned:0,heat:0,payT:60,troubleT:120,trouble:null,collections:0,recruitCd:0};
 }
 roleState();
 const inClub=()=>scene==='interior'&&int&&int.kind==='club';
@@ -1676,7 +1698,7 @@ function growNext(){const g=save.grow,n=GROW_LV[g.lvl+1];if(!n)return null;const
 function growLevelUp(){const g=save.grow,nx=growNext();if(!nx||!nx.ok||save.cash<nx.n.cost)return;save.cash-=nx.n.cost;g.lvl++;growFix();persist();hudKey='';
   if(growOpen)closeGrow();cine([{who:'The Plug',text:`Level ${g.lvl+1}: ${nx.n.n}. ${nx.n.say}`,cam:GROW_DOOR}],()=>{})}
 function growHint(){const nx=growNext();if(!nx)return save.grow.job?`Deliver ${save.grow.job.bags} bags to ${save.grow.job.label}`:'Distro: pick up orders at The Plug.';const miss=nx.req.find(r=>!r[1]);return miss?`Next grow level (${nx.n.n}): ${miss[0]}`:`Upgrade to ${nx.n.n} at the grow house ($${nx.n.cost.toLocaleString()})`}
-function sideTarget(){if(turfWar){if(turfWar.phase==='fight')return turfWar.foes.find(a=>!a.dead)||cornerOf(turfWar.i);return cornerOf(turfWar.i)}const g=save.grow;if(save.mode==='crook'&&g&&g.job)return g.job;return null}
+function sideTarget(){if(save.role==='escort'&&save.escort&&save.escort.job)return save.escort.job;if(save.role==='pimp'&&save.pimp&&save.pimp.trouble)return save.pimp.trouble;if(turfWar){if(turfWar.phase==='fight')return turfWar.foes.find(a=>!a.dead)||cornerOf(turfWar.i);return cornerOf(turfWar.i)}const g=save.grow;if(save.mode==='crook'&&g&&g.job)return g.job;return null}
 function stageOf(p){if(!p)return'Empty';if(p.dead)return'Dead';const f=p.t/GROW_TIME();return f>=1?'Ready':f>.66?'Flowering':f>.33?'Growing':'Seedling'}
 let growOpen=false,growRT=0;
 function growTick(dt){
@@ -1726,7 +1748,7 @@ $('growClose').addEventListener('click',closeGrow);
 function sellBags(){
   const g=save.grow;if(!g.bags)return;if(g.lvl===undefined)growFix();
   if(g.lvl<1){toast(`The Plug: "That's basement weed. Get your grow house to Level 2 and come back."`,3.4);return}
-  const per=GROW_LV[g.lvl].price,n=g.bags,pay=n*per;if(n>=15)g.big=true;
+  const per=Math.round(GROW_LV[g.lvl].price*(CITY.mult||1)),n=g.bags,pay=n*per;if(n>=15)g.big=true;
   save.cash+=pay;g.sold+=n;g.earned+=pay;save.rep+=Math.round(n/2)+1;g.bags=0;persist();hudKey='';
   toast(`The Plug took ${n} bags. +${money(pay)}.`,2.4);
   if(n>=15&&missionActive&&curMission()&&curMission().title==='Big Order'){const bonus=Math.round(pay*.5);save.cash+=bonus;save.flags.bigSale=true;persist();setTimeout(()=>toast(`Big order filled. Premium on top: +${money(bonus)}.`,2.8),2500)}
@@ -2029,7 +2051,60 @@ const DANCER=[
    outro:()=>[{who:'Jade',text:`Your name is on the door now. You don't work the stage anymore. You own it.`},{who:'Narrator',text:`End of the dancer story. Your club owner story starts now.`}],
    done:()=>{save.cash-=6000;save.role='owner';save.m=-1;roleState();persist();hudKey=''}}
 ];
-const ROLE_MISSIONS={smuggler:SMUG,grower:GROW,owner:OWNER,dancer:DANCER};
+
+/* ================= escort + pimp ================= */
+const WORK_NAMES=['Diamond','Cherry','Lexi','Mona','Star','Honey','Raven','Jade','Coco','Angel','Sky','Vee'];
+function workSpot(){const b=pick(blocks.filter(x=>x.kind==='plain'||x.kind==='cardroom'||x.kind==='club')),d=doorPt(b);return{x:d.x,y:d.y,label:placeName(b)||`a place on ${streetAt(d.x,d.y+T)||districtAt(d.x,d.y)}`}}
+function escortTick(dt){const e=save.escort;if(save.role!=='escort'||!e||save.mode!=='crook')return;
+  if(!e.job){e.cd-=dt;if(e.cd<=0){const sp=workSpot(),base=e.dates>=60?650:e.dates>=30?450:e.dates>=10?300:180;e.job=Object.assign(sp,{pay:Math.round(base*(CITY.mult||1)*(.8+Math.random()*.5))});persist();radio(`New date: ${e.job.label}. ${money(e.job.pay)}.`,4)}}}
+function escortDate(){const e=save.escort,j=e.job;if(!j)return;e.job=null;e.cd=25+Math.random()*25;const roll=Math.random();
+  cine([{who:'',text:'Two hours later…'}],()=>{
+    if(roll<.15){e.stings++;persist();addStars(2,'It was vice. Undercover cop. Run!')}
+    else if(roll<.3){const t=mkActor({kind:'thug',name:'Bad date',x:player.x+40,y:player.y+10,hp:ACTOR.thug.hp,armed:null,aware:true});actors.push(t);e.bad={t,pay:Math.round(j.pay*1.5)};toast('He says he is not paying. Make him.',3)}
+    else{e.dates++;e.earned+=j.pay;save.cash+=j.pay;save.rep+=2;persist();hudKey='';toast(`Good date. +${money(j.pay)}.`,2.4)}})}
+function escortBadCheck(){const e=save.escort;if(e&&e.bad&&e.bad.t.dead){e.dates++;e.earned+=e.bad.pay;save.cash+=e.bad.pay;save.rep+=4;e.bad=null;persist();hudKey='';toast('He paid. With interest.',2.4)}}
+function pimpHint(){const p=save.pimp||{};if(p.trouble)return `${p.trouble.name} needs you at ${p.trouble.label}`;if(!(p.stable||[]).length)return 'Recruit at Club Velvet.';return `${p.stable.length} working · your cut ${p.cut}% · vice heat ${Math.round(p.heat)}%`}
+function pimpTick(dt){const p=save.pimp;if(save.role!=='pimp'||!p||save.mode!=='crook')return;
+  if(p.recruitCd>0)p.recruitCd-=dt;
+  if(p.stable.length){p.payT-=dt;if(p.payT<=0){p.payT=60;let take=0;const left=[];
+    for(const w of p.stable){const earn=Math.round((140+Math.random()*160)*(CITY.mult||1));take+=Math.round(earn*p.cut/100);w.loyalty=clamp(w.loyalty+(p.cut>60?-7:p.cut<=40?3:-1),0,100);if(w.loyalty<20)left.push(w)}
+    save.cash+=take;p.earned+=take;p.collections++;p.heat=Math.min(100,p.heat+p.stable.length*1.5);hudKey='';
+    toast(`Your people brought in ${money(take)} (${p.cut}% cut).`,2.4);
+    for(const w of left){p.stable=p.stable.filter(x=>x!==w);radio(`${w.name} left. She said your cut was robbery.`,4)}
+    if(p.heat>=75&&p.stable.length){const w=pick(p.stable);p.stable=p.stable.filter(x=>x!==w);p.heat=25;radio(`Vice picked up ${w.name}. She's in county now.`,4);addStars(1)}
+    persist()}
+    p.troubleT-=dt;if(!p.trouble&&p.troubleT<=0){const w=pick(p.stable),sp=workSpot();p.trouble={name:w.name,x:sp.x,y:sp.y,label:sp.label,t:90,spawned:false,foes:[]};p.troubleT=100+Math.random()*80;radio(`${w.name}: a client got rough at ${sp.label}. Get here!`,5)}}
+  const tr=p.trouble;if(tr){tr.t-=dt;
+    if(!tr.spawned&&scene==='city'&&dist(player.inCar||player,tr)<200){tr.spawned=true;for(let i=0;i<2;i++){const a=mkActor({kind:'thug',x:tr.x+rnd(-30,30),y:tr.y+rnd(10,40),hp:ACTOR.thug.hp,armed:i?'pistol':null,aware:true});tr.foes.push(a);actors.push(a)}}
+    if(tr.spawned&&tr.foes.every(a=>a.dead)){const w=p.stable.find(x=>x.name===tr.name);if(w)w.loyalty=Math.min(100,w.loyalty+15);save.rep+=6;p.trouble=null;persist();toast(`${tr.name} is safe. She won't forget that.`,2.6)}
+    else if(!tr.spawned&&tr.t<=0){const w=p.stable.find(x=>x.name===tr.name);if(w)w.loyalty-=25;p.trouble=null;persist();radio(`You never showed. ${tr.name} won't forget that either.`,4)}}}
+function pimpRecruit(){const p=save.pimp;if(p.recruitCd>0){toast('Give it time. Word has to get around.',2);return}if(save.cash<500){toast('Recruiting takes $500 for clothes, a phone and a room.',2.4);return}
+  save.cash-=500;p.recruitCd=45;const ok=Math.random()<Math.min(.85,.45+save.rep/400+(p.cut<=40?.15:0));
+  if(ok){const used=p.stable.map(w=>w.name);const name=pick(WORK_NAMES.filter(n=>!used.includes(n)))||'Nova';p.stable.push({name,loyalty:60});toast(`${name} is with you now. Keep her safe.`,2.6)}else toast('She laughed at you. Your rep is not there yet.',2.4);persist();hudKey=''}
+const ESCORT=[
+  {title:'New in Town',intro:()=>[{who:'Miss Velvet',text:`Honey, this city pays if you're smart. The Harbor Card Room is where the money drinks.`,cam:CARD_DOOR},{who:'Miss Velvet',text:`Your phone will ring. You choose who you see. Never get in a car you didn't call.`}],
+   obj:()=>'Go to the Harbor Card Room',target:()=>CARD_DOOR,check:()=>go(CARD_DOOR,90)},
+  {title:'First Date',intro:()=>[{who:'Miss Velvet',text:`When the phone rings, go meet him and hold the button. Get paid first.`}],
+   start:()=>{save.escort.cd=2},obj:()=>save.escort.job?`Meet your date at ${save.escort.job.label}`:'Wait for the phone to ring',target:()=>save.escort.job||null,check:()=>save.escort.dates>=1},
+  {title:'Vice',intro:()=>[{who:'Miss Velvet',text:`Vice is running stings this month. If it smells like a cop, run. Three good dates and you are a regular.`}],
+   start:()=>{save.flags.escBase=save.escort.dates},obj:()=>save.escort.job?`Date ${save.escort.dates-save.flags.escBase+1} of 3 at ${save.escort.job.label}`:`Good dates: ${save.escort.dates-save.flags.escBase}/3`,target:()=>save.escort.job||null,check:()=>save.escort.dates-save.flags.escBase>=3&&stars===0},
+  {title:'Independent',intro:()=>[{who:'Miss Velvet',text:`You don't need a man taking half. Stack your own money and nobody owns you.`}],
+   obj:()=>`Earn $3,000 from dates (${money(save.escort.earned)})`,target:()=>save.escort.job||null,check:()=>save.escort.earned>=3000,
+   outro:()=>[{who:'Miss Velvet',text:`Look at you. Private clients, your own rates. Next you run the agency.`},{who:'Narrator',text:`End of Chapter 1. The seasons start now.`}]}
+];
+const PIMP=[
+  {title:'The Hustle',intro:()=>[{who:'Slick Rick',text:`Nephew, this game is about people. Treat yours right and they make you rich. Treat them wrong and they make you broke.`,cam:CLUB_DOOR},{who:'Slick Rick',text:`Velvet is where you meet them. Bring $500 and some charm.`}],
+   obj:()=>save.pimp.stable.length?'Done':'Recruit someone at Club Velvet',target:()=>CLUB_DOOR,check:()=>save.pimp.stable.length>=1},
+  {title:'Protect Your Own',intro:()=>[{who:'Slick Rick',text:`When one of yours calls, you go. Every time. That's the whole job.`}],
+   start:()=>{save.pimp.troubleT=3},obj:()=>save.pimp.trouble?`Get to ${save.pimp.trouble.label} (${Math.ceil(save.pimp.trouble.t)}s)`:'Wait for the call',target:()=>save.pimp.trouble||null,check:()=>save.flags.pimpSaved||false,
+   tick:()=>{if(save.pimp.trouble)save.flags.pimpWatch=1;else if(save.flags.pimpWatch&&!save.pimp.trouble){save.flags.pimpSaved=true}}},
+  {title:'Stable',intro:()=>[{who:'Slick Rick',text:`Three people, a fair cut, and nobody in county. That's a business.`}],
+   obj:()=>`Have 3 people working (${save.pimp.stable.length}/3). Set your cut in Empire.`,target:()=>CLUB_DOOR,check:()=>save.pimp.stable.length>=3},
+  {title:'Respect',intro:()=>[{who:'Slick Rick',text:`Now the money talks. Get to $5,000 and the city knows your name.`}],
+   obj:()=>`Collect $5,000 (${money(save.pimp.earned)})`,target:()=>save.pimp.trouble||null,check:()=>save.pimp.earned>=5000,
+   outro:()=>[{who:'Slick Rick',text:`You did it the right way. Now everybody wants what you got.`},{who:'Narrator',text:`End of Chapter 1. The seasons start now.`}]}
+];
+const ROLE_MISSIONS={smuggler:SMUG,grower:GROW,owner:OWNER,dancer:DANCER,escort:ESCORT,pimp:PIMP};
 
 /* ---------- extra chapters for gang and cop ---------- */
 const GANG_MID=[
@@ -2215,6 +2290,17 @@ const CROOK_EPS={
       tick:()=>{if(p.c&&!p.got&&go(CARD_DOOR,90)){p.got=true;const s=seasonOf(epIdx());const amt=p.c==='heavy'?3000*s:p.c==='light'?1200*s:600*s;save.cash+=amt;if(p.c==='heavy')save.empire.fed+=14;else if(p.c==='straight')save.rep+=8;persist();toast(`Collected ${money(amt)} from the count room.`,2.6)}},
       obj:()=>p.c&&!p.got?'Collect at the Harbor Card Room':'',target:()=>p.c&&!p.got?CARD_DOOR:null,check:()=>!!p.got,
       outro:()=>p.c==='heavy'?[{who:'Manager',text:`The bosses upstairs noticed the numbers were light. They'll be asking questions.`}]:[]})},
+  yard_crew:{when:()=>true,gen:r=>({n:pick(['Kingston','Spanish Town','Montego Bay']),pt:null}),
+    make:p=>{if(!p.pt)p.pt=randomSpot();return{title:'Yard Crew',
+      intro:()=>[{who:'Pookie',text:`A crew came up from Miami, born in ${p.n}. No warning shots. They want in on your corners.`,cam:p.pt},
+                 {who:'Their don',text:`We nuh come to beg. Partner with us and we move twice the weight. Or we take it.`,choices:[
+                   {label:'Partner up (more money, more heat)',fn:()=>{p.c='partner';save.empire.fed+=8;save.empire.crew.push({name:`${p.n} Tony`,loyalty:60});persist()}},
+                   {label:'Run them out',fn:()=>{p.c='war';persist()}}]}],
+      tick:()=>{if(p.c==='war')fightAt(p,p.pt,4+seasonOf(epIdx()),'The yard crew opened fire!')},
+      obj:()=>p.c==='war'?fightObj(p,'Run the yard crew off your corner','Take them out'):'',target:()=>p.c==='war'?fightTarget(p,p.pt):null,
+      check:()=>p.c==='partner'||(p.c==='war'&&p.cleared),
+      done:()=>{if(p.c==='partner')save.cash+=2500*seasonOf(epIdx());else{save.rep+=15;save.cash+=1000}},
+      outro:()=>p.c==='partner'?[{who:'Their don',text:`Respect. Now we eat together. Just remember who brought the heat.`}]:[{who:'Pookie',text:`They went back to Miami. Some of them, anyway.`}]}}},
   young_gun:{when:()=>save.empire.crew.length<4,gen:r=>({n:NAMES1[Math.floor(r()*NAMES1.length)]}),
     make:p=>({title:'Young Gun',
       intro:()=>[{who:p.n,text:`I've been watching how you move. I want in. I'll do whatever you need.`},
@@ -2362,7 +2448,9 @@ function renderEmpire(){
   if(save.jobs&&save.jobs.list)save.jobs.list.forEach((j,i)=>{const J=JOBS[j.k];if(!J)return;row(i?'':"Today's jobs",`${j.done?'✓':'○'} ${J.txt(J.n)}${j.done?'':` (${Math.max(0,Math.min(J.n,J.v()-j.base))}/${J.n})`} · $750`)});
   if(save.mode==='crook'){row('Cash stash',`${money(save.bank||0)}${atProperty()?'':' · go to a property you own to stash or take out'}`);
     if(atProperty()&&stars===0){const d=document.createElement('div');d.className='btnrow';d.innerHTML=`<button class="small go" data-act="in" ${save.cash<1?'disabled':''}>Stash all cash</button><button class="small" data-act="out" ${!(save.bank>0)?'disabled':''}>Take it all out</button>`;el.appendChild(d)}}
-  row('Save code',window.__cloud?`${fmtCode(saveCode())}${cloudOk===false?' (offline, will retry)':cloudOk?' · backed up':''}`:'Cloud saves work on the public game link');
+  row('Save code',window.__cloud?`${save.saveCode&&save.saveCode.length!==12?save.saveCode:fmtCode(saveCode())}${cloudOk===false?' (offline, will retry)':cloudOk?' · backed up':''}`:'Cloud saves work on the full game link');
+  if(window.__cloud){const d=document.createElement('div');d.className='ecode';d.innerHTML='<input id="myCode" maxlength="24" placeholder="Make your own code (8-24 letters/numbers)"><button class="small go" data-act="code">Save it</button>';el.appendChild(d)}
+  else if(save.flags.started){const d=document.createElement('div');d.className='btnrow';d.innerHTML='<button class="small go" data-act="move">Move my progress to the full game</button>';el.appendChild(d)}
   if(save.mode==='crook'){row('Turf',`${myBlocks()} block${myBlocks()===1?'':'s'} · ${money(myBlocks()*150)} every 90 seconds`);
     const others=new Map();for(const p of pactRows){const o=p.a===save.lbId?{id:p.b,name:p.b_name}:{id:p.a,name:p.a_name};others.set(o.id,o.name)}
     for(const r of Object.values(turfRows))if(r.owner_id&&r.owner_id!==save.lbId)others.set(r.owner_id,r.owner_name);
@@ -2378,13 +2466,20 @@ function renderEmpire(){
       if(!hitOn(id))btn('Put a hit · $2,000','hit',2000);
       el.appendChild(d)}
     if((save.crown||0)<3&&others.size){row('','Reach Boss rank to call sit-downs and declare war.')}}
+  if(save.role==='pimp'&&save.pimp){const p=save.pimp;const h=document.createElement('b');h.textContent='Your people';h.style.marginTop='6px';el.appendChild(h);
+    row('Cut',`${p.cut}% · vice heat ${Math.round(p.heat)}%`);for(const w of p.stable)row(w.name,`loyalty ${Math.round(w.loyalty)}`);if(!p.stable.length)row('Nobody yet','Recruit at Club Velvet.');
+    const d=document.createElement('div');d.className='btnrow';d.innerHTML=[30,40,50,60,70].map(c=>`<button class="small${c===p.cut?' go':''}" data-cut="${c}">${c}%</button>`).join('')+`<button class="small" data-act="lay" ${save.cash<1000||p.heat<10?'disabled':''}>Pay off vice · $1,000</button>`;el.appendChild(d)}
+  if(save.role==='escort'&&save.escort){const e=save.escort;row('Dates',`${e.dates} done · ${money(e.earned)} earned · ${e.stings} vice stings`)}
   {const L=lawyerState();const h=document.createElement('b');h.textContent='Side job: lawyer';h.style.marginTop='6px';el.appendChild(h);
     if(!window.__law)row('Lawyering','Works on the public game link.');
     else if(!L.licensed){row('License','Pass the bar to take cases from locked-up players. They pay you.');const d=document.createElement('div');d.className='btnrow';d.innerHTML=`<button class="small go" data-law="bar" ${save.cash<1000?'disabled':''}>Pass the bar · $1,000</button>`;el.appendChild(d)}
     else{row('Record',`${L.won} won · ${L.lost} lost`);
       if(L.caseId)row('Active case',`Argue ${L.client}'s case: hold the button at the precinct (courthouse).`);
-      else{const open=lawRows.filter(c=>c.status==='open'&&c.client_id!==save.lbId);if(!open.length)row('Open cases','Nobody needs a lawyer right now.');
+      else{const open=lawRows.filter(c=>c.status==='open'&&c.client_id!==save.lbId&&c.fee>0);if(!open.length)row('Open cases','Nobody needs a lawyer right now.');
         for(const c of open){row(c.client_name,`${(CITY_DEFS[c.city]||{}).name||c.city} · ${mmss(Date.parse(c.release_at)-Date.now())} left · pays ${money(c.fee)}`);const d=document.createElement('div');d.className='btnrow';const b=document.createElement('button');b.className='small go';b.textContent=`Take the case · +${money(c.fee)}`;b.dataset.take=c.id;d.appendChild(b);el.appendChild(d)}}}}
+  {const inside=lawRows.filter(c=>c.city===CITY_ID&&c.client_id!==save.lbId&&['open','taken','lost'].includes(c.status)&&Date.parse(c.release_at)>Date.now());
+    if(inside.length){const h=document.createElement('b');h.textContent=`Locked up in ${CITY.name}`;h.style.marginTop='6px';el.appendChild(h);const atP=scene==='city'&&dist(player,POLICE_DOOR)<90;
+      for(const c of inside.slice(0,8)){row(c.client_name,`${mmss(Date.parse(c.release_at)-Date.now())} left`);const d=document.createElement('div');d.className='btnrow';const b=document.createElement('button');b.className='small';b.textContent=atP?'Bust them out · 40%':'Go to the precinct to bust them out';b.disabled=!atP||stars>0;b.dataset.bust=c.id;b.dataset.bn=c.client_name;d.appendChild(b);el.appendChild(d)}}}
   {const open=hitRows.filter(h=>h.status==='open');if(open.length){const h=document.createElement('b');h.textContent='Open contracts';h.style.marginTop='6px';el.appendChild(h);for(const x of open.slice(0,8))row(x.target_name===((save.profile&&save.profile.name)||'')?`${x.target_name} (YOU)`:x.target_name,`${money(x.amount)} · ${x.reason||'no reason given'}`)}}
   row('Leaderboard score',lbScore().toLocaleString());
   if(!empireOn()){row('Seasons',`Finish your Chapter 1 story to start the never-ending seasons.`);return}
@@ -2399,8 +2494,14 @@ function renderEmpire(){
 }
 
 $('empBody').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;
+  if(b.dataset.act==='move'){moveProgress();return}
+  if(b.dataset.cut){save.pimp.cut=+b.dataset.cut;persist();renderEmpire();return}
+  if(b.dataset.act==='lay'){if(save.cash<1000)return;save.cash-=1000;save.pimp.heat=Math.max(0,save.pimp.heat-40);persist();hudKey='';toast('Vice found something else to do this week.',2.4);renderEmpire();return}
+  if(b.dataset.act==='code'){const v=($('myCode').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(v.length<8||v.length>24){toast('Use 8 to 24 letters or numbers. No spaces.',2.6);return}
+    if(!window.__cloud||!window.__cloud.setCode)return;window.__cloud.setCode(save.saveCode||'',v,Object.assign({},save,{saveCode:v})).then(r=>{if(r==='taken'){toast('Somebody already has that code. Try another.',2.6);return}save.saveCode=v;persist();cloudLast='';toast(`Your save code is now ${v}. Don't share it.`,3.4);renderEmpire()}).catch(()=>toast('Could not save that code. Try again.',2.4));return}
   if(b.dataset.law==='bar'){if(save.cash<1000)return;save.cash-=1000;lawyerState().licensed=true;persist();hudKey='';toast('You passed the bar. Locked-up players can hire you now.',3);renderEmpire();return}
   if(b.dataset.take){takeCase(b.dataset.take);return}
+  if(b.dataset.bust){if(!window.__law)return;lbEnsure().then(()=>window.__law.bust(save.lbId,save.lbSecret,(save.profile&&save.profile.name)||'Player',b.dataset.bust)).then(r=>{if(r==='freed'){save.rep+=10;persist();toast(`You busted ${b.dataset.bn} out. +10 rep.`,3)}else{closeEmpire();addStars(3,`Guards caught you trying to bust ${b.dataset.bn} out!`)}}).catch(()=>toast('They already got out.',2));return}
   if(b.dataset.pa==='hit'){placeHit(b.dataset.pid,b.dataset.pn,+b.dataset.pt,'Boss business').then(()=>renderEmpire());return}if(b.dataset.pa){if(b.dataset.pa==='offer'&&+b.dataset.pt>save.cash){toast(`You need ${money(+b.dataset.pt)} to put on the table.`,2.4);return}pactDo(b.dataset.pid,b.dataset.pn,b.dataset.pa,+b.dataset.pt);return}if(b.dataset.act==='in')bankIn();if(b.dataset.act==='out')bankOut();renderEmpire()});
 $('empBtn').addEventListener('click',openEmpire);$('empClose').addEventListener('click',closeEmpire);$('empModal').addEventListener('click',ev=>{if(ev.target.id==='empModal')closeEmpire()});
 
@@ -2417,7 +2518,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)try{cloudPu
 let loadArmed=null;
 $('loadBtn').addEventListener('click',async()=>{const m=$('loadMsg');m.hidden=false;
   const code=$('loadCode').value.toUpperCase().replace(/[^A-Z0-9]/g,'');
-  if(!/^[A-HJ-NP-Z2-9]{12}$/.test(code)){m.textContent='Save codes are 12 letters and numbers, like ABCD-EFGH-JK23.';return}
+  if(!/^[A-Z0-9]{8,24}$/.test(code)){m.textContent='Save codes are 8 to 24 letters and numbers.';return}
   if(!window.__cloud){m.textContent='Cloud saves work on the public game link, not this preview.';return}
   if(hasProgress()&&loadArmed!==code&&code!==save.saveCode){loadArmed=code;m.textContent='This replaces the save on this device. Tap Load again to confirm.';return}
   m.textContent='Loading…';
@@ -2443,9 +2544,11 @@ const JOBS={
   bag:{txt:n=>`Sell ${n} bags`,v:()=>save.grow?save.grow.sold:0,n:10},
   night:{txt:()=>'Run a night at Velvet',v:()=>save.club?save.club.nights:0,n:1},
   set:{txt:n=>`Dance ${n} sets`,v:()=>save.dancer?save.dancer.sets:0,n:3},
-  arr:{txt:n=>`Make ${n} arrests`,v:()=>save.arrests,n:3}
+  arr:{txt:n=>`Make ${n} arrests`,v:()=>save.arrests,n:3},
+  date:{txt:n=>`Finish ${n} dates`,v:()=>save.escort?save.escort.dates:0,n:2},
+  col:{txt:n=>`Collect from your people ${n} times`,v:()=>save.pimp?save.pimp.collections:0,n:3}
 };
-function jobsFor(){if(save.mode==='cop')return['arr','rep','ep'];return[({gang:'rob',smuggler:'run',grower:'bag',owner:'night',dancer:'set'})[save.role]||'rob','esc','ep']}
+function jobsFor(){if(save.mode==='cop')return['arr','rep','ep'];return[({gang:'rob',smuggler:'run',grower:'bag',owner:'night',dancer:'set',escort:'date',pimp:'col'})[save.role]||'rob','esc','ep']}
 let jobsT=2;
 function jobsTick(dt){if(!save.mode)return;jobsT-=dt;if(jobsT>0)return;jobsT=1;const day=new Date().toDateString();
   if(!save.jobs||save.jobs.day!==day||save.jobs.mode!==save.mode){save.jobs={day,mode:save.mode,bonus:false,list:jobsFor().map(k=>({k,base:JOBS[k].v(),done:false}))};persist();toast("Today's 3 jobs are in Empire. Finish all 3 for a bonus.",3);return}
@@ -2470,7 +2573,9 @@ function ownerOf(i){
 }
 const myBlocks=()=>{let n=0;for(let i=0;i<N*N;i++)if(takeable(i)&&ownerOf(i).kind==='me')n++;return n};
 function pactWith(id){if(!id||!save.lbId)return null;return pactRows.find(p=>(p.a===id&&p.b===save.lbId)||(p.b===id&&p.a===save.lbId))||null}
-async function lbEnsure(){if(!window.__lb)return;lbIds();try{await window.__lb.submit(save.lbId,save.lbSecret,lbRow())}catch(e){}}
+async function lbEnsure(){if(!window.__lb)return;lbIds();try{await window.__lb.submit(save.lbId,save.lbSecret,lbRow())}catch(e){}homeSend()}
+async function homeSend(){const h=(save.profile&&save.profile.home)||{},key=JSON.stringify([h.city,h.region,h.country,CITY_ID]);if(!window.__lb||!window.__lb.home||save.homeSent===key||!save.lbId)return;
+  try{await window.__lb.home(save.lbId,save.lbSecret,h.city||'',h.region||'',h.country||'',CITY_ID);save.homeSent=key;persist()}catch(e){}}
 async function turfSync(){
   if(!window.__turf||!save.mode)return;
   try{const rows=await window.__turf.list();const m={};for(const r of rows)m[r.block]=r;
@@ -2479,6 +2584,8 @@ async function turfSync(){
       const pk=r.owner_id||null,p=pk&&pactWith(pk)||(pactRows.find(x=>(x.a_name===who||x.b_name===who)&&x.state==='truce'));
       toast(`Your block on ${blockName(+k)} was ${r.owner_id?'taken':'hit'} by ${who}.${p&&p.state==='truce'?' They broke the truce!':''}`,4.5);radio(`Lost a block: ${blockName(+k)}.`,3)}}
     for(const r of rows)if(r.owner_id===save.lbId)save.turf[r.block]=true;
+    {const me=(save.profile&&save.profile.name)||'Player',crew=(save.profile&&save.profile.crew)||'',col=/^#[0-9a-f]{6}$/i.test((save.profile&&save.profile.col)||'')?save.profile.col:'#5ed08b';
+      for(const k of Object.keys(save.turf))if(!m[k]&&takeable(+k)){await lbEnsure();try{await window.__turf.claim(save.lbId,save.lbSecret,+k,me,crew,col,false);m[k]={block:+k,owner_id:save.lbId,owner_name:me,owner_crew:crew,color:col}}catch(e){}}}
     turfRows=m;persist()}catch(e){}
   try{if(save.lbId){pactRows=await window.__turf.pacts(save.lbId);pactInbox()}}catch(e){}
 }
@@ -2527,7 +2634,7 @@ async function winTurf(){
   persist();hudKey='';turfSync();
 }
 function turfTick(dt){
-  turfT-=dt;if(turfT<=0){turfT=20;turfSync()}
+  turfT-=dt;if(turfT<=0){turfT=20;turfSync();save.lastSeen=Date.now()}
   if(save.mode==='crook'){turfIncT-=dt;if(turfIncT<=0){turfIncT=90;const n=myBlocks();if(n){const amt=n*150;save.cash+=amt;persist();hudKey='';toast(`Your ${n} block${n>1?'s':''} paid ${money(amt)}.`,2.4)}}}
   for(const r of remote.values()){const a=r.p&&r.p.atk;if(!a||!save.lbId||a.o!==save.lbId)continue;const k=r.peer+'|'+a.b;if(warnedAtk[k])continue;warnedAtk[k]=1;
     radio(a.s?`Someone is hitting your block on ${blockName(a.b)}!`:`${clip(r.p.n)} is hitting your block on ${blockName(a.b)}!`,5)}
@@ -2568,14 +2675,15 @@ const mmss=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return `${Math.floor(s/60
 function sendToJail(by){
   const st=Math.max(1,chaseMax||stars||1),mins=Math.round(4+st*4+heatLv()*2);
   save.jail={until:Date.now()+mins*60000,mins,pd:false,caseId:null,status:'',lawyer:null,lawyerId:null,refund:0,by:by||''};persist();
-  setTimeout(()=>{started=false;showJail();try{cloudPush(true)}catch(e){}},3100);
+  setTimeout(async()=>{started=false;showJail();try{cloudPush(true)}catch(e){}
+    if(window.__law){await lbEnsure();try{const id=await window.__law.open(save.lbId,save.lbSecret,(save.profile&&save.profile.name)||'Player',CITY_ID,0,mins);if(save.jail){save.jail.caseId=id;save.jail.status='open';save.jail.refund=0;persist();jailSync()}}catch(e){}}},3100);
 }
 function showJail(){cineOn=false;$('cine').hidden=true;$('jail').hidden=false;$('intro').hidden=true;renderJail();if(!jailT)jailT=setInterval(jailTickUI,1000);jailSync()}
 function hideJail(){$('jail').hidden=true;if(jailT){clearInterval(jailT);jailT=0}}
 async function jailSync(){
   if(!save.jail||!window.__law)return;
   try{if(save.jail.caseId){const c=await window.__law.myCase(save.lbId);if(c&&c.id===save.jail.caseId){
-      save.jail.status=c.status;save.jail.lawyer=c.lawyer_name;save.jail.lawyerId=c.lawyer_id;save.jail.until=Date.parse(c.release_at);persist()}}
+      save.jail.status=c.status;save.jail.lawyer=c.lawyer_name;save.jail.lawyerId=c.lawyer_id;save.jail.freedBy=c.freed_by||null;const su=Date.parse(c.release_at);save.jail.until=c.status==='won'?su:Math.max(save.jail.until,su);persist()}}
     lawRows=await window.__law.roster(CITY_ID)}catch(e){}
   renderJail();
 }
@@ -2587,7 +2695,7 @@ function releaseJail(msg){
 }
 function jailTickUI(){
   if(!save.jail){hideJail();return}
-  if(Date.now()>=save.jail.until){releaseJail(save.jail.status==='won'?`Your lawyer ${save.jail.lawyer} got you off. You're free.`:"Time served. You're out.");return}
+  if(Date.now()>=save.jail.until){releaseJail(save.jail.status==='won'?(save.jail.freedBy?`${save.jail.freedBy} busted you out! Get gone.`:`Your lawyer ${save.jail.lawyer} got you off. You're free.`):"Time served. You're out.");return}
   $('jailTime').textContent=`Time left: ${mmss(save.jail.until-Date.now())}`;
   if(Date.now()%10000<1000)jailSync();
 }
@@ -2596,7 +2704,8 @@ function renderJail(){
   $('jailWho').textContent=`${(save.profile&&save.profile.name)||'You'} · ${CITY.name} County Jail`;
   $('jailTime').textContent=`Time left: ${mmss(j.until-Date.now())}`;
   const st=$('jailCase');st.textContent=!j.caseId?(j.pd?'Your public defender is on it. Do not expect much.':'No lawyer yet.'):j.status==='open'?`Your case is posted (${money(j.refund||0)}). Waiting for a lawyer to take it.`:j.status==='taken'?`${j.lawyer} took your case. They have to argue it at the courthouse.`:j.status==='won'?`${j.lawyer} won your case!`:j.status==='lost'?`${j.lawyer} LOST your case. Ten more minutes.`:'';
-  $('jHire').hidden=!!j.caseId||!window.__law;$('jNoLaw').hidden=!!window.__law;
+  $('jHire').hidden=(!!j.caseId&&(j.refund||0)>0)||!window.__law;
+  const ec=j.escT&&j.escT>Date.now();$('jEscape').disabled=!!ec;$('jEscape').textContent=ec?`Guards are watching (${mmss(j.escT-Date.now())})`:'Try to escape · 35%';$('jNoLaw').hidden=!!window.__law;
   $('jPD').disabled=j.pd;const bail=Math.max(1500,Math.round((save.cash+(save.bank||0))*.3));$('jBail').textContent=`Post bail · ${money(bail)}`;$('jBail').disabled=save.cash+(save.bank||0)<bail;
   $('jHitRow').hidden=!(j.status==='lost'&&j.lawyerId&&!j.hitPlaced);
   if(j.lawyer)$('jHitLbl').textContent=`Put a hit on ${j.lawyer}:`;
@@ -2636,14 +2745,33 @@ async function argueCase(){const L=lawyerState();if(!L.caseId||!window.__law)ret
   try{const r=await window.__law.argue(save.lbId,save.lbSecret,L.caseId);if(r==='won'){L.won++;save.rep+=12;toast(`Not guilty! ${L.client} walks. +12 rep.`,3.4)}else{L.lost++;toast(`You lost ${L.client}'s case. They might want you dead now.`,3.6)}}catch(e){toast('The judge threw it out. The case is closed.',2.4)}
   L.caseId=null;L.client='';persist()}
 
+/* ================= moving progress to the full game ================= */
+const PUBLIC_URL='https://rbrinson102-arch.github.io/my-world-game/';
+const IS_SITE=/github\.io$/.test(location.hostname);
+const b64e=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const b64d=t=>JSON.parse(decodeURIComponent(escape(atob(t.replace(/-/g,'+').replace(/_/g,'/')))));
+function moveProgress(){const a=document.createElement('a');a.href=PUBLIC_URL+'#import='+b64e(save);a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove()}
+(function(){
+  if(!IS_SITE&&save.mode&&save.flags.started){$('moveBox').hidden=false}
+  if(!IS_SITE&&!save.flags.started){$('moveBox').hidden=false;$('moveBtn').textContent='Open the full game'}
+  $('moveBtn').addEventListener('click',()=>{if(save.flags.started)moveProgress();else{const a=document.createElement('a');a.href=PUBLIC_URL;a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove()}});
+  const h=location.hash||'';if(!h.startsWith('#import='))return;
+  let d=null;try{d=b64d(h.slice(8))}catch(e){}
+  if(!d||!d.flags){history.replaceState(null,'',location.pathname);return}
+  $('importBox').hidden=false;$('importTxt').textContent=`Bring over ${(d.profile&&d.profile.name)||'your character'} (${(ROLE_LABEL[d.role]||d.mode||'').toString().toLowerCase()}, ${money((d.cash||0)+(d.bank||0))}, ${d.rep||0} rep)${(save.mode&&save.flags.started&&(save.m>0||save.rep>=20))?' and replace the save on this device':''}?`;
+  $('importBtn').addEventListener('click',()=>{save=Object.assign(FRESH(),d);save.city=save.city||'raleigh';delete save.saveCode;persist();history.replaceState(null,'',location.pathname);location.reload()});
+})();
+
 /* ================= leaderboard ================= */
 let lbOpen=false,lbFilter='all',lbT=8,lbRows=null;
 function lbIds(){if(!save.lbId){const h=n=>{const a=new Uint8Array(n);crypto.getRandomValues(a);return [...a].map(x=>x.toString(16).padStart(2,'0')).join('')};const x=h(16);save.lbId=`${x.slice(0,8)}-${x.slice(8,12)}-4${x.slice(13,16)}-a${x.slice(17,20)}-${x.slice(20,32)}`;save.lbSecret=h(16);persist()}}
 function lbRow(){const pf=save.profile||{};return{name:(pf.name||'Player').slice(0,16),crew:(pf.crew||'').slice(0,4),mode:save.mode,role:(save.role||'').slice(0,12),rank:String(roleTag()).slice(0,20),score:lbScore(),rep:save.rep,houses:Math.min(9,props()),season:save.m>=scriptedLen()?seasonOf(save.m-scriptedLen()):0}}
-function lbSubmit(){if(!window.__lb||!save.mode||!started)return;lbIds();window.__lb.submit(save.lbId,save.lbSecret,lbRow()).catch(()=>{})}
+function lbSubmit(){if(!window.__lb||!save.mode||!started)return;lbIds();window.__lb.submit(save.lbId,save.lbSecret,lbRow()).then(homeSend).catch(()=>{})}
 function lbTick(dt){lbT-=dt;if(lbT<=0){lbT=45;lbSubmit()}}
 async function openLb(){if(!started||cineOn)return;for(const k in K)K[k]=0;firing=false;lbOpen=true;$('lbModal').hidden=false;lbRows=null;renderLb();lbSubmit();
-  if(window.__lb){try{lbRows=await window.__lb.top()}catch(e){lbRows=[]}if(lbOpen)renderLb()}}
+  if(window.__lb){try{lbRows=await window.__lb.top()}catch(e){lbRows=[]}if(lbOpen)renderLb();
+    try{const pl=await window.__lb.places();const el=$('lbPlaces');el.textContent='';for(const p of pl.slice(0,15)){const d=document.createElement('div');d.textContent=`${[p.city,p.region,p.country].filter(Boolean).join(', ')||'Unknown'} · ${p.players} player${p.players===1?'':'s'}`;el.appendChild(d)}if(!pl.length)el.textContent='No one has shared where they play yet.'}catch(e){}}
+  else $('lbPlaces').textContent='Shows on the full game link.'}
 function closeLb(){lbOpen=false;$('lbModal').hidden=true}
 function renderLb(){
   const list=$('lbList');list.textContent='';const me=lbRow();let rows,live=!window.__lb;
@@ -2661,6 +2789,9 @@ function renderLb(){
 
 $('jHire').addEventListener('click',e=>{const b=e.target.closest('button');if(b&&b.dataset.fee)hireLawyer(+b.dataset.fee)});
 $('jHitRow').addEventListener('click',async e=>{const b=e.target.closest('button');if(!b||!b.dataset.hit||!save.jail)return;const ok=await placeHit(save.jail.lawyerId,save.jail.lawyer,+b.dataset.hit,'Lost my case');if(ok){save.jail.hitPlaced=true;persist();renderJail()}});
+$('jEscape').addEventListener('click',()=>{const j=save.jail;if(!j||(j.escT&&j.escT>Date.now()))return;
+  if(Math.random()<.35){releaseJail('You went over the fence. Run!');setTimeout(()=>{if(save.mode==='crook'){addStars(3,'Escaped inmate! Every cop in the city is looking for you.')}},3600)}
+  else{j.until+=10*60000;j.escT=Date.now()+5*60000;persist();$('jailCase').textContent='The guards caught you at the fence. Ten more minutes.';renderJail()}});
 $('jPD').addEventListener('click',publicDefender);$('jBail').addEventListener('click',postBail);$('jAlt').addEventListener('click',switchSlot);
 $('slotBtn').addEventListener('click',switchSlot);
 (function(){const other=(()=>{try{return JSON.parse(localStorage.getItem(SLOT==='1'?'uws-v4-s2':'uws-v4')||'null')}catch(e){return null}})();
@@ -2728,7 +2859,7 @@ const running=()=>started&&!cineOn&&!shopOpen&&!mapOpen&&!growOpen&&!clubOpen&&!
 function frame(now){
   const dt=Math.min(.05,(now-last)/1000);last=now;const t=now/1000;FDT=dt;
   cineTick(dt);beatTick();
-  if(started){growTick(dt);clubTick(dt);empireTick(dt);crownTick(dt);lbTick(dt);cloudTick(dt);jobsTick(dt);turfTick(dt);lawTick(dt);stage.classList.toggle('hasbombs',(save.bombs||0)>0);if(empOpen){empRT-=dt;if(empRT<=0){empRT=1;renderEmpire()}}if(save.dancer){save.dancer.cd=Math.max(0,save.dancer.cd-dt);save.dancer.vipCd=Math.max(0,save.dancer.vipCd-dt)}}
+  if(started){growTick(dt);clubTick(dt);empireTick(dt);crownTick(dt);lbTick(dt);cloudTick(dt);jobsTick(dt);turfTick(dt);lawTick(dt);escortTick(dt);pimpTick(dt);escortBadCheck();stage.classList.toggle('hasbombs',(save.bombs||0)>0);if(empOpen){empRT-=dt;if(empRT<=0){empRT=1;renderEmpire()}}if(save.dancer){save.dancer.cd=Math.max(0,save.dancer.cd-dt);save.dancer.vipCd=Math.max(0,save.dancer.vipCd-dt)}}
   if(running()){
     if(frozen>0)frozen-=dt;
     else{
@@ -2791,13 +2922,15 @@ function startGame(mode,fresh,role){
     if(r0==='gang'){const s0=doorOf(blk(2,2));player.x=s0.x;player.y=s0.y+20;
       cars.push({x:s0.x+70,y:(2*BS+6.5)*T,ang:0,dir:0,speed:0,kind:'parked',color:'#d9a13b',hp:100,hitCd:0,stuck:0,rev:0});
       if(save.m===0)actors.push(mkActor({kind:'friend',name:'Dre',x:player.x+26,y:player.y,hp:999}));}
-    else{const d0=r0==='smuggler'?DOCKS_DOOR:r0==='grower'?GROW_DOOR:CLUB_DOOR;player.x=d0.x;player.y=d0.y+20;if(r0==='smuggler')spawnTruck()}
+    else{const d0=r0==='smuggler'?DOCKS_DOOR:r0==='grower'?GROW_DOOR:r0==='escort'?CARD_DOOR:CLUB_DOOR;player.x=d0.x;player.y=d0.y+20;if(r0==='smuggler')spawnTruck()}
     for(let i=0;i<2;i++)spawnPatrol();
   }
   player.hp=100;player.inCar=null;camInit=false;
   for(let i=0;i<30;i++)peds.push(newPed());
   for(let i=0;i<15;i++){const c=newTraffic();if(c)cars.push(c)}
   if(save.m===4&&mode==='crook')thugs=[];
+  if(save.lastSeen&&mode==='crook'){const hrs=Math.min(8,(Date.now()-save.lastSeen)/3600000);if(hrs>.25){const per=myBlocks()*150+((save.empire&&save.empire.terr||[]).length)*350;const amt=Math.round(hrs*40*per*.25);if(amt>0){save.cash+=amt;setTimeout(()=>toast(`While you were gone, your blocks and houses made ${money(amt)}.`,4),2500)}}}
+  save.lastSeen=Date.now();
   $('intro').hidden=true;started=true;hudKey='';last=performance.now();
   dailyReward();
   if(curMission())startMission();else toast('Free roam.',2);
@@ -2807,8 +2940,10 @@ function readProfile(){
   const pf=save.profile||{};
   const name=($('pname').value.trim().replace(/[^\w .'-]/g,'').slice(0,16))||pf.name||('Player'+ri(100,999));
   const crew=$('pcrew').value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4);
-  save.profile={name,crew,col:selFit};persist();
+  const home={city:$('hcity').value.trim().slice(0,40),region:$('hregion').value.trim().slice(0,40),country:$('hcountry').value.trim().slice(0,40)};
+  save.profile={name,crew,col:selFit,home:(home.city||home.region||home.country)?home:(pf.home||null)};persist();
 }
+(function(){const h=save.profile&&save.profile.home;if(h){$('hcity').value=h.city||'';$('hregion').value=h.region||'';$('hcountry').value=h.country||''}})();
 let selFit=(save.profile&&save.profile.col)||FITS[0];
 $('pname').value=(save.profile&&save.profile.name)||'';$('pcrew').value=(save.profile&&save.profile.crew)||'';
 FITS.forEach(c=>{const b=document.createElement('button');b.type='button';b.style.background=c;b.setAttribute('aria-label','Shirt color');b.setAttribute('aria-pressed',String(c===selFit));b.addEventListener('click',()=>{selFit=c;document.querySelectorAll('#swatches button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});$('swatches').appendChild(b)});
@@ -2824,7 +2959,7 @@ if(save.mode&&save.flags.started){const c=$('continue');c.hidden=false;c.textCon
 $('newgame').addEventListener('click',()=>{started=false;$('intro').hidden=false;$('continue').hidden=true;cineOn=false;$('cine').hidden=true});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){for(const k in K)K[k]=0;firing=false}});
 resize();
-window.__uw={throwBomb:()=>throwBomb(),explode:(x,y)=>explode(x,y),get bombs(){return bombs},busted:b=>busted(b),get jail(){return save.jail},releaseJail:m=>releaseJail(m),CITY_ID,SLOT,turfContext:()=>turfContext(),startTurfWar:c=>startTurfWar(c),get turfWar(){return turfWar},myBlocks:()=>myBlocks(),ownerOf:i=>ownerOf(i),turfSync:()=>turfSync(),get pactRows(){return pactRows},heatLv:()=>heatLv(),cornerOf:i=>cornerOf(i),bankIn:()=>bankIn(),bankOut:()=>bankOut(),atProperty:()=>atProperty(),jobsTick:d=>jobsTick(d),saveCode:()=>saveCode(),lbScore:()=>lbScore(),props:()=>props(),get stars(){return stars},copSees:()=>copSees(),growLevelUp:()=>growLevelUp(),growNext:()=>growNext(),context:()=>context(),renderLb:()=>renderLb(),episode:()=>episode(),empireState:()=>empireState(),scriptedLen:()=>scriptedLen(),resetEp:()=>{epCache=null},CROOK_EPS,COP_EPS,get missionActive(){return missionActive},get save(){return save},get player(){return player},get scene(){return scene},stashes,get actors(){return actors},get intActors(){return intActors},get cars(){return cars},get int(){return int},enterHouse,cineAdvance,get cineOn(){return cineOn},get call(){return call},startGame,setStars:n=>{stars=n},testPeers:l=>{peersList=l;myPeer='me1';onPeers()},BUYER:BUYER_DOOR,missionCount:()=>list().length,missionList:()=>list(),say,get remote(){return remote},get dmgOut(){return dmgOut}};
+window.__uw={escortTick:d=>escortTick(d),pimpTick:d=>pimpTick(d),pimpRecruit:()=>pimpRecruit(),moveProgress:()=>moveProgress(),throwBomb:()=>throwBomb(),explode:(x,y)=>explode(x,y),get bombs(){return bombs},busted:b=>busted(b),get jail(){return save.jail},releaseJail:m=>releaseJail(m),CITY_ID,SLOT,turfContext:()=>turfContext(),startTurfWar:c=>startTurfWar(c),get turfWar(){return turfWar},myBlocks:()=>myBlocks(),ownerOf:i=>ownerOf(i),turfSync:()=>turfSync(),get pactRows(){return pactRows},heatLv:()=>heatLv(),cornerOf:i=>cornerOf(i),bankIn:()=>bankIn(),bankOut:()=>bankOut(),atProperty:()=>atProperty(),jobsTick:d=>jobsTick(d),saveCode:()=>saveCode(),lbScore:()=>lbScore(),props:()=>props(),get stars(){return stars},copSees:()=>copSees(),growLevelUp:()=>growLevelUp(),growNext:()=>growNext(),context:()=>context(),renderLb:()=>renderLb(),episode:()=>episode(),empireState:()=>empireState(),scriptedLen:()=>scriptedLen(),resetEp:()=>{epCache=null},CROOK_EPS,COP_EPS,get missionActive(){return missionActive},get save(){return save},get player(){return player},get scene(){return scene},stashes,get actors(){return actors},get intActors(){return intActors},get cars(){return cars},get int(){return int},enterHouse,cineAdvance,get cineOn(){return cineOn},get call(){return call},startGame,setStars:n=>{stars=n},testPeers:l=>{peersList=l;myPeer='me1';onPeers()},BUYER:BUYER_DOOR,missionCount:()=>list().length,missionList:()=>list(),say,get remote(){return remote},get dmgOut(){return dmgOut}};
 requestAnimationFrame(frame);
 })();
 </script>
