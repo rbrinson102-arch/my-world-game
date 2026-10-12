@@ -238,7 +238,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
 <div class="wrap">
   <header class="top">
     <h1>My <span>Block</span></h1>
-    <p id="subhead">Prototype v2.3 · Fictional game.</p>
+    <p id="subhead">Prototype v2.4 · Fictional game.</p>
   </header>
 
   <div class="stage" id="stage">
@@ -300,7 +300,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
     </div>
     <div class="modal" id="clubModal" hidden>
       <div class="panelbox">
-        <h2>Club Velvet · office</h2>
+        <h2>Club office</h2>
         <div id="clubBody" style="display:flex;flex-direction:column;gap:10px"></div>
         <button class="primary" id="clubGo">Open the doors</button>
         <button class="small" id="clubClose">Close the office</button>
@@ -441,7 +441,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
           <button class="mode crook" data-role="gang"><span class="tag">Start $200</span><strong>Gang member</strong><small>Fresh out of county. Get strapped, rob Rico's stash houses and take his district.</small></button>
           <button class="mode smug" data-role="smuggler"><span class="tag">Start $500 + van</span><strong>Smuggler</strong><small>You own the trucks. Load cargo at the docks and deliver it across town without getting pulled over.</small></button>
           <button class="mode grow" data-role="grower"><span class="tag">Start $600 + house</span><strong>Grower</strong><small>Your uncle left you a grow house. Plant, water, harvest, and sell to The Plug before the cops raid it.</small></button>
-          <button class="mode owner" data-role="owner"><span class="tag">Start $3,000 + club</span><strong>Club owner</strong><small>You own Club Velvet. Book DJs, hire security, handle fights, and deal with Rico wanting a cut.</small></button>
+          <button class="mode owner" data-role="owner"><span class="tag">Start $3,000 + club</span><strong>Club owner</strong><small>You own the Velvet club. Book DJs, hire security, handle fights, and deal with Rico wanting a cut.</small></button>
           <button class="mode dancer" data-role="dancer"><span class="tag">Start $100</span><strong>Dancer</strong><small>Work the stage at Velvet for tips and fans. Overhear the wrong conversation. Save up to buy in.</small></button>
           <button class="mode escort" data-role="escort"><span class="tag">Start $150</span><strong>Escort</strong><small>Your phone rings, you set the price. Dodge vice stings and bad dates, build a client list and run your own agency.</small></button>
           <button class="mode pimp" data-role="pimp"><span class="tag">Start $1,000</span><strong>Pimp</strong><small>Recruit at Velvet, protect your people, keep the cut fair or they walk. Vice is always watching.</small></button>
@@ -461,10 +461,10 @@ canvas#mini{cursor:pointer;pointer-events:auto}
       <h3>How it plays</h3>
       <ul>
         <li>Pay Pookie for intel and the door card shows who's inside before you walk in.</li>
-        <li>Get away: break line of sight and the stars drop. Hide out at a house you own, or respray your car at Sparkle Car Wash. Cops start easy and get tougher as you rank up; at 4 stars SWAT shows. Shoot back or run.</li>
+        <li>Get away: break line of sight and the stars drop. Hide out at a house you own, or respray your car at the car wash. Cops start easy and get tougher as you rank up; at 4 stars SWAT shows. Shoot back or run.</li>
         <li>Turf war: walk to a block's corner flag and start a war. Clear the soldiers, hold the block 20 seconds, and it pays you. Bosses can call sit-downs in Empire: make peace, pay for it, declare war, or hit a truce partner's block behind their back.</li>
         <li>Cops start easy and get tougher as you rank up. Lose them by breaking line of sight, shoot their cars until they wreck, hide out, or respray.</li>
-        <li>Drive-by: shoot from your car (aim with the mouse, or FIRE auto-aims on phones). Iron Works sells assault rifles, the street sweeper and pipe bombs (G or BOMB).</li>
+        <li>Drive-by: shoot from your car (aim with the mouse, or FIRE auto-aims on phones). The gun shop sells assault rifles, the street sweeper and pipe bombs (G or BOMB).</li>
         <li>Get busted and you go to county jail for real minutes. Hire a player lawyer, use the public defender, post bail, or play your second character while you wait. Lose your case? Put a hit on your lawyer.</li>
         <li>Anyone can work as a lawyer on the side (Empire → pass the bar). Travel between Raleigh, Durham, Charlotte and Chicago from the map.</li>
         <li>Trap: re-up at The Plug, then serve people on the sidewalk with a green $. Each block only has so many customers, so the big players sell wholesale to other players on the Exchange. Work your way up or buy your way in. Test before you buy: scammers step on their work. Hire protection, because somebody always wants your spot.</li>
@@ -487,7 +487,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
         <li>Your progress backs up online. Your save code is in Empire: type it on any phone or computer to keep playing where you left off.</li>
         <li>Climb Corner → Runner → Lieutenant → Boss → Kingpin → The Crown. Tap Ranks to see where you stand against everyone.</li>
         <li>Walk into a stash house, clear the rooms, crack the safe, get out, lose the cops.</li>
-        <li>Iron Works sells pistols, SMGs, shotguns, armor and ammo.</li>
+        <li>The gun shop sells pistols, SMGs, shotguns, armor and ammo.</li>
         <li>Cops chase at 1 star and shoot at 3 (2 once you rank up). Busted takes 25% of the cash on you and sends you to county; Wasted costs 20%. Your stash is safe.</li>
         <li>Cop mode: ram the getaway car, then hold the action button to cuff whoever runs.</li>
         <li>Eight ways to start: gang member, smuggler, grower, club owner, dancer, escort, pimp or cop. Each one has its own story, then endless seasons.</li>
@@ -541,6 +541,40 @@ const CITY_DEFS={
   charlotte:{name:'Charlotte',st:'NC',mult:1.15,h:['Trade St','Tryon St','Independence Blvd','Beatties Ford Rd','Freedom Dr','Wilkinson Blvd'],v:['Graham St','Church St','College St','Brevard St','Davidson St','Caldwell St'],d:[['Uptown','NoDa'],['West End','South End']],roofs:['#26303a','#2c2c38','#2a3532','#34302c','#232b36','#30303a','#2a2a30']},
   chicago:{name:'Chicago',st:'IL',mult:1.5,h:['Madison St','Roosevelt Rd','Division St','Chicago Ave','63rd St','79th St'],v:['Michigan Ave','State St','Halsted St','Ashland Ave','Pulaski Rd','Cicero Ave'],d:[['The Loop','North Side'],['West Side','South Side']],roofs:['#2c2c2c','#33302c','#28303a','#3a2a2a','#2a2e2a','#302a36','#262a2e']}
 };
+/* ---------- v2.4 every city is its own place ---------- */
+const CITY_PLUS={
+  goldsboro:{lay:["T.6.Pa","3S.H$N","F0*C.4","1RGKW.","D.X2B7","b5wZL8"],
+    deco:{a:{k:'park',n:'Herman Park'},b:{k:'theatre',n:'Paramount Theatre'}},
+    names:{police:'Wayne County Sheriff',hospital:'County Hospital',guns:'Duck Creek Guns',club:'Velvet Juke Joint',docks:'Rail Yard',carwash:'Shine Time Car Wash',cardroom:'Back Room Cards',barber:'Kutz on Center',laundry:'Spin City Laundry',tires:'Country Tire',bank:'First Wayne Bank',store:'Quick Stop',pawn:'Pawn King',chicken:'Chicken Shack',nails:'Pretty Tips'},
+    style:{ground:'#1f2a1b',side:'#3a3e33',road:'#1d1f1b',lane:'rgba(255,255,255,.42)',dash:[24,20],light:'255,180,80',trees:1,shadow:4,tall:0,floor:['#3d3428','#38301f'],wall:'#2a2418',grass:1},
+    cars:['#8a5a3b','#c9c9c9','#3b5f3b','#a33b3b','#d9c9a0','#2d2d2d','#6a7a8a','#4a3a2a'],police:{body:'#d6c69c',band:'#2f5a3a'},shirts:['#7a8a5a','#a0784f','#5a6a8a','#b0a080','#8a4f4f','#d0d0c0','#4f7a6a'],
+    rules:{copSpd:.85,sight:.9,fade:.8,pay:1,txt:'Small town. The deputies are slower, but the back roads all lead to the county jail.'}},
+  raleigh:{lay:["6.3.$b","aPRSHN",".F*0.4","1..CGK","T2WXB7","DwZ5L8"],
+    deco:{a:{k:'capitol',n:'State Capitol'},b:{k:'park',n:'Moore Square'}},
+    names:{police:'Raleigh PD',hospital:'Capital General',guns:'Iron Works',club:'Club Velvet',docks:'Distribution Center',carwash:'Sparkle Car Wash',cardroom:'Harbor Card Room',barber:'Fresh Cutz Barbershop',laundry:'Suds Laundromat',tires:'Big Wheel Tires',bank:'Capital Trust Bank',store:'Corner Store',pawn:'Gold Pawn',chicken:'Wing Spot',nails:'Nail Salon'},
+    style:{ground:'#16191f',side:'#2a2e37',road:'#16191f',lane:'rgba(255,200,90,.55)',dash:[16,16],light:'255,170,60',trees:.55,shadow:6,tall:0,floor:['#3a2f28','#362b24'],wall:'#262b35'},
+    cars:['#a33b3b','#3b5fa3','#c9c9c9','#2d2d2d','#d9a13b','#3b8f6a','#6a3ba3','#8a8a8a'],police:{body:'#f2f2f2',band:'#14161c'},shirts:['#4f6d9a','#9a4f6d','#6d9a4f','#9a8a4f','#5a5a6a','#7a4f9a','#2f7f7f','#b0b0b0'],
+    rules:{copSpd:1,sight:1,fade:1,pay:1,txt:'The state capital. City cops and state troopers share the same radio.'}},
+  durham:{lay:["..a1HP","6KD.$3","S.0Cb4","N*GW.T","7FXBR2","8wLZ5."],
+    deco:{a:{k:'ballpark',n:'The Ballpark'},b:{k:'smokestack',n:'Old Tobacco District'}},
+    names:{police:'Durham PD',hospital:'Bull City Medical',guns:'Bull City Arms',club:'Velvet Warehouse',docks:'Tobacco Warehouse',carwash:'Bull Wash',cardroom:'Smokehouse Cards',barber:'Clean Lines Barbers',laundry:'Mangum Laundry',tires:'Tobacco Road Tires',bank:'Mechanics Savings',store:'Bodega',pawn:'Bull Pawn',chicken:'Hot Chicken',nails:'Glam Nails'},
+    style:{ground:'#1d1716',side:'#3b2d2a',road:'#191515',lane:'rgba(255,210,80,.5)',dash:[14,14],light:'255,150,70',trees:.3,shadow:7,tall:0,brick:1,floor:['#4a2e26','#432a22'],wall:'#2e1e1a'},
+    cars:['#7a2a22','#c9c9c9','#2d2d2d','#3b5fa3','#b08a3b','#4a5a4a','#9a9a9a','#5a3a5a'],police:{body:'#1f2e52',band:'#f2f2f2'},shirts:['#8a3b2f','#c09060','#3b4f7a','#6d6d6d','#a07a4f','#2f5f4f','#e0d0b0'],
+    rules:{copSpd:1,sight:1,fade:1,pay:1.1,txt:'Bull City. Customers pay 10% more on the street, and the old warehouses hide everything.'}},
+  charlotte:{lay:["5..PH6","a$KCS.","N2X0*B","wF.Gb1","3RW.Z7","D8LT4."],
+    deco:{a:{k:'stadium',n:'The Stadium'},b:{k:'skyscraper',n:'Crown Tower'}},
+    names:{police:'CMPD Uptown',hospital:'Queen City Medical',guns:'Crown Arms',club:'Velvet Skyline Lounge',docks:'Freight Terminal',carwash:'Diamond Detail',cardroom:'Uptown Poker Club',barber:'Sharp Cuts',laundry:'Fresh and Clean',tires:'Speedway Tires',bank:'Queen City Bank Tower',store:'Uptown Market',pawn:'Gold Exchange',chicken:'Wing Kingdom',nails:'Luxe Nails'},
+    style:{ground:'#141821',side:'#3c4250',road:'#1a1d25',lane:'rgba(255,255,255,.5)',dash:[30,14],light:'170,205,255',trees:.2,shadow:18,tall:1,glass:1,floor:['#2c3340','#283040'],wall:'#1b2130'},
+    cars:['#e8e8e8','#1d1d1d','#3b5fa3','#8a8a8a','#a33b3b','#2a4a6a','#c9b06a','#5a5a5a'],police:{body:'#c9ced6',band:'#1f3f7a'},shirts:['#2f3f5f','#d0d0d0','#5f2f3f','#1f1f2f','#6a7a8a','#b0a090','#2f6f6f'],
+    rules:{copSpd:1.05,sight:1.15,fade:1.3,pay:1,txt:'Bank town. Cameras on every corner: once you\'re hot, the stars take longer to fade.'}},
+  chicago:{lay:["6P.H.a","S$K3Ca","F0*GXD","1R.BW4","TN2wZ7","5.Lb.8"],
+    deco:{a:{k:'lake',n:'Lake Michigan'},b:{k:'elevated',n:'L Station'}},
+    names:{police:'CPD District HQ',hospital:'County General',guns:'South Side Arms',club:'The Velvet Room',docks:'Lake Docks',carwash:'Windy Wash',cardroom:'Back Room at Sal\'s',barber:'Chi Cuts',laundry:'Coin Wash',tires:'Halsted Tires',bank:'Lakeshore Savings',store:'Corner Mart',pawn:'Loop Pawn',chicken:'Fried Chicken Corner',nails:'Nail Bar'},
+    style:{ground:'#1e2023',side:'#56595f',road:'#17181a',lane:'rgba(255,255,255,.45)',dash:[18,18],light:'255,215,150',trees:.1,shadow:16,tall:1,snow:1,el:1,floor:['#3a3a3a','#343434'],wall:'#202020'},
+    cars:['#e8c43a','#2d2d2d','#8a8a8a','#3b3b5a','#a33b3b','#c9c9c9','#2a4a3a','#e8c43a'],police:{body:'#f2f2f2',band:'#1f3f8a',checker:1},shirts:['#2a2a2a','#3a3f4a','#5a2a2a','#2a3a2a','#6a6a6a','#4a3a2a','#1f2f4f'],
+    rules:{copSpd:1.15,sight:1.1,fade:1.2,pay:1,txt:'The big leagues. Cops move faster, see farther, and everything pays more.'}}
+};
+for(const k in CITY_PLUS)Object.assign(CITY_DEFS[k],CITY_PLUS[k]);
 const SLOT=(()=>{try{return localStorage.getItem('uws-slot')==='2'?'2':'1'}catch(e){return '1'}})();
 const SAVE_KEY=SLOT==='1'?'uws-v4':'uws-v4-s2';
 const CITY_ID=(()=>{try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return 'goldsboro';const c=JSON.parse(raw).city;return CITY_DEFS[c]?c:'raleigh'}catch(e){return 'goldsboro'}})();
@@ -549,9 +583,14 @@ const ROOFS=CITY.roofs;
 const blocks=[];
 for(let by=0;by<N;by++)for(let bx=0;bx<N;bx++){const det=[];for(let i=0;i<4;i++)det.push([seeded()*3.2+.2,seeded()*3.2+.2,seeded()*.5+.3]);blocks.push({bx,by,kind:'plain',roof:ROOFS[Math.floor(seeded()*ROOFS.length)],det})}
 const blk=(bx,by)=>blocks[by*N+bx];
-blk(1,1).kind='police'; blk(4,1).kind='hospital'; blk(4,3).kind='guns'; blk(3,3).kind='club'; blk(0,5).kind='docks'; blk(2,4).kind='grow'; blk(4,4).kind='buyer'; blk(1,5).kind='carwash'; blk(5,3).kind='cardroom'; blk(2,1).kind='barber'; blk(4,5).kind='laundry'; blk(0,4).kind='tires'; blk(4,0).kind='bank'; blk(3,1).kind='store'; blk(5,1).kind='pawn'; blk(1,2).kind='chicken'; blk(2,5).kind='nails'; blk(3,4).kind='towers';
+const LAYCODE={P:'police',H:'hospital',G:'guns',C:'club',D:'docks',W:'grow',B:'buyer',w:'carwash',K:'cardroom',R:'barber',L:'laundry',T:'tires',$:'bank',S:'store',N:'pawn',F:'chicken',Z:'nails',X:'towers'};
+const KPOS={},SPOS=[],START_P=[2,2];
+CITY.lay.forEach((row,by)=>[...row].forEach((ch,bx)=>{const b=blk(bx,by);if(LAYCODE[ch]){b.kind=LAYCODE[ch];KPOS[b.kind]=[bx,by]}else if(ch>='0'&&ch<='8')SPOS[+ch]=[bx,by];else if(ch==='a'||ch==='b'){b.kind='deco';b.deco=CITY.deco[ch]}else if(ch==='*'){START_P[0]=bx;START_P[1]=by}}));
+const kb=k=>blk(KPOS[k][0],KPOS[k][1]);const START_B=blk(START_P[0],START_P[1]);
+const NM_DEF={police:'Precinct',hospital:'Hospital',guns:'Iron Works',club:'Club Velvet',docks:'Dockside Warehouse',grow:'Grow house',buyer:'The Plug',carwash:'Sparkle Car Wash',cardroom:'Harbor Card Room',barber:'Fresh Cutz Barbershop',laundry:'Suds Laundromat',tires:'Big Wheel Tires',bank:CITY.name+' Trust Bank',store:'Corner Store',pawn:'Gold Pawn',chicken:'Wing Spot',nails:'Nail Salon',towers:'Kingsley Towers'};
+const NM=k=>(CITY.names&&CITY.names[k])||NM_DEF[k]||null;
 const doorOf=b=>({x:(b.bx*BS+3)*T,y:(b.by*BS+5)*T+14});
-const STASH_DEF=[[3,2,'Rico'],[0,3,'Big Tee'],[1,4,'Mama Lux'],[2,0,'Deacon'],[5,2,'Silk'],[3,5,'Knox'],[0,0,'Duchess'],[5,4,'Baron'],[5,5,'Rico']];
+const STASH_DEF=['Rico','Big Tee','Mama Lux','Deacon','Silk','Knox','Duchess','Baron','Rico'].map((n,i)=>[SPOS[i][0],SPOS[i][1],n]);
 const stashes=STASH_DEF.map(([bx,by,boss],i)=>{const b=blk(bx,by);b.kind='stash';const d=doorOf(b);return{id:i,b,x:d.x,y:d.y,boss,value:0,out:0,inside:0,bossHome:false,cooldown:0,alert:false,calm:0,main:i===8,corner:i===0,owned:false}});
 function rollStash(s){
   if(s.main){s.value=15000;s.out=2;s.inside=4;s.bossHome=true;s.twist='none';return}
@@ -560,8 +599,8 @@ function rollStash(s){
   s.layout=ri(0,4);s.twist=pick(['none','dark','dogs','count','witness','alarm','vault','party','dark','dogs','count','vault']);
 }
 const TWISTS={none:'',dark:'Lights are cut. You can barely see.',dogs:'Two dogs in the back.',count:'Count room: cash on the tables, no safe. Backup comes fast.',witness:'Somebody is inside who will call the cops if she gets out.',alarm:'The safe has a silent alarm.',vault:'A floor vault. Drilling takes time but it pays more.',party:'They are having a party. Lots of witnesses, lots of jewelry.'};
-const POLICE_DOOR=doorOf(blk(1,1)), HOSPITAL_DOOR=doorOf(blk(4,1)), GUN_DOOR=doorOf(blk(4,3));
-const POOKIE={x:(2*BS+.5)*T,y:(3*BS+.5)*T};
+const POLICE_DOOR=doorOf(kb('police')), HOSPITAL_DOOR=doorOf(kb('hospital')), GUN_DOOR=doorOf(kb('guns'));
+const POOKIE={x:(clamp(SPOS[0][0]-1,0,N-1)*BS+.5)*T,y:(clamp(SPOS[0][1]+1,0,N-1)*BS+.5)*T};
 const hLane=(k,dir)=>(BS*k+(dir===0?7.5:6.5))*T;
 const vLane=(j,dir)=>(BS*j+(dir===1?6.5:7.5))*T;
 const HSTREETS=CITY.h;
@@ -569,41 +608,63 @@ const VSTREETS=CITY.v;
 const DISTRICT_NAMES=CITY.d;
 const districtAt=(x,y)=>DISTRICT_NAMES[Math.floor(y/(BS*T))<3?0:1][Math.floor(x/(BS*T))<3?0:1];
 function streetAt(x,y){const tx=Math.floor(x/T),ty=Math.floor(y/T),lx=tx%BS,ly=ty%BS,k=clamp(Math.floor(ty/BS),0,N-1),j=clamp(Math.floor(tx/BS),0,N-1);if(ly>=6&&lx>=6)return HSTREETS[k]+' & '+VSTREETS[j];if(ly>=6)return HSTREETS[k];if(lx>=6)return VSTREETS[j];return null}
-function placeName(b){return({police:'Precinct',hospital:'Hospital',guns:'Iron Works',club:'Club Velvet',docks:'Dockside Warehouse',grow:'Grow house',buyer:'The Plug',carwash:'Sparkle Car Wash',cardroom:'Harbor Card Room',barber:'Fresh Cutz Barbershop',laundry:'Suds Laundromat',tires:'Big Wheel Tires',bank:CITY.name+' Trust Bank',store:'Corner Store',pawn:'Gold Pawn',chicken:'Wing Spot',nails:'Nail Salon',towers:'Kingsley Towers'})[b.kind]||null}
+function placeName(b){return b.kind==='deco'?b.deco.n:b.kind==='grow'?'Grow house':b.kind==='buyer'?'The Plug':b.kind==='towers'?'Kingsley Towers':NM(b.kind)}
 
 const city=document.createElement('canvas'); city.width=WORLD; city.height=WORLD;
 (function(){
-  const c=city.getContext('2d');
-  c.fillStyle='#16191f';c.fillRect(0,0,WORLD,WORLD);
-  for(let ty=0;ty<TILES;ty++)for(let tx=0;tx<TILES;tx++)if(cityTile(tx,ty)===1){c.fillStyle='#2a2e37';c.fillRect(tx*T,ty*T,T,T);c.strokeStyle='rgba(0,0,0,.25)';c.lineWidth=1;c.strokeRect(tx*T+.5,ty*T+.5,T-1,T-1)}
-  c.strokeStyle='rgba(255,200,90,.55)';c.lineWidth=2;c.setLineDash([16,16]);
+  const c=city.getContext('2d'),ST=CITY.style,rr=mulberry(Object.keys(CITY_DEFS).indexOf(CITY_ID)*97+11);
+  c.fillStyle=ST.road;c.fillRect(0,0,WORLD,WORLD);
+  for(let ty=0;ty<TILES;ty++)for(let tx=0;tx<TILES;tx++)if(cityTile(tx,ty)===1){c.fillStyle=ST.side;c.fillRect(tx*T,ty*T,T,T);c.strokeStyle='rgba(0,0,0,.25)';c.lineWidth=1;c.strokeRect(tx*T+.5,ty*T+.5,T-1,T-1)}
+  c.strokeStyle=ST.lane;c.lineWidth=2;c.setLineDash(ST.dash);
   for(let k=0;k<N;k++){const y=(BS*k+7)*T;c.beginPath();c.moveTo(0,y);c.lineTo(WORLD,y);c.stroke();const x=(BS*k+7)*T;c.beginPath();c.moveTo(x,0);c.lineTo(x,WORLD);c.stroke()}
   c.setLineDash([]);
-  for(let k=0;k<N;k++)for(let j=0;j<N;j++){const x0=(BS*j+6)*T,y0=(BS*k+6)*T;c.fillStyle='#16191f';c.fillRect(x0,y0,2*T,2*T);c.fillStyle='rgba(255,255,255,.07)';for(let i=0;i<5;i++){c.fillRect(x0+6+i*18,y0-14,10,12);c.fillRect(x0-14,y0+6+i*18,12,10)}}
+  for(let k=0;k<N;k++)for(let j=0;j<N;j++){const x0=(BS*j+6)*T,y0=(BS*k+6)*T;c.fillStyle=ST.road;c.fillRect(x0,y0,2*T,2*T);if(ST.grass)continue;c.fillStyle='rgba(255,255,255,.07)';for(let i=0;i<5;i++){c.fillRect(x0+6+i*18,y0-14,10,12);c.fillRect(x0-14,y0+6+i*18,12,10)}}
+  if(ST.snow){for(let i=0;i<2600;i++){c.fillStyle=`rgba(235,240,250,${.05+rr()*.12})`;c.fillRect(rr()*WORLD,rr()*WORLD,2+rr()*3,2+rr()*3)}}
+  const tree=(x,y,r)=>{c.fillStyle='rgba(0,0,0,.35)';c.beginPath();c.arc(x+4,y+5,r,0,Math.PI*2);c.fill();c.fillStyle=ST.snow?'#4a5a4a':'#2f5a2a';c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();c.fillStyle=ST.snow?'#6a7a6a':'#3f7a35';c.beginPath();c.arc(x-r*.3,y-r*.3,r*.55,0,Math.PI*2);c.fill()};
+  const ROOFC={police:'#1d2c4a',hospital:'#cfd3da',stash:'#2a2418',towers:'#2a2235',guns:'#2c1d1d',club:'#2a1533',docks:'#1c2a2e',grow:'#1d2e20',buyer:'#2f2a1a',carwash:'#16303d',cardroom:'#2d1a1a',barber:'#2a1f33',laundry:'#1f2c38',tires:'#262626',bank:'#2c2a1c',store:'#1f2f24',pawn:'#33291a',chicken:'#3a2318',nails:'#3a1f33'};
+  const LBLC={towers:'#c9a0ff',club:'#ff5fd2',docks:'#5fd0c8',grow:'#7ad06a',buyer:'#ffd36a',carwash:'#6ac8ff',cardroom:'#ff8a5f',barber:'#e0a0ff',laundry:'#8fd8ff',tires:'#ffcf5f',bank:'#ffe08a',store:'#7ae08a',pawn:'#ffc04a',chicken:'#ff9a5a',nails:'#ff8ad0',guns:'#ff4b5c',police:'#4a8cff'};
   for(const b of blocks){
     const x=(b.bx*BS+1)*T,y=(b.by*BS+1)*T,w=4*T,h=4*T;
-    let roof=b.roof;if(b.kind==='police')roof='#1d2c4a';if(b.kind==='hospital')roof='#cfd3da';if(b.kind==='stash')roof='#2a2418';if(b.kind==='towers')roof='#2a2235';if(b.kind==='guns')roof='#2c1d1d';if(b.kind==='club')roof='#2a1533';if(b.kind==='docks')roof='#1c2a2e';if(b.kind==='grow')roof='#1d2e20';if(b.kind==='buyer')roof='#2f2a1a';if(b.kind==='carwash')roof='#16303d';if(b.kind==='cardroom')roof='#2d1a1a';if(b.kind==='barber')roof='#2a1f33';if(b.kind==='laundry')roof='#1f2c38';if(b.kind==='tires')roof='#262626';if(b.kind==='bank')roof='#2c2a1c';if(b.kind==='store')roof='#1f2f24';if(b.kind==='pawn')roof='#33291a';if(b.kind==='chicken')roof='#3a2318';if(b.kind==='nails')roof='#3a1f33';
-    c.fillStyle='rgba(0,0,0,.45)';c.fillRect(x+6,y+8,w,h);c.fillStyle=roof;c.fillRect(x,y,w,h);
+    if(b.kind==='deco'){drawDeco(c,b,x,y,w,h,tree,rr);continue}
+    let roof=ROOFC[b.kind]||b.roof;
+    const sh=ST.shadow+(ST.tall&&b.kind==='plain'?rr()*14:0);
+    c.fillStyle='rgba(0,0,0,.45)';c.fillRect(x+sh,y+sh+2,w,h);c.fillStyle=roof;c.fillRect(x,y,w,h);
+    if(ST.brick){c.fillStyle='rgba(0,0,0,.18)';for(let yy=y+6;yy<y+h;yy+=10)c.fillRect(x,yy,w,2)}
+    if(ST.glass&&b.kind==='plain'){c.fillStyle='rgba(150,200,255,.12)';for(let yy=y+10;yy<y+h-10;yy+=16)for(let xx=x+10;xx<x+w-10;xx+=16)c.fillRect(xx,yy,10,10)}
     c.strokeStyle='rgba(255,255,255,.07)';c.lineWidth=3;c.strokeRect(x+4,y+4,w-8,h-8);
-    if(b.kind==='plain')for(const [dx,dy,s] of b.det){c.fillStyle='rgba(255,255,255,.06)';c.fillRect(x+dx*T*1.1,y+dy*T*1.1,T*s,T*s*.7);c.fillStyle='rgba(0,0,0,.3)';c.fillRect(x+dx*T*1.1+3,y+dy*T*1.1+3,T*s-6,4)}
+    if(b.kind==='plain'){if(ST.tall){c.fillStyle='rgba(255,255,255,.05)';c.fillRect(x+w*.3,y+h*.3,w*.4,h*.4)}else for(const [dx,dy,s] of b.det){c.fillStyle='rgba(255,255,255,.06)';c.fillRect(x+dx*T*1.1,y+dy*T*1.1,T*s,T*s*.7);c.fillStyle='rgba(0,0,0,.3)';c.fillRect(x+dx*T*1.1+3,y+dy*T*1.1+3,T*s-6,4)}}
+    if(ST.trees&&b.kind!=='towers'&&rr()<ST.trees){for(let i=0;i<2;i++)if(rr()<ST.trees)tree(x+(i===0?-14:w+14),y+12+rr()*(h-40),10+rr()*6)}
     c.textAlign='center';c.textBaseline='middle';
-    if(b.kind==='police'){c.fillStyle='#4a8cff';c.font='700 34px Anton, Impact, sans-serif';c.fillText('POLICE',x+w/2,y+h/2)}
     if(b.kind==='hospital'){c.fillStyle='#e43f4f';c.fillRect(x+w/2-12,y+h/2-40,24,80);c.fillRect(x+w/2-40,y+h/2-12,80,24)}
-    if(b.kind==='guns'){c.fillStyle='#ff4b5c';c.font='700 30px Anton, Impact, sans-serif';c.fillText('IRON',x+w/2,y+h/2-18);c.fillText('WORKS',x+w/2,y+h/2+18)}
     if(b.kind==='stash'){c.fillStyle='rgba(255,178,62,.85)';c.font='700 64px Anton, Impact, sans-serif';c.fillText('$',x+w/2,y+h/2+2)}
-    const two=(a,b2,col)=>{c.fillStyle=col;c.font='700 30px Anton, Impact, sans-serif';c.fillText(a,x+w/2,y+h/2-18);c.fillText(b2,x+w/2,y+h/2+18)};
-    if(b.kind==='towers')two('KINGSLEY','TOWERS','#c9a0ff');if(b.kind==='club')two('CLUB','VELVET','#ff5fd2');if(b.kind==='docks')two('DOCKSIDE','WAREHOUSE','#5fd0c8');if(b.kind==='grow')two('GROW','HOUSE','#7ad06a');if(b.kind==='buyer')two('THE','PLUG','#ffd36a');if(b.kind==='carwash')two('SPARKLE','CAR WASH','#6ac8ff');if(b.kind==='cardroom')two('HARBOR','CARD ROOM','#ff8a5f');if(b.kind==='barber')two('FRESH CUTZ','BARBERSHOP','#e0a0ff');if(b.kind==='laundry')two('SUDS','LAUNDROMAT','#8fd8ff');if(b.kind==='tires')two('BIG WHEEL','TIRES','#ffcf5f');if(b.kind==='bank')two(CITY.name.toUpperCase(),'TRUST BANK','#e8d27a');if(b.kind==='store')two('CORNER','STORE','#7ad06a');if(b.kind==='pawn')two('GOLD','PAWN','#ffd36a');if(b.kind==='chicken')two('WING','SPOT','#ff9a4a');if(b.kind==='nails')two('NAIL','SALON','#ff8fd0');
+    const nm=b.kind==='police'?NM('police'):b.kind==='grow'?'Grow House':b.kind==='buyer'?'The Plug':b.kind==='towers'?'Kingsley Towers':NM(b.kind);
+    if(nm&&b.kind!=='hospital'&&b.kind!=='stash'&&b.kind!=='plain'){const words=nm.toUpperCase().split(' ');const half=Math.ceil(words.length/2);const l1=words.slice(0,half).join(' '),l2=words.slice(half).join(' ');
+      c.fillStyle=LBLC[b.kind]||'#ddd';let fs=30;c.font=`700 ${fs}px Anton, Impact, sans-serif`;while(fs>16&&Math.max(c.measureText(l1).width,c.measureText(l2).width)>w-16){fs-=2;c.font=`700 ${fs}px Anton, Impact, sans-serif`}
+      if(l2){c.fillText(l1,x+w/2,y+h/2-fs*.6);c.fillText(l2,x+w/2,y+h/2+fs*.6)}else c.fillText(l1,x+w/2,y+h/2)}
     const d=doorOf(b);c.fillStyle=b.kind==='stash'?'#a87420':b.kind==='guns'?'#a33b3b':'#3a3f4a';c.fillRect(d.x-12,(b.by*BS+5)*T-6,24,8);
   }
-  // street name plates painted on the road, plus building names
   c.font='600 13px "IBM Plex Sans Condensed", Arial, sans-serif';c.textAlign='center';c.textBaseline='middle';
   const plate=(txt,x,y,rot)=>{c.save();c.translate(x,y);if(rot)c.rotate(rot);const w=c.measureText(txt).width+16;c.fillStyle='rgba(20,60,40,.85)';c.fillRect(-w/2,-10,w,20);c.strokeStyle='rgba(255,255,255,.55)';c.lineWidth=1;c.strokeRect(-w/2+2,-8,w-4,16);c.fillStyle='#f2f2f2';c.fillText(txt,0,1);c.restore()};
   for(let k=0;k<N;k++)for(let j=0;j<N;j+=2){plate(HSTREETS[k],(BS*j+3)*T,(BS*k+7)*T)}
   for(let j=0;j<N;j++)for(let k=1;k<N;k+=2){plate(VSTREETS[j],(BS*j+7)*T,(BS*k+3)*T,-Math.PI/2)}
   c.font='700 22px Anton, Impact, sans-serif';
-  for(const b of blocks){if(b.kind!=='hospital')continue;const x=(b.bx*BS+1)*T,y=(b.by*BS+1)*T;c.fillStyle='#e43f4f';c.fillText('HOSPITAL',x+2*T,y+4*T-22)}
-  for(let k=0;k<N;k++)for(let j=0;j<N;j++){const x=(BS*j+7)*T,y=(BS*k+7)*T,g=c.createRadialGradient(x,y,0,x,y,150);g.addColorStop(0,'rgba(255,170,60,.16)');g.addColorStop(1,'rgba(255,170,60,0)');c.fillStyle=g;c.fillRect(x-150,y-150,300,300)}
+  for(const b of blocks){if(b.kind!=='hospital')continue;const x=(b.bx*BS+1)*T,y=(b.by*BS+1)*T;c.fillStyle='#e43f4f';c.fillText(NM('hospital').toUpperCase(),x+2*T,y+4*T-22)}
+  for(let k=0;k<N;k++)for(let j=0;j<N;j++){const x=(BS*j+7)*T,y=(BS*k+7)*T,g=c.createRadialGradient(x,y,0,x,y,150);g.addColorStop(0,`rgba(${ST.light},.16)`);g.addColorStop(1,`rgba(${ST.light},0)`);c.fillStyle=g;c.fillRect(x-150,y-150,300,300)}
 })();
+function drawDeco(c,b,x,y,w,h,tree,rr){const D=b.deco;c.textAlign='center';c.textBaseline='middle';
+  const label=(t,col)=>{c.font='700 24px Anton, Impact, sans-serif';const tw=c.measureText(t).width+16;c.fillStyle='rgba(7,9,14,.7)';c.fillRect(x+w/2-tw/2,y+h-34,tw,28);c.fillStyle=col;c.fillText(t,x+w/2,y+h-20)};
+  if(D.k==='park'){c.fillStyle='#24401f';c.fillRect(x-8,y-8,w+16,h+16);c.strokeStyle='#4a4436';c.lineWidth=10;c.beginPath();c.moveTo(x,y+h/2);c.quadraticCurveTo(x+w/2,y+h/4,x+w,y+h/2);c.moveTo(x+w/2,y);c.lineTo(x+w/2,y+h);c.stroke();for(let i=0;i<14;i++)tree(x+20+rr()*(w-40),y+20+rr()*(h-40),12+rr()*10);label(D.n,'#9be08a')}
+  else if(D.k==='lake'){c.fillStyle='#14304a';c.fillRect(x,y,w,h);c.strokeStyle='rgba(160,200,255,.18)';c.lineWidth=2;for(let i=0;i<16;i++){const yy=y+rr()*h,xx=x+rr()*w;c.beginPath();c.moveTo(xx,yy);c.quadraticCurveTo(xx+12,yy-5,xx+24,yy);c.stroke()}label(D.n,'#8fc8ff')}
+  else if(D.k==='capitol'){c.fillStyle='#24401f';c.fillRect(x-8,y-8,w+16,h+16);c.fillStyle='rgba(0,0,0,.45)';c.fillRect(x+30,y+34,w-48,h-60);c.fillStyle='#d8d4c8';c.fillRect(x+24,y+28,w-48,h-64);c.fillStyle='#ece8dc';c.beginPath();c.arc(x+w/2,y+h/2-4,34,0,Math.PI*2);c.fill();c.fillStyle='#c0bcb0';c.beginPath();c.arc(x+w/2,y+h/2-4,18,0,Math.PI*2);c.fill();for(let i=0;i<6;i++)tree(x+12+i*(w-24)/5,y+h-10,9);label(D.n,'#fff2c0')}
+  else if(D.k==='ballpark'){c.fillStyle='#2a3a2a';c.fillRect(x,y,w,h);c.fillStyle='#3d7a35';c.beginPath();c.moveTo(x+w/2,y+h-12);c.arc(x+w/2,y+h-12,h-30,-Math.PI*.85,-Math.PI*.15);c.closePath();c.fill();c.fillStyle='#a07a4f';c.beginPath();c.moveTo(x+w/2,y+h-20);c.lineTo(x+w/2-34,y+h-54);c.lineTo(x+w/2,y+h-88);c.lineTo(x+w/2+34,y+h-54);c.closePath();c.fill();label(D.n,'#ffd36a')}
+  else if(D.k==='smokestack'){c.fillStyle='#4a2a22';c.fillRect(x,y,w,h);c.fillStyle='rgba(0,0,0,.18)';for(let yy=y+6;yy<y+h;yy+=10)c.fillRect(x,yy,w,2);c.fillStyle='rgba(0,0,0,.5)';c.beginPath();c.arc(x+w/2+10,y+h/2+12,26,0,Math.PI*2);c.fill();c.fillStyle='#6a3a2a';c.beginPath();c.arc(x+w/2,y+h/2,24,0,Math.PI*2);c.fill();c.fillStyle='#1a1010';c.beginPath();c.arc(x+w/2,y+h/2,14,0,Math.PI*2);c.fill();label(D.n,'#ffb08a')}
+  else if(D.k==='stadium'){c.fillStyle='#1d2430';c.fillRect(x,y,w,h);c.fillStyle='#2f6f35';c.fillRect(x+30,y+40,w-60,h-80);c.strokeStyle='#e8e8e8';c.lineWidth=2;c.strokeRect(x+30,y+40,w-60,h-80);c.beginPath();c.moveTo(x+w/2,y+40);c.lineTo(x+w/2,y+h-40);c.stroke();label(D.n,'#8fc8ff')}
+  else if(D.k==='skyscraper'){c.fillStyle='rgba(0,0,0,.55)';c.fillRect(x+30,y+30,w,h);c.fillStyle='#24384f';c.fillRect(x,y,w,h);c.fillStyle='rgba(170,210,255,.22)';for(let yy=y+8;yy<y+h-8;yy+=12)for(let xx=x+8;xx<x+w-8;xx+=12)c.fillRect(xx,yy,7,7);c.fillStyle='#ffd36a';c.beginPath();c.moveTo(x+w/2,y+h/2-30);for(let i=0;i<5;i++){const a=-Math.PI/2+i*Math.PI*2/5;c.lineTo(x+w/2+Math.cos(a)*30,y+h/2+Math.sin(a)*30);c.lineTo(x+w/2+Math.cos(a+Math.PI/5)*12,y+h/2+Math.sin(a+Math.PI/5)*12)}c.closePath();c.fill();label(D.n,'#ffe08a')}
+  else if(D.k==='elevated'){c.fillStyle='#2a2a2e';c.fillRect(x,y,w,h);c.fillStyle='#4a3a2a';c.fillRect(x+10,y+h/2-26,w-20,52);c.fillStyle='#8a8a92';for(let xx=x+14;xx<x+w-14;xx+=20)c.fillRect(xx,y+h/2-22,4,44);label(D.n,'#ffd36a')}
+  else if(D.k==='theatre'){c.fillStyle='rgba(0,0,0,.45)';c.fillRect(x+6,y+8,w,h);c.fillStyle='#3a1f2a';c.fillRect(x,y,w,h);c.fillStyle='#ffd36a';for(let i=0;i<10;i++){c.beginPath();c.arc(x+16+i*(w-32)/9,y+h/2-30,4,0,Math.PI*2);c.fill()}c.font='700 30px Anton, Impact, sans-serif';c.fillStyle='#ff6b6b';c.fillText('PARAMOUNT',x+w/2,y+h/2+6);label(D.n,'#ffd36a')}
+}
+function drawEl(t){if(!CITY.style.el)return;const k=2,y=(BS*k+7)*T;ctx.fillStyle='rgba(40,40,46,.45)';ctx.fillRect(0,y-22,WORLD,44);ctx.fillStyle='rgba(120,120,130,.9)';ctx.fillRect(0,y-16,WORLD,4);ctx.fillRect(0,y+12,WORLD,4);ctx.fillStyle='rgba(90,90,98,.9)';for(let x=0;x<WORLD;x+=40)ctx.fillRect(x,y-22,6,44);
+  const tx=((t*260)%(WORLD+800))-400;ctx.fillStyle='rgba(180,185,195,.7)';ctx.fillRect(tx,y-14,320,28);ctx.fillStyle='rgba(255,230,150,.9)';for(let i=0;i<8;i++)ctx.fillRect(tx+12+i*38,y-8,22,16)}
 
 /* ================= interiors ================= */
 const INT_T=[
@@ -663,8 +724,8 @@ let stick=null,sosT=0;
 let cars=[],peds=[],actors=[],intActors=[],bullets=[],fx=[];
 let stars=0,calm=0,shake=0,frozen=0;
 const SKIN=['#8d5524','#c68642','#e0ac69','#f1c27d','#5c3a1e'];
-const SHIRTS=['#4f6d9a','#9a4f6d','#6d9a4f','#9a8a4f','#5a5a6a','#7a4f9a','#2f7f7f','#b0b0b0'];
-const CARCOL=['#a33b3b','#3b5fa3','#c9c9c9','#2d2d2d','#d9a13b','#3b8f6a','#6a3ba3','#8a8a8a'];
+const SHIRTS=CITY.shirts;
+const CARCOL=CITY.cars;
 const curActors=()=>scene==='city'?actors:intActors;
 
 function sidewalkSpot(near,minD,maxD){
@@ -849,7 +910,7 @@ function context(){
   const p=nearPerp();if(p)return{t:'arrest',label:'Hold: cuff',hold:.8,p};
   if(save.mode==='crook'&&stars>0&&scene==='city'&&hideoutNear())return{t:'hide',label:'Hold: hide out',hold:3};
   {const twc=towersContext();if(twc)return twc}
-  if(dist(player,CLUB_DOOR)<46&&save.role!=='pimp')return{t:'club',label:'Enter Club Velvet'};
+  if(dist(player,CLUB_DOOR)<46&&save.role!=='pimp')return{t:'club',label:`Enter ${NM('club')}`};
   if(has('grower')&&dist(player,GROW_DOOR)<46)return{t:'grow',label:'Tend the grow'};
   if(save.grow&&save.grow.lvl>=4&&!save.grow.job&&dist(player,BUYER_DOOR)<46)return{t:'order',label:'Take a distro order'};
   if(save.grow&&save.grow.job&&dist(player,save.grow.job)<60)return{t:'drop',label:`Hold: drop ${save.grow.job.bags} bags`,hold:1.5};
@@ -1026,7 +1087,7 @@ function shootPlayer(dt){
     for(const t of curActors()){if(t.dead||t.kind==='friend')continue;if(dist(t,player)<30&&Math.abs(angDiff(Math.atan2(t.y-player.y,t.x-player.x),a))<1.1){damageActor(t,w.dmg,a)}}
     for(const p of peds){if(p.down<=0&&dist(p,player)<26){p.flee=5;}}
     return}
-  if(!(save.ammo[curW]>0)){player.fireCd=.4;toast('Out of ammo. Iron Works sells more.',1.4);return}
+  if(!(save.ammo[curW]>0)){player.fireCd=.4;toast('Out of ammo. '+NM('guns')+' sells more.',1.4);return}
   save.ammo[curW]--;player.fireCd=w.rate;player.flash=.07;hudKey='';
   sfx('shot');
   for(let i=0;i<w.pellets;i++){const ang=a+rnd(-w.spread,w.spread);bullets.push({x:player.x+Math.cos(a)*14,y:player.y+Math.sin(a)*14,vx:Math.cos(ang)*w.speed,vy:Math.sin(ang)*w.speed,dmg:w.dmg,from:'p',life:w.range||.6})}
@@ -1152,11 +1213,11 @@ function updatePolice(c,dt){
   const tgt=player.inCar||player,d=dist(c,tgt),hl=heatLv();
   if(c.hp<=0){c.kind='wreck';c.speed=0;fx.push({x:c.x,y:c.y,t:.5,kind:'spark'});shake=.3;toast('Cop car wrecked!',1.8);return}
   if(stars===0||scene!=='city'){c.ang+=clamp(angDiff(Math.atan2(c.y-tgt.y,c.x-tgt.x),c.ang)*2,-2.5,2.5)*dt;c.speed+=(140-c.speed)*dt;moveCar(c,dt);if(d>620||scene!=='city')c.gone=true;return}
-  const sees=d<330+hl*20&&los(c,tgt);let gx=tgt.x,gy=tgt.y;
+  const sees=d<(330+hl*20)*CITY.rules.sight&&los(c,tgt);let gx=tgt.x,gy=tgt.y;
   if(!sees&&lastSeen&&calm>1.2){c.wpT=(c.wpT||0)-dt;
     if(!c.wp||c.wpT<=0||dist(c,c.wp)<70){const a=Math.random()*Math.PI*2,r=rnd(60,300);c.wp={x:lastSeen.x+Math.cos(a)*r,y:lastSeen.y+Math.sin(a)*r};c.wpT=5}
     gx=c.wp.x;gy=c.wp.y}
-  const want=(!player.inCar&&d<80)?(stars>=2?0:70):clamp(115+hl*18+stars*14,115,250);
+  const want=(!player.inCar&&d<80)?(stars>=2?0:70):clamp(115+hl*18+stars*14,115,250)*CITY.rules.copSpd;
   steerTo(c,gx,gy,sees?want:150,dt);
   if((stars>=3||(stars>=2&&hl>=1))&&!c.deployed&&d<200&&sees){c.deployed=true;const swat=stars>=4;for(const off of [Math.PI/2,-Math.PI/2]){const x=c.x+Math.cos(c.ang+off)*26,y=c.y+Math.sin(c.ang+off)*26;if(!hits(x,y,7))actors.push(mkActor(Object.assign({kind:'cop',x,y,hp:swat?90:ACTOR.cop.hp,armed:swat?'smg':'pistol',aware:true},swat?{swat:true,shirt:'#15171d',name:'SWAT'}:{})))}if(swat)radio('SWAT is on scene.',2)}
   if(stars>=4&&hl>=2&&sees&&d<280){c.fireCd=(c.fireCd===undefined?1:c.fireCd)-dt;if(c.fireCd<=0){c.fireCd=rnd(1,1.6);const ang=Math.atan2(tgt.y-c.y,tgt.x-c.x)+rnd(-.2,.2);bullets.push({x:c.x+Math.cos(ang)*20,y:c.y+Math.sin(ang)*20,vx:Math.cos(ang)*620,vy:Math.sin(ang)*620,dmg:6,from:'e',life:.6})}}
@@ -1257,7 +1318,7 @@ function collisions(dt){
 /* ================= events ================= */
 function busted(by){if(frozen>0||save.jail)return;if(save.mode==='crook'&&fakeIdOut(by))return;const lost=Math.round(save.cash*.25);save.cash-=lost;const seized=dropContraband();persist();big('busted','Busted',`${by?`Officer ${by} put the cuffs on you. `:''}The cops took ${money(lost)}${seized?` and ${seized}`:''}. You're going to county.`);sendToJail(by);respawn(POLICE_DOOR)}
 function wasted(){const cop=save.mode==='cop';const lost=Math.round(save.cash*(cop?.1:.2));save.cash-=lost;const by=lastHitBy&&performance.now()-lastHitT<4000?lastHitBy:null;lastHitBy=null;
-  if(cop){save.rep=Math.max(0,save.rep-5);if(call)endCall();const cr=cars.find(c=>c.cop&&(c.kind==='cruiser'||c.kind==='player'||c.kind==='wreck'));if(cr){cr.kind='cruiser';cr.hp=100;cr.speed=0;cr.x=POLICE_DOOR.x+60;cr.y=(1*BS+6.5)*T;cr.ang=0}persist();
+  if(cop){save.rep=Math.max(0,save.rep-5);if(call)endCall();const cr=cars.find(c=>c.cop&&(c.kind==='cruiser'||c.kind==='player'||c.kind==='wreck'));if(cr){cr.kind='cruiser';cr.hp=100;cr.speed=0;cr.x=POLICE_DOOR.x+60;cr.y=(KPOS.police[1]*BS+6.5)*T;cr.ang=0}persist();
     big('wasted','Officer down',`${by?`${by} took you out. `:''}Hospital bill ${money(lost)}, -5 rep, your call went to another unit and your cruiser was towed to the precinct.`)}
   else{const seized=dropContraband();persist();big('wasted','Wasted',`${by?`${by} took you out. `:''}Hospital bill: ${money(lost)}${seized?`. You lost ${seized}`:''}.`)}if(scene==='interior'){int=null;intActors=[];scene='city'}respawn(HOSPITAL_DOOR)}
 function respawn(at){if(stick){actors=actors.filter(x=>!stick.a.includes(x));stick=null}
@@ -1279,7 +1340,7 @@ function updateWanted(dt){
   if(stars>0&&scene==='city'){
     const f=player.inCar||player;chaseMax=Math.max(chaseMax,stars);seenNow=copSees();
     if(seenNow){calm=0;lastSeen={x:f.x,y:f.y}}
-    else{calm+=dt;if(calm>3+stars*.6+heatLv()*.5){if(stars>1){stars--;calm=0;toast('They lost your trail. One star down.',1.8)}else escaped()}}
+    else{calm+=dt;if(calm>(3+stars*.6+heatLv()*.5)*CITY.rules.fade){if(stars>1){stars--;calm=0;toast('They lost your trail. One star down.',1.8)}else escaped()}}
   }
   if(stars===0){seenNow=false}
   const hl=heatLv(),want=scene==='city'?Math.min(stars,1+Math.ceil(hl/2)+(stars>=4?1:0),4):0,have=cars.filter(c=>c.kind==='police'&&!c.gone).length;
@@ -1354,9 +1415,9 @@ const CROOK=[
    obj:()=>'Jack a car',target:()=>null,check:()=>!!player.inCar},
   {title:'Get Strapped',
    intro:()=>[{who:'Dre',text:'You can\'t walk into Rico\'s spots with your hands. Here\'s $700.'},
-              {who:'Dre',text:'Iron Works pawn on the east side sells pistols. No names, no receipts.',cam:GUN_DOOR}],
+              {who:'Dre',text:''+NM('guns')+' sells pistols. No names, no receipts.',cam:GUN_DOOR}],
    start:()=>{if(!save.flags.gift){save.flags.gift=true;save.cash+=700;persist()}},
-   obj:()=>'Buy a pistol at Iron Works',target:()=>GUN_DOOR,check:()=>!!save.weapons.pistol},
+   obj:()=>'Buy a pistol at '+NM('guns')+'',target:()=>GUN_DOOR,check:()=>!!save.weapons.pistol},
   {title:'Ears on the Street',
    intro:()=>[{who:'Dre',text:'Never walk in blind. Pookie stands on that corner all night and hears everything.',cam:POOKIE},
               {who:'Dre',text:'A hundred dollars and he\'ll tell you who\'s inside every house.'}],
@@ -1633,8 +1694,8 @@ function drawCar(c,t){
   if(lights&&(c.kind!=='cruiser')){const g=ctx.createRadialGradient(0,0,0,0,0,70);g.addColorStop(0,on?'rgba(255,75,92,.28)':'rgba(74,140,255,.28)');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(-70,-70,140,140)}
   if(c.kind!=='wreck'&&c.kind!=='parked'&&c.kind!=='cruiser'){const g=ctx.createLinearGradient(18,0,100,0);g.addColorStop(0,'rgba(255,230,170,.2)');g.addColorStop(1,'rgba(255,230,170,0)');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(18,-8);ctx.lineTo(100,-30);ctx.lineTo(100,30);ctx.lineTo(18,8);ctx.fill()}
   ctx.fillStyle='rgba(0,0,0,.4)';ctx.fillRect(-16,-8,38,22);
-  ctx.fillStyle=c.kind==='wreck'?'#2a2a2a':(c.cop||c.kind==='police'||c.kind==='patrol')?'#f2f2f2':c.color;roundRect(-18,-10,36,20,5);ctx.fill();
-  if(c.cop||c.kind==='police'||c.kind==='patrol'){ctx.fillStyle='#14161c';ctx.fillRect(-18,-10,10,20);ctx.fillRect(9,-10,9,20)}
+  ctx.fillStyle=c.kind==='wreck'?'#2a2a2a':(c.cop||c.kind==='police'||c.kind==='patrol')?CITY.police.body:c.color;roundRect(-18,-10,36,20,5);ctx.fill();
+  if(c.cop||c.kind==='police'||c.kind==='patrol'){ctx.fillStyle=CITY.police.band;if(CITY.police.checker){for(let i=-18;i<18;i+=6){ctx.fillRect(i,-10,3,3);ctx.fillRect(i+3,-7,3,3);ctx.fillRect(i,7,3,3);ctx.fillRect(i+3,4,3,3)}}else{ctx.fillRect(-18,-10,10,20);ctx.fillRect(9,-10,9,20)}}
   ctx.fillStyle='rgba(20,30,45,.92)';ctx.fillRect(4,-8,7,16);ctx.fillRect(-12,-7,5,14);ctx.fillStyle='rgba(255,255,255,.14)';ctx.fillRect(-6,-8,10,16);
   if(lights){ctx.fillStyle=on?'#ff4b5c':'#4a8cff';ctx.fillRect(-3,-8,4,7);ctx.fillStyle=on?'#4a8cff':'#ff4b5c';ctx.fillRect(-3,1,4,7)}
   if(c.kind!=='wreck'){ctx.fillStyle=(c.kind==='parked'||c.kind==='cruiser')?'rgba(255,240,200,.35)':'rgba(255,240,200,.95)';ctx.fillRect(16,-8,3,4);ctx.fillRect(16,4,3,4);ctx.fillStyle='rgba(255,60,60,.8)';ctx.fillRect(-19,-8,2,4);ctx.fillRect(-19,4,2,4)}
@@ -1646,8 +1707,8 @@ function drawInterior(t){
   const g=int.grid;
   for(let y=0;y<int.h;y++)for(let x=0;x<int.w;x++){
     const ch=g[y][x],px=x*T,py=y*T;
-    if(ch==='#'){ctx.fillStyle='#0d1015';ctx.fillRect(px,py,T,T);ctx.fillStyle='#262b35';ctx.fillRect(px,py,T,6);continue}
-    ctx.fillStyle=(x+y)%2?'#3a2f28':'#362b24';ctx.fillRect(px,py,T,T);
+    if(ch==='#'){ctx.fillStyle='#0d1015';ctx.fillRect(px,py,T,T);ctx.fillStyle=CITY.style.wall;ctx.fillRect(px,py,T,6);continue}
+    ctx.fillStyle=(x+y)%2?CITY.style.floor[0]:CITY.style.floor[1];ctx.fillRect(px,py,T,T);
     ctx.strokeStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.moveTo(px,py+T/2);ctx.lineTo(px+T,py+T/2);ctx.stroke();
     if(ch==='E'){ctx.fillStyle='#7a5620';ctx.fillRect(px+2,py+T-14,T-4,12)}
     if(ch==='T'){ctx.fillStyle='#5a4632';ctx.fillRect(px+4,py+6,T-8,T-12);ctx.fillStyle='rgba(255,255,255,.1)';ctx.fillRect(px+10,py+12,10,8)}
@@ -1713,7 +1774,7 @@ function draw(t){
     if(a.kind==='boss'||a.name){ctx.fillStyle='#ffdca0';ctx.font='600 12px "IBM Plex Sans Condensed",sans-serif';ctx.textAlign='center';ctx.fillText(a.name||'',a.x,a.y-20)}
     if(a.stun>0){ctx.fillStyle='#ffb23e';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText('✶ ✶',a.x,a.y-18)}
   }
-  if(scene==='city'){for(const c of cars)drawCar(c,t);drawRemotes()}
+  if(scene==='city'){for(const c of cars)drawCar(c,t);drawRemotes();drawEl(t)}
   const pf=prof();
   if(!player.inCar){const w=WEAPONS[curW];player.flash=Math.max(0,player.flash-.016);drawPerson(player,pf.col||'#ffb23e','#c68642',1.12,'rgba(255,178,62,.5)',w.melee?null:curW)}
   if(!cineOn){const f=player.inCar||player;const role=save.mode==='cop'?'⛉ '+roleTag():isBoss()?'♛ '+roleTag().toUpperCase():roleTag();
@@ -1742,7 +1803,7 @@ function drawMini(){
     mctx.fillStyle='#fff';mctx.beginPath();mctx.arc(ox+player.x*sc,oy+player.y*sc,5,0,Math.PI*2);mctx.fill();mctx.restore();return}
   const sc=S/WORLD;
   mctx.fillStyle='#262b35';for(let k=0;k<N;k++){mctx.fillRect(0,(BS*k+6)*T*sc,S,2*T*sc);mctx.fillRect((BS*k+6)*T*sc,0,2*T*sc,S)}
-  for(const b of blocks){mctx.fillStyle=b.kind==='police'?'#4a8cff':b.kind==='hospital'?'#e6e6e6':b.kind==='guns'?'#a33b3b':'#3a4050';mctx.fillRect((b.bx*BS+1)*T*sc,(b.by*BS+1)*T*sc,4*T*sc,4*T*sc)}
+  for(const b of blocks){mctx.fillStyle=b.kind==='deco'?(b.deco.k==='lake'?'#1f4a70':b.deco.k==='park'||b.deco.k==='capitol'?'#2f5a2a':'#5a4a3a'):b.kind==='police'?'#4a8cff':b.kind==='hospital'?'#e6e6e6':b.kind==='guns'?'#a33b3b':'#3a4050';mctx.fillRect((b.bx*BS+1)*T*sc,(b.by*BS+1)*T*sc,4*T*sc,4*T*sc)}
   mctx.font='700 20px Anton, Impact, sans-serif';mctx.textAlign='center';mctx.textBaseline='middle';
   for(const b of blocks){const ic=({police:'P',hospital:'+',guns:'G',club:'V',docks:'D',grow:'H',buyer:'B',carwash:'W',cardroom:'C',barber:'$',laundry:'$',tires:'$',bank:'B',store:'$',pawn:'$',chicken:'$',nails:'$'})[b.kind]||null;if(!ic)continue;mctx.fillStyle=b.kind==='hospital'?'#e43f4f':'#fff';mctx.fillText(ic,(b.bx*BS+3)*T*sc,(b.by*BS+3)*T*sc+1)}
   if(save.mode==='crook'){for(const s of stashes){if(s.cooldown>0)continue;mctx.fillStyle=s.owned?'#5ed08b':'#ffb23e';mctx.beginPath();mctx.arc(s.x*sc,(s.y-2*T)*sc,6,0,Math.PI*2);mctx.fill()}
@@ -1778,7 +1839,7 @@ const ROLE_RANKS={
   escort:()=>{const d=save.escort?save.escort.dates:0;return d>=60?'Madam':d>=30?'VIP':d>=10?'Private':'Street'},
   pimp:()=>{const p=save.pimp||{};const n=(p.stable||[]).length,e=p.earned||0;return e>=40000&&n>=5?'Mack':e>=12000&&n>=3?'Big Pimp':n>=1?'Pimp':'Hustler'}
 };
-const CLUB_DOOR=doorOf(blk(3,3)),DOCKS_DOOR=doorOf(blk(0,5)),GROW_DOOR=doorOf(blk(2,4)),BUYER_DOOR=doorOf(blk(4,4)),WASH_DOOR=doorOf(blk(1,5)),CARD_DOOR=doorOf(blk(5,3));
+const CLUB_DOOR=doorOf(kb('club')),DOCKS_DOOR=doorOf(kb('docks')),GROW_DOOR=doorOf(kb('grow')),BUYER_DOOR=doorOf(kb('buyer')),WASH_DOOR=doorOf(kb('carwash')),CARD_DOOR=doorOf(kb('cardroom'));
 function roleState(){
   save.smug=save.smug||{truck:0,cargo:null,runs:0,boxRuns:0};
   save.grow=save.grow||{slots:[null,null,null],lights:false,heat:0,bags:0,sold:0,earned:0,harvested:0,lvl:0,distT:120};
@@ -1803,10 +1864,10 @@ function spawnTruck(){
   if(cars.some(c=>c.owned&&c.kind!=='wreck'))return;
   if(cars.some(c=>c.owned)&&save.smug.cargo){save.smug.cargo=null;toast('The load was lost with the wreck.',2.4)}
   cars=cars.filter(c=>!c.owned);
-  cars.push({x:DOCKS_DOOR.x+80,y:(5*BS+6.5)*T,ang:0,dir:0,speed:0,kind:'parked',owned:true,truck:save.smug.truck,color:'#e8e2d0',hp:100,hitCd:0,stuck:0,rev:0});
+  cars.push({x:DOCKS_DOOR.x+80,y:(KPOS.docks[1]*BS+6.5)*T,ang:0,dir:0,speed:0,kind:'parked',owned:true,truck:save.smug.truck,color:'#e8e2d0',hp:100,hitCd:0,stuck:0,rev:0});
 }
 function newContract(){
-  const opts=blocks.filter(b=>b.kind!=='docks'&&Math.hypot(doorOf(b).x-DOCKS_DOOR.x,doorOf(b).y-DOCKS_DOOR.y)>1100);
+  const opts=blocks.filter(b=>b.kind!=='docks'&&b.kind!=='deco'&&Math.hypot(doorOf(b).x-DOCKS_DOOR.x,doorOf(b).y-DOCKS_DOOR.y)>1100);
   const b=pick(opts),d=doorOf(b),s=stashes.find(s=>s.b===b);
   const label=placeName(b)||(s?`${s.boss}'s spot`:`a garage on ${streetAt(d.x,d.y+T)||districtAt(d.x,d.y)}`);
   const hot=!!save.flags.hotNext;save.flags.hotNext=false;
@@ -1921,7 +1982,7 @@ function enterClub(){
   for(let i=0;i<n;i++){const p=pick(int.dance);int.crowd.push({x:p.x+rnd(-16,16),y:p.y+rnd(-16,16),ang:rnd(0,6.28),shirt:pick(SHIRTS),skin:pick(SKIN),ph:rnd(0,6)})}
   cityReturn={x:CLUB_DOOR.x,y:CLUB_DOOR.y+22};player.x=int.exit.x;player.y=int.exit.y-T*.9;player.ang=-Math.PI/2;enterCd=1;camInit=false;
   if(save.role==='owner'&&save.club.fight&&!save.club.fight.resolved)spawnRowdies();
-  toast(save.role==='owner'?'Your club. Office is in the back right.':save.role==='dancer'?'Stage is up top. VIP booths on the sides.':'Club Velvet. Music\'s loud, drinks are flowing.',2.6);
+  toast(save.role==='owner'?'Your club. Office is in the back right.':save.role==='dancer'?'Stage is up top. VIP booths on the sides.':''+NM('club')+'. Music\'s loud, drinks are flowing.',2.6);
 }
 function spawnRowdies(){if(!inClub())return;intActors=intActors.filter(a=>a.kind!=='rowdy');for(let i=0;i<2;i++){const p=pick(int.dance);intActors.push(mkActor({kind:'rowdy',x:p.x,y:p.y,hp:ACTOR.rowdy.hp,armed:null,aware:true}))}}
 let clubOpen=false;
@@ -2012,9 +2073,9 @@ const sideDest=side=>side==='tee'?{x:TEE.x,y:TEE.y+30,label:`Big Tee's spot`,mul
 function docksCall(){
   if(call)return;
   const crew=[0,1,2].map(()=>mkActor({kind:'perp',x:DOCKS_DOOR.x,y:DOCKS_DOOR.y,hp:ACTOR.perp.hp,armed:Math.random()<.6?'pistol':null,inCar:true}));
-  const car={x:DOCKS_DOOR.x+140,y:(5*BS+6.5)*T,ang:0,speed:0,kind:'perp',color:'#3a3a3a',hp:130,hitCd:0,stuck:0,rev:0,crew,fleeing:false,wpT:0};
+  const car={x:DOCKS_DOOR.x+140,y:(KPOS.docks[1]*BS+6.5)*T,ang:0,speed:0,kind:'perp',color:'#3a3a3a',hp:130,hitCd:0,stuck:0,rev:0,crew,fleeing:false,wpT:0};
   cars.push(car);call={type:'robbery',car,perps:crew,where:{boss:'Rico'},t:0,far:0,rico:true,docks:true};
-  radio(`All units: Rico's shipment is being moved out of the Dockside Warehouse. Black box van, three suspects, some armed.`,6);
+  radio(`All units: Rico's shipment is being moved out of the ${NM('docks')}. Black box van, three suspects, some armed.`,6);
 }
 
 /* ---------- SMUGGLER: The Yard ---------- */
@@ -2117,7 +2178,7 @@ const GROW=[
 /* ---------- CLUB OWNER: Velvet ---------- */
 const OWNER=[
   {title:'Grand Opening',
-   intro:()=>[{who:'Vee (club manager)',text:`Welcome to Club Velvet, boss. Paint's still wet and the line's already around the corner.`,cam:CLUB_DOOR},
+   intro:()=>[{who:'Vee (club manager)',text:`Welcome to ${NM('club')}, boss. Paint's still wet and the line's already around the corner.`,cam:CLUB_DOOR},
               {who:'Vee',text:`Your office is in the back right. Book a DJ, hire security, pick a cover charge, and open the doors.`}],
    obj:()=>save.club.night?`First night in progress (${Math.ceil(save.club.t)}s)`:'Go to your office and open the doors',
    target:()=>inClub()?int.desk:CLUB_DOOR,check:()=>save.club.nights>=1},
@@ -2198,7 +2259,7 @@ const DANCER=[
    obj:()=>`Reach 120 fans (${save.dancer.fans}/120)`,target:()=>inClub()?int.stage[2]:CLUB_DOOR,check:()=>save.dancer.fans>=120},
   {title:'Her Own Stage',
    intro:()=>[{who:'Jade',text:`The owner wants out. You keep stacking like this and you could buy in.`}],
-   obj:()=>`Save $8,000 to buy into Club Velvet (${money(save.cash)})`,target:()=>inClub()?null:CLUB_DOOR,check:()=>save.cash>=8000,
+   obj:()=>`Save $8,000 to buy into ${NM('club')} (${money(save.cash)})`,target:()=>inClub()?null:CLUB_DOOR,check:()=>save.cash>=8000,
    outro:()=>[{who:'Jade',text:`Your name is on the door now. You don't work the stage anymore. You own it.`},{who:'Narrator',text:`End of the dancer story. Your club owner story starts now.`}],
    done:()=>{save.cash-=6000;save.role='owner';save.m=-1;roleState();persist();hudKey=''}}
 ];
@@ -2214,7 +2275,7 @@ function escortDate(){const e=save.escort,j=e.job;if(!j)return;e.job=null;e.cd=2
     else if(roll<.3){const t=mkActor({kind:'thug',name:'Bad date',x:player.x+40,y:player.y+10,hp:ACTOR.thug.hp,armed:null,aware:true});actors.push(t);badDate=t;e.bad={pay:Math.round(j.pay*1.5)};toast('He says he is not paying. Make him.',3)}
     else{e.dates++;e.earned+=j.pay;save.cash+=j.pay;save.rep+=2;persist();hudKey='';toast(`Good date. +${money(j.pay)}.`,2.4)}})}
 function escortBadCheck(){const e=save.escort;if(!e||!e.bad)return;if(e.bad.t)delete e.bad.t;if(scene==='city'&&(!badDate||!actors.includes(badDate))&&!(badDate&&badDate.dead)){badDate=mkActor({kind:'thug',name:'Bad date',x:player.x+60,y:player.y+20,hp:ACTOR.thug.hp,armed:null,aware:true});if(hits(badDate.x,badDate.y,7)){badDate.x=player.x;badDate.y=player.y+30}actors.push(badDate);toast('That bad date found you. He still owes.',2.4)}if(badDate&&badDate.dead){badDate=null;e.dates++;e.earned+=e.bad.pay;save.cash+=e.bad.pay;save.rep+=4;e.bad=null;persist();hudKey='';toast('He paid. With interest.',2.4)}}
-function pimpHint(){const p=save.pimp||{};if(p.trouble)return `${p.trouble.name} needs you at ${p.trouble.label}`;if(!(p.stable||[]).length)return 'Recruit at Club Velvet.';return `${p.stable.length} working · your cut ${p.cut}% · vice heat ${Math.round(p.heat)}%`}
+function pimpHint(){const p=save.pimp||{};if(p.trouble)return `${p.trouble.name} needs you at ${p.trouble.label}`;if(!(p.stable||[]).length)return 'Recruit at '+NM('club')+'.';return `${p.stable.length} working · your cut ${p.cut}% · vice heat ${Math.round(p.heat)}%`}
 function pimpTick(dt){const p=save.pimp;if(!has('pimp')||!p||save.mode!=='crook')return;
   if(p.recruitCd>0)p.recruitCd-=dt;
   if(p.stable.length){p.payT-=dt;if(p.payT<=0){p.payT=60;let take=0;const left=[];
@@ -2233,8 +2294,8 @@ function pimpRecruit(){const p=save.pimp;if(p.recruitCd>0){toast('Give it time. 
   save.cash-=500;p.recruitCd=45;const ok=Math.random()<Math.min(.85,.45+save.rep/400+(p.cut<=40?.15:0));
   if(ok){const used=p.stable.map(w=>w.name);const name=pick(WORK_NAMES.filter(n=>!used.includes(n)))||'Nova';p.stable.push({name,loyalty:60});toast(`${name} is with you now. Keep her safe.`,2.6)}else toast('She laughed at you. Your rep is not there yet.',2.4);persist();hudKey=''}
 const ESCORT=[
-  {title:'New in Town',intro:()=>[{who:'Miss Velvet',text:`Honey, this city pays if you're smart. The Harbor Card Room is where the money drinks.`,cam:CARD_DOOR},{who:'Miss Velvet',text:`Your phone will ring. You choose who you see. Never get in a car you didn't call.`}],
-   obj:()=>'Go to the Harbor Card Room',target:()=>CARD_DOOR,check:()=>go(CARD_DOOR,90)},
+  {title:'New in Town',intro:()=>[{who:'Miss Velvet',text:`Honey, this city pays if you're smart. The ${NM('cardroom')} is where the money drinks.`,cam:CARD_DOOR},{who:'Miss Velvet',text:`Your phone will ring. You choose who you see. Never get in a car you didn't call.`}],
+   obj:()=>'Go to the '+NM('cardroom')+'',target:()=>CARD_DOOR,check:()=>go(CARD_DOOR,90)},
   {title:'First Date',intro:()=>[{who:'Miss Velvet',text:`When the phone rings, go meet him and hold the button. Get paid first.`}],
    start:()=>{save.escort.cd=2},obj:()=>save.escort.job?`Meet your date at ${save.escort.job.label}`:'Wait for the phone to ring',target:()=>save.escort.job||null,check:()=>save.escort.dates>=1},
   {title:'Vice',intro:()=>[{who:'Miss Velvet',text:`Vice is running stings this month. If it smells like a cop, run. Three good dates and you are a regular.`}],
@@ -2245,7 +2306,7 @@ const ESCORT=[
 ];
 const PIMP=[
   {title:'The Hustle',intro:()=>[{who:'Slick Rick',text:`Nephew, this game is about people. Treat yours right and they make you rich. Treat them wrong and they make you broke.`,cam:CLUB_DOOR},{who:'Slick Rick',text:`Velvet is where you meet them. Bring $500 and some charm.`}],
-   obj:()=>save.pimp.stable.length?'Done':'Recruit someone at Club Velvet',target:()=>CLUB_DOOR,check:()=>save.pimp.stable.length>=1},
+   obj:()=>save.pimp.stable.length?'Done':'Recruit someone at '+NM('club')+'',target:()=>CLUB_DOOR,check:()=>save.pimp.stable.length>=1},
   {title:'Protect Your Own',intro:()=>{save.flags.pimpSaved=false;return[{who:'Slick Rick',text:`When one of yours calls, you go. Every time. That's the whole job.`}]},
    start:()=>{if(!save.pimp.trouble)save.pimp.troubleT=Math.min(save.pimp.troubleT,3)},obj:()=>save.pimp.trouble?`Get to ${save.pimp.trouble.label} (${Math.ceil(save.pimp.trouble.t)}s)`:'Wait for the call',target:()=>save.pimp.trouble||null,check:()=>save.flags.pimpSaved||false,
    start2:0},
@@ -2272,7 +2333,7 @@ const GANG_MID=[
               {who:'Dre',text:`Take that shipment and Rico can't pay his people. Without his people, he's just a man in a big house.`}],
    start:()=>{save.flags.dockSpawned=false;thugs=[];persist()},
    tick:()=>{if(!save.flags.dockSpawned&&go(DOCKS_DOOR,320)){save.flags.dockSpawned=true;spawnThugsAt(DOCKS_DOOR,4,`Rico's shooters at the warehouse!`)}},
-   obj:()=>!save.flags.dockSpawned?'Get to the Dockside Warehouse':`Take out Rico's crew at the docks (${thugs.filter(t=>!t.dead).length} left)`,
+   obj:()=>!save.flags.dockSpawned?'Get to the '+NM('docks')+'':`Take out Rico's crew at the docks (${thugs.filter(t=>!t.dead).length} left)`,
    target:()=>!save.flags.dockSpawned?DOCKS_DOOR:(thugs.find(t=>!t.dead)||null),
    check:()=>save.flags.dockSpawned&&thugs.length>0&&thugs.every(t=>t.dead),
    outro:()=>[{who:'Dre',text:`The shipment's ours. $3,000 off the top for you. Rico's men haven't been paid in a week.`},{who:'Dre',text:`He's desperate now. And desperate men stay home.`}],
@@ -2289,7 +2350,7 @@ const GANG_END={title:'The Detective',
               {who:'Narrator',text:`End of Chapter 1: District 7 is yours. Chapter 2: holding it.`}]};
 const COP_END=[
   {title:'Thursday Night',
-   intro:()=>[{who:'Sgt. Hayes',text:`Tip came in: Rico's shipment hits the Dockside Warehouse tonight.`,cam:DOCKS_DOOR},
+   intro:()=>[{who:'Sgt. Hayes',text:`Tip came in: Rico's shipment hits the ${NM('docks')} tonight.`,cam:DOCKS_DOOR},
               {who:'Sgt. Hayes',text:`They'll move it out in a van. Stop the van, cuff at least one of them alive. That's the case.`}],
    start:()=>{save.flags.dockBust=false;persist();if(call)endCall();setTimeout(docksCall,1500)},
    tick:()=>{if(!save.flags.dockBust&&!call&&save.mode==='cop')docksCall()},
@@ -2362,9 +2423,9 @@ const CROOK_EPS={
                    {label:`Buy in (${money(cost)})`,fn:()=>{if(save.cash>=cost){save.cash-=cost;p.choice='buy'}else{p.choice='broke'}persist()}},
                    {label:'Pass',fn:()=>{p.choice='pass';persist()}}]}],
       tick:()=>{if(p.choice==='buy'&&!p.picked&&go(DOCKS_DOOR,110)){p.picked=true;persist();toast('Product loaded. Get it to one of your houses.',2.6)}
-                if(p.choice==='buy'&&p.picked&&!p.home){const h=ownedHouses()[0];if(h?go(h,110):go(doorPt(blk(2,2)),110)){p.home=true;save.cash+=pay;save.empire.fed+=6;persist();toast(`Your people moved it. +${money(pay)}.`,3)}}},
+                if(p.choice==='buy'&&p.picked&&!p.home){const h=ownedHouses()[0];if(h?go(h,110):go(doorPt(START_B),110)){p.home=true;save.cash+=pay;save.empire.fed+=6;persist();toast(`Your people moved it. +${money(pay)}.`,3)}}},
       obj:()=>p.choice!=='buy'?'':!p.picked?'Pick up the shipment at the docks':`Bring it to ${ownedHouses()[0]?ownedHouses()[0].boss+"'s old house":'your block'}`,
-      target:()=>p.choice!=='buy'?null:!p.picked?DOCKS_DOOR:(ownedHouses()[0]||doorPt(blk(2,2))),
+      target:()=>p.choice!=='buy'?null:!p.picked?DOCKS_DOOR:(ownedHouses()[0]||doorPt(START_B)),
       check:()=>p.choice==='pass'||p.choice==='broke'||!!p.home,
       outro:()=>p.choice==='broke'?[{who:p.supplier,text:`Come back when your money's long enough to talk to me.`}]:p.home?[{who:crewName(),text:`Everything moved. ${p.supplier} wants to do it again.`}]:[]}}},
   take_corner:{when:()=>stashes.some(s=>!s.owned&&s.cooldown<=0&&!s.hq),gen:r=>{let opts=stashes.filter(s=>!s.owned&&!s.hq&&s.cooldown<=0&&!s.main);if(!opts.length)opts=stashes.filter(s=>!s.owned&&!s.hq);return{sid:opts.length?opts[Math.floor(r()*opts.length)].id:0}},
@@ -2429,16 +2490,16 @@ const CROOK_EPS={
   front:{when:()=>!save.empire.front,gen:()=>({}),
     make:p=>({title:'Clean Money',
       intro:()=>[{who:'Your accountant',text:`You can't spend money you can't explain. Every dollar you touch is a dollar the feds can count.`,cam:WASH_DOOR},
-                 {who:'Your accountant',text:`Sparkle Car Wash is for sale. Cash business. Buy it and your money comes out clean.`}],
+                 {who:'Your accountant',text:`${NM('carwash')} is for sale. Cash business. Buy it and your money comes out clean.`}],
       obj:()=>ownsAnyFront()?'Done':`Buy a front: car wash, barbershop, laundromat or tire shop (${money(save.cash)})`,target:()=>{const k=Object.keys(FRONTS).find(k=>!frontOwner(k)&&!myFront(k));return k?frontDoor(k):WASH_DOOR},check:()=>ownsAnyFront(),
       outro:()=>[{who:'Your accountant',text:`Congratulations. You're a businessman now. The feds hate businessmen.`}]})},
   skim:{when:()=>seasonOf(epIdx())>=1,gen:()=>({}),
     make:p=>({title:'The Back Room',
-      intro:()=>[{who:'Harbor Card Room manager',text:`The count room does forty thousand a night. Nobody counts the counters.`,cam:CARD_DOOR},
-                 {who:'Harbor Card Room manager',text:`Your crew watches the door, you get a piece of the count. How big a piece is up to you.`,choices:[
+      intro:()=>[{who:''+NM('cardroom')+' manager',text:`The count room does forty thousand a night. Nobody counts the counters.`,cam:CARD_DOOR},
+                 {who:''+NM('cardroom')+' manager',text:`Your crew watches the door, you get a piece of the count. How big a piece is up to you.`,choices:[
                    {label:'Skim heavy',fn:()=>{p.c='heavy';persist()}},{label:'Skim light',fn:()=>{p.c='light';persist()}},{label:'Run it straight',fn:()=>{p.c='straight';persist()}}]}],
       tick:()=>{if(p.c&&!p.got&&go(CARD_DOOR,90)){p.got=true;const s=seasonOf(epIdx());const amt=p.c==='heavy'?3000*s:p.c==='light'?1200*s:600*s;save.cash+=amt;if(p.c==='heavy')save.empire.fed+=14;else if(p.c==='straight')save.rep+=8;persist();toast(`Collected ${money(amt)} from the count room.`,2.6)}},
-      obj:()=>p.c&&!p.got?'Collect at the Harbor Card Room':'',target:()=>p.c&&!p.got?CARD_DOOR:null,check:()=>!!p.got,
+      obj:()=>p.c&&!p.got?'Collect at the '+NM('cardroom')+'':'',target:()=>p.c&&!p.got?CARD_DOOR:null,check:()=>!!p.got,
       outro:()=>p.c==='heavy'?[{who:'Manager',text:`The bosses upstairs noticed the numbers were light. They'll be asking questions.`}]:[]})},
   yard_crew:{when:()=>true,gen:r=>({n:pick(['Kingston','Spanish Town','Montego Bay']),pt:null}),
     make:p=>{if(!p.pt)p.pt=randomSpot();return{title:'Yard Crew',
@@ -2767,11 +2828,11 @@ function renderEmpire(force){const ae0=document.activeElement;if(!force&&ae0&&ae
   if(save.mode==='crook'){const h=document.createElement('b');h.textContent=`Businesses in ${CITY.name}`;h.style.marginTop='6px';el.appendChild(h);
     for(const k of Object.keys(FRONTS)){const F=FRONTS[k],o=frontOwner(k);row(F.name,myFront(k)?'Yours':o?`Owned by ${o}`:`For sale · ${money(F.price)}`);
       if(o&&window.__fronts){const d=document.createElement('div');d.className='btnrow';d.innerHTML=`<button class="small" data-offer="${k}" data-amt="${F.price}">Offer ${money(F.price)}</button><button class="small go" data-offer="${k}" data-amt="${Math.round(F.price*1.6)}">Offer ${money(Math.round(F.price*1.6))}</button>`;el.appendChild(d)}}
-    row('Protection rackets',`${myRacketCount()}/6 shops · ${money(Math.round(myRacketCount()*120*(CITY.mult||1)))} every 90s · lean on any small shop's door`);
+    row('Protection rackets',`${myRacketCount()}/${blocks.filter((b,i)=>shopBlock(i)).length} shops · ${money(Math.round(myRacketCount()*120*(CITY.mult||1)))} every 90s · lean on any small shop's door`);
     row('Market today',`${market(CITY_ID).txt} · product sells at ${Math.round(prodMult()*100)}% here`)}
   if(save.mode==='crook')renderCrewSection(el,row);
   if(has('pimp')&&save.mode==='crook'&&save.pimp){const p=save.pimp;const h=document.createElement('b');h.textContent='Your people';h.style.marginTop='6px';el.appendChild(h);
-    row('Cut',`${p.cut}% · vice heat ${Math.round(p.heat)}%`);for(const w of p.stable)row(w.name,`loyalty ${Math.round(w.loyalty)}`);if(!p.stable.length)row('Nobody yet','Recruit at Club Velvet.');
+    row('Cut',`${p.cut}% · vice heat ${Math.round(p.heat)}%`);for(const w of p.stable)row(w.name,`loyalty ${Math.round(w.loyalty)}`);if(!p.stable.length)row('Nobody yet','Recruit at '+NM('club')+'.');
     const d=document.createElement('div');d.className='btnrow';d.innerHTML=[30,40,50,60,70].map(c=>`<button class="small${c===p.cut?' go':''}" data-cut="${c}">${c}%</button>`).join('')+`<button class="small" data-act="lay" ${save.cash<1000||p.heat<10?'disabled':''}>Pay off vice · $1,000</button>`;el.appendChild(d)}
   if(save.role==='escort'&&save.escort){const e=save.escort;row('Dates',`${e.dates} done · ${money(e.earned)} earned · ${e.stings} vice stings`)}
   {const L=lawyerState();const h=document.createElement('b');h.textContent='Side job: lawyer';h.style.marginTop='6px';el.appendChild(h);
@@ -2792,7 +2853,7 @@ function renderEmpire(force){const ae0=document.activeElement;if(!force&&ae0&&ae
   row('Territory',e.terr.length?e.terr.map(id=>STASH_DEF[id][2]+(id===8?"'s main house":"'s old house")).join(', '):'None yet');
   row('Income',e.terr.length?`${money(e.terr.length*350*seasonOf(i))} every 90 seconds`:'Take houses to get paid');
   row('Federal case',`${Math.round(e.fed)}%${e.fed>=85?' · indictment coming':e.fed>=55?' · raids likely':''}`);
-  row('Front business',e.front?'Sparkle Car Wash (cleans your money)':'None. The feds see every dollar.');
+  row('Front business',e.front?''+NM('carwash')+' (cleans your money)':'None. The feds see every dollar.');
   row('Crew',e.crew.map(c=>`${c.name} (loyalty ${c.loyalty})`).join(' · ')||'Nobody');
   row('Rival',e.rival?`${e.rival.name} from ${e.rival.city}`:'Nobody yet this season');
 }
@@ -2866,7 +2927,7 @@ function jobsTick(dt){if(!save.mode)return;jobsT-=dt;if(jobsT>0)return;jobsT=1;c
   if(!save.jobs.bonus&&save.jobs.list.every(j=>j.done)){save.jobs.bonus=true;save.cash+=1500;persist();hudKey='';setTimeout(()=>toast('All 3 daily jobs done. Bonus +$1,500. New jobs tomorrow.',3.4),3200)}}
 
 /* ================= turf wars + sit-downs ================= */
-const SPECIAL_BLOCKS=[7,10,21,22,23,26,28,30,31,8,24,34,4,9,11,13,32,27];
+const SPECIAL_BLOCKS=blocks.map((b,i)=>b.kind!=='plain'&&b.kind!=='stash'?i:-1).filter(i=>i>=0);
 const blockIdx=(x,y)=>clamp(Math.floor(y/(BS*T)),0,N-1)*N+clamp(Math.floor(x/(BS*T)),0,N-1);
 const takeable=i=>i>=0&&i<N*N&&!SPECIAL_BLOCKS.includes(i);
 const cornerOf=i=>({x:((i%N)*BS+5.5)*T,y:(Math.floor(i/N)*BS+5.5)*T});
@@ -2961,7 +3022,7 @@ const turfObj=()=>!turfWar?null:turfWar.phase==='fight'?`Turf war: clear ${turfW
 /* ================= bombs ================= */
 let bombs=[];
 function throwBomb(){
-  if(!started||!running()||scene!=='city')return;if(!(save.bombs>0)){toast('No bombs. Iron Works sells pipe bombs.',1.8);return}
+  if(!started||!running()||scene!=='city')return;if(!(save.bombs>0)){toast('No bombs. '+NM('guns')+' sells pipe bombs.',1.8);return}
   save.bombs--;hudKey='';persist();const src=player.inCar||player;const a=player.inCar?driveAim(player.inCar):aimAngle();const sp=player.inCar?380:300;
   bombs.push({x:src.x+Math.cos(a)*18,y:src.y+Math.sin(a)*18,vx:Math.cos(a)*sp+(player.inCar?Math.cos(player.inCar.ang)*player.inCar.speed*.5:0),vy:Math.sin(a)*sp+(player.inCar?Math.sin(player.inCar.ang)*player.inCar.speed*.5:0),t:1.2});
 }
@@ -3078,7 +3139,7 @@ function moveProgress(){const a=document.createElement('a');a.href=PUBLIC_URL+'#
 
 /* ================= front businesses ================= */
 const FRONTS={
-  carwash:{name:'Sparkle Car Wash',price:12000,rate:4,launder:3,heatK:.8,b:[1,5],perk:'Cleans the most money. Free resprays.'},
+  carwash:{name:''+NM('carwash')+'',price:12000,rate:4,launder:3,heatK:.8,b:[1,5],perk:'Cleans the most money. Free resprays.'},
   barber:{name:'Fresh Cutz Barbershop',price:8000,rate:3,launder:1,heatK:1,b:[2,1],perk:'Steady foot traffic. Sells fast.'},
   laundry:{name:'Suds Laundromat',price:6000,rate:2,launder:2,heatK:.6,b:[4,5],perk:'Low heat. Cheapest way in.'},
   tires:{name:'Big Wheel Tires',price:10000,rate:3,launder:1,heatK:.9,b:[0,4],perk:'Big stash room. Holds 120 units.'},
@@ -3087,6 +3148,7 @@ const FRONTS={
   chicken:{name:'Wing Spot',price:7000,rate:3,launder:1,heatK:1,b:[1,2],perk:'Late-night lines out the door. Sells fast.'},
   nails:{name:'Nail Salon',price:6500,rate:2,launder:2,heatK:.7,b:[2,5],perk:'Nobody suspects a nail salon. Low heat.'}
 };
+for(const k in FRONTS){FRONTS[k].b=KPOS[k];FRONTS[k].name=NM(k)}
 const frontDoor=k=>doorOf(blk(FRONTS[k].b[0],FRONTS[k].b[1]));
 let frontRows={},frontT=4,frontOpen=null,frontTick=60,shakeCd={};
 function frontKey(k){return CITY_ID+':'+k}
@@ -3206,8 +3268,8 @@ function ciTarget(){const c=save.ci;if(!c)return null;const s=stashes[c.sid];ret
 async function wireDone(){const c=save.ci;if(!c)return;const s=stashes[c.sid];save.ci=null;persist();if(s){s.alert=true}toast('The feds got what they needed. Your deal is done. Now get out of there.',3.4);addStars(1)}
 
 /* ================= crew heists ================= */
-const BANK_DOOR=doorOf(blk(4,0));
-const HEISTS={bank:{name:`${CITY.name} Trust Bank`,door:BANK_DOOR,base:30000},count:{name:'Harbor Card Room count',door:CARD_DOOR,base:18000},truck:{name:'Armored truck at the docks',door:DOCKS_DOOR,base:24000}};
+const BANK_DOOR=doorOf(kb('bank'));
+const HEISTS={bank:{name:NM('bank'),door:BANK_DOOR,base:30000},count:{name:''+NM('cardroom')+' count',door:CARD_DOOR,base:18000},truck:{name:'Armored truck at the docks',door:DOCKS_DOOR,base:24000}};
 const ROLE_TXT={inside:'Inside: crack the vault',lookout:'Lookout: watch the corner',driver:'Driver: getaway car out front'};
 let heist=null,heistT=6,heistSeen={};
 function heistSpots(h){const H=HEISTS[h.target];if(!H)return{};const d=H.door,bi=blockIdx(d.x,d.y-T);return{inside:{x:d.x,y:d.y},lookout:cornerOf(bi),driver:{x:d.x+T*2,y:d.y+T*1.6}}}
@@ -3392,7 +3454,7 @@ $('jPD').addEventListener('click',publicDefender);$('jBail').addEventListener('c
 $('slotBtn').addEventListener('click',switchSlot);
 (function(){const other=(()=>{try{return JSON.parse(localStorage.getItem(SLOT==='1'?'uws-v4-s2':'uws-v4')||'null')}catch(e){return null}})();
   const nm=other&&other.profile&&other.profile.name;$('slotBtn').textContent=nm?`Switch to ${nm}${other.jail&&Date.now()<other.jail.until?` (in jail ${mmss(other.jail.until-Date.now())})`:''}`:`Make a second character`;
-  $('subhead').textContent=`v2.3 · Level ${CITY_ORDER.indexOf(CITY_ID)+1}: ${CITY.name}, ${CITY.st} · Fictional game.`;$('introCity').textContent=`${CITY.name}, ${CITY.st}. After midnight. Everybody wants a piece of this city. Pick who you are.`;$('mapTitle').textContent=`${CITY.name}, ${CITY.st}`;
+  $('subhead').textContent=`v2.4 · Level ${CITY_ORDER.indexOf(CITY_ID)+1}: ${CITY.name}, ${CITY.st} · Fictional game.`;$('introCity').textContent=`${CITY.name}, ${CITY.st}. After midnight. ${CITY.rules.txt} Pick who you are.`;$('mapTitle').textContent=`${CITY.name}, ${CITY.st}`;
   if(save.jail&&Date.now()<save.jail.until)setTimeout(showJail,50);else if(save.jail){save.jail=null;persist()}})();
 /* ---------- TRAP: street dealing, the Exchange, protection, scams ---------- */
 const TRAP_TIERS=[
@@ -3406,7 +3468,7 @@ let trapMine=[],trapTested={},trapOpen=false,offerOpen=false,trapNetT=6,trapReg=
 const tEsc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function trapFix(){const t=save.trap=save.trap||{};const d={tier:0,sold:0,earned:0,dem:0,demT:0,lotT:0,scams:0,scammed:0,mine:{},bought:[],muscleT:0,guard:null,stickT:300,scamT:480,toldUp:-1,meet:null};for(const k in d)if(t[k]===undefined)t[k]=d[k];return t}
 const TT=()=>TRAP_TIERS[clamp(trapFix().tier,0,4)];
-const streetPrice=()=>Math.round(TT().street*prodMult());
+const streetPrice=()=>Math.round(TT().street*prodMult()*(CITY.rules.pay||1));
 const lotCost=()=>Math.round(TT().cost*(CITY.mult||1)*(orgHas('connect')?.85:1));
 function demandLeft(){const t=trapFix();if(Date.now()>t.demT){t.dem=0;t.demT=Date.now()+600000}return Math.max(0,trapCap()-t.dem)}
 const canExchange=()=>trapFix().tier>=2||(save.grow&&save.grow.lvl>=1&&has('grower'))||(save.mode==='cop'&&copTier()>=7&&isDirty());
@@ -3548,7 +3610,7 @@ $('trapBody').addEventListener('click',e=>{const b=e.target.closest('button');if
 const has=h=>save.role===h||!!(save.hustles&&save.hustles[h]);
 const HUSTLES={
   grower:{n:'Grow house',cost:6000,req:()=>true,why:'Growing is a felony in North Carolina. Keep the heat down and sell it yourself.'},
-  pimp:{n:'Pimping',cost:5000,req:()=>save.rep>=60,need:'60 rep',why:'Recruit at Club Velvet. Keep your people paid and safe.'},
+  pimp:{n:'Pimping',cost:5000,req:()=>save.rep>=60,need:'60 rep',why:'Recruit at '+NM('club')+'. Keep your people paid and safe.'},
   scam:{n:'Scam laptop',cost:2500,req:()=>true,why:'Print fake IDs, buy card dumps, run phishing. Everybody hunts scammers.'}
 };
 function startHustle(k){const H=HUSTLES[k];if(!H||has(k)||save.mode!=='crook')return;if(!H.req()){toast(`You need ${H.need} for that.`,2.4);return}if(save.cash<H.cost){toast(`That costs ${money(H.cost)}.`,2.2);return}
@@ -3583,12 +3645,12 @@ function fakeIdOut(by){const s=save.scam;if(!s||s.ids<1)return false;if(Math.ran
 /* NC grow law */
 const growLegal=()=>CITY.st==='CA';
 /* Kingsley Towers */
-const TOWERS_I=27,TOWERS_DOOR=doorOf(blk(3,4));
+const TOWERS_I=KPOS.towers[1]*N+KPOS.towers[0],TOWERS_DOOR=doorOf(kb('towers'));
 let towersRow=null,towersT=3,towOpen=false,towBusy=false,towTakeAt=0;
 const myTowers=()=>!!(towersRow&&save.lbId&&towersRow.owner_id===save.lbId);
 function towFix(){const t=save.towers=save.towers||{};const d={city:null,evict:false,cook:null,heat:0,since:0,raidT:400,lost:null};for(const k in d)if(t[k]===undefined)t[k]=d[k];return t}
 const TOW_DEF=[{n:'Open lobby'},{n:'Steel doors',cost:5000},{n:'Roof lookouts',cost:10000},{n:'Armed security',cost:20000}];
-const TOWERS_S={id:'towers',b:blk(3,4),x:TOWERS_DOOR.x,y:TOWERS_DOOR.y,boss:'Duke Mason',value:6000,out:0,inside:4,bossHome:true,cooldown:0,alert:false,calm:0,main:false,layout:1,twist:'none',towers:true,owned:false};
+const TOWERS_S={id:'towers',b:kb('towers'),x:TOWERS_DOOR.x,y:TOWERS_DOOR.y,boss:'Duke Mason',value:6000,out:0,inside:4,bossHome:true,cooldown:0,alert:false,calm:0,main:false,layout:1,twist:'none',towers:true,owned:false};
 async function towersSync(){if(!window.__towers)return;const asked=Date.now();try{const r=await window.__towers.get(CITY_ID);if(asked<towTakeAt)return;const prev=towersRow;towersRow=r||null;const t=towFix();
   if(t.city===CITY_ID&&!myTowers()&&save.lbId){t.city=null;if(t.cook&&(!t.cook.city||t.cook.city===CITY_ID))t.cook=null;t.lost=r&&r.owner_name?`${clip(r.owner_name)} took Kingsley Towers from you.`:r&&r.raided_by?`The feds raided Kingsley Towers. Agent ${clip(r.raided_by)} led it.`:'You lost Kingsley Towers.';toast(t.lost,4);persist()}
   if(myTowers()&&t.city!==CITY_ID){t.city=CITY_ID;persist()}}catch(e){}}
@@ -3729,7 +3791,7 @@ function renderTravel(){const el=$('travelRow');el.textContent='';
   for(const id of CITY_ORDER){const c=CITY_DEFS[id];const lv=CITY_ORDER.indexOf(id)+1,mk=market(id);const b=document.createElement('button');b.className='small'+(id===CITY_ID?' go':'');
     if(id===CITY_ID){b.textContent=`Level ${lv} · ${c.name} (you are here) · ${mk.txt}`;b.disabled=true}
     else if(!cityUnlocked(id)){b.textContent=`Level ${lv} · ${c.name} · locked until ${cityNeed(id)}`;b.disabled=true}
-    else{const cost=(save.mode==='cop'&&copTier()>=5)||orgHas('driver')?0:c.st===CITY.st?250:900;b.textContent=`Level ${lv} · ${c.name}, ${c.st} · ${money(cost)} · ${mk.txt}`;b.dataset.city=id;b.dataset.cost=cost}
+    else{const cost=(save.mode==='cop'&&copTier()>=5)||orgHas('driver')?0:c.st===CITY.st?250:900;b.textContent=`Level ${lv} · ${c.name}, ${c.st} · ${money(cost)} · ${mk.txt}`;b.title=c.rules.txt;b.dataset.city=id;b.dataset.cost=cost}
     el.appendChild(b)}}
 $('travelRow').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled||!b.dataset.city)return;const cost=+b.dataset.cost;
   if(stars>0||turfWar){toast('Not with the heat on you. Lose the cops first.',2.4);return}if(save.cash<cost){toast(`The ticket costs ${money(cost)}.`,2);return}
@@ -3761,7 +3823,7 @@ function drawBigMap(){
   DISTRICT_NAMES.forEach((row,ry)=>row.forEach((nm,rx)=>g.fillText(nm.toUpperCase(),(rx*3+1.5)*BS*T*sc,(ry*3+1.5)*BS*T*sc)));
   for(const b of blocks){
     const x=(b.bx*BS+1)*T*sc,y=(b.by*BS+1)*T*sc,w=4*T*sc;const s=stashes.find(s=>s.b===b);
-    g.fillStyle=b.kind==='towers'?'#3a2a55':b.kind==='police'?'#1d2c4a':b.kind==='hospital'?'#cfd3da':b.kind==='guns'?'#4a1f1f':b.kind==='club'?'#3a1a44':b.kind==='docks'?'#1c3438':b.kind==='grow'?'#1f3a22':b.kind==='buyer'?'#3a3218':b.kind==='carwash'?'#16303d':b.kind==='barber'?'#2a1f33':b.kind==='laundry'?'#1f2c38':b.kind==='tires'?'#262626':b.kind==='bank'?'#3a3620':b.kind==='store'?'#1f2f24':b.kind==='pawn'?'#33291a':b.kind==='chicken'?'#3a2318':b.kind==='nails'?'#3a1f33':b.kind==='cardroom'?'#3a1c1c':s?(s.owned?'#1f3a2a':'#3a2c14'):'#2a2f3a';g.fillRect(x,y,w,w);
+    g.fillStyle=b.kind==='deco'?(b.deco.k==='lake'?'#1f4a70':b.deco.k==='park'||b.deco.k==='capitol'?'#2f5a2a':'#5a4a3a'):b.kind==='towers'?'#3a2a55':b.kind==='police'?'#1d2c4a':b.kind==='hospital'?'#cfd3da':b.kind==='guns'?'#4a1f1f':b.kind==='club'?'#3a1a44':b.kind==='docks'?'#1c3438':b.kind==='grow'?'#1f3a22':b.kind==='buyer'?'#3a3218':b.kind==='carwash'?'#16303d':b.kind==='barber'?'#2a1f33':b.kind==='laundry'?'#1f2c38':b.kind==='tires'?'#262626':b.kind==='bank'?'#3a3620':b.kind==='store'?'#1f2f24':b.kind==='pawn'?'#33291a':b.kind==='chicken'?'#3a2318':b.kind==='nails'?'#3a1f33':b.kind==='cardroom'?'#3a1c1c':s?(s.owned?'#1f3a2a':'#3a2c14'):'#2a2f3a';g.fillRect(x,y,w,w);
     let label=placeName(b),col='#fff';
     if(s&&save.mode==='crook'){label=s.owned?'Your house':`${s.boss}'s ${s.main?'main':'stash'}`;col=s.owned?'#5ed08b':s.cooldown>0?'#8e94a4':'#ffb23e'}
     if(b.kind==='hospital')col='#c81e2e';
@@ -3783,7 +3845,7 @@ function drawBigMap(){
 let locKey='';
 function updateLoc(){
   let main='',sub='';
-  if(scene==='interior'){if(int.kind==='club'){main='Club Velvet';sub=districtAt(CLUB_DOOR.x,CLUB_DOOR.y)}else{main=int.stash.towers?'Kingsley Towers':`${int.stash.boss}'s ${int.stash.main?'main house':'stash'}`;sub=districtAt(int.stash.x,int.stash.y)}}
+  if(scene==='interior'){if(int.kind==='club'){main=''+NM('club')+'';sub=districtAt(CLUB_DOOR.x,CLUB_DOOR.y)}else{main=int.stash.towers?'Kingsley Towers':`${int.stash.boss}'s ${int.stash.main?'main house':'stash'}`;sub=districtAt(int.stash.x,int.stash.y)}}
   else{const f=player.inCar||player;sub=districtAt(f.x,f.y);
     let near=null;for(const b of blocks){const d=doorOf(b);if(Math.hypot(d.x-f.x,d.y-f.y)<120){const s=stashes.find(s=>s.b===b);near=placeName(b)||(s&&save.mode==='crook'?`${s.boss}'s ${s.main?'main house':'stash'}`:null);break}}
     main=near||streetAt(f.x,f.y)||`Block, ${sub}`;if(save.mode==='crook'){const bi=blockIdx(f.x,f.y);if(takeable(bi)){const o=ownerOf(bi);sub+=` · ${o.kind==='me'?'your turf':o.name+(o.kind==='npc'?' turf':' turf')}`}}}
@@ -3846,7 +3908,7 @@ function frame(now){
 }
 
 /* ================= game start ================= */
-function startGame(mode,fresh,role){stick=null;sosT=0;
+function startGame(mode,fresh,role){stick=null;sosT=0;setTimeout(()=>{if(started&&!save.flags['rule_'+CITY_ID]){save.flags['rule_'+CITY_ID]=1;persist();radio(`${CITY.name}: ${CITY.rules.txt}`,8)}},5000);
   if(fresh){const carry=mode==='crook'&&save.mode==='cop';const keep=Object.assign({profile:save.profile,daily:save.daily},carry?{cash:Math.round(save.cash*.5)}:{});save=Object.assign(FRESH(),keep);save.role=role||(mode==='cop'?'cop':'gang');if(!carry)save.cash=START_CASH[save.role]||200}
   save.role=role||save.role||(mode==='cop'?'cop':'gang');roleState();
   save.mode=mode;save.flags.started=true;persist();
@@ -3857,11 +3919,11 @@ function startGame(mode,fresh,role){stick=null;sosT=0;
   if(mode==='cop'){
     save.weapons.pistol=true;if(!save.ammo.pistol)save.ammo.pistol=60;curW='pistol';
     const p=POLICE_DOOR;player.x=p.x;player.y=p.y+18;
-    const cr={x:p.x+60,y:(1*BS+6.5)*T,ang:0,dir:0,speed:0,kind:'cruiser',cop:true,color:'#f2f2f2',hp:100,hitCd:0,stuck:0,rev:0};cars.push(cr);
+    const cr={x:p.x+60,y:(KPOS.police[1]*BS+6.5)*T,ang:0,dir:0,speed:0,kind:'cruiser',cop:true,color:'#f2f2f2',hp:100,hitCd:0,stuck:0,rev:0};cars.push(cr);
   } else {
     const r0=save.role;
-    if(r0==='gang'){const s0=doorOf(blk(2,2));player.x=s0.x;player.y=s0.y+20;
-      cars.push({x:s0.x+70,y:(2*BS+6.5)*T,ang:0,dir:0,speed:0,kind:'parked',color:'#d9a13b',hp:100,hitCd:0,stuck:0,rev:0});
+    if(r0==='gang'){const s0=doorOf(START_B);player.x=s0.x;player.y=s0.y+20;
+      cars.push({x:s0.x+70,y:(START_P[1]*BS+6.5)*T,ang:0,dir:0,speed:0,kind:'parked',color:'#d9a13b',hp:100,hitCd:0,stuck:0,rev:0});
       if(save.m===0)actors.push(mkActor({kind:'friend',name:'Dre',x:player.x+26,y:player.y,hp:999}));}
     else{const d0=r0==='smuggler'?DOCKS_DOOR:r0==='grower'?GROW_DOOR:r0==='escort'?CARD_DOOR:CLUB_DOOR;player.x=d0.x;player.y=d0.y+20;if(r0==='smuggler')spawnTruck()}
     for(let i=0;i<2;i++)spawnPatrol();
