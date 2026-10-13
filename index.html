@@ -256,6 +256,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
   .title b{font-size:clamp(26px,8.5vw,88px);text-align:center;padding:0 12px;line-height:1.05}
   .touch #actbtn{width:96px;height:96px;font-size:11px;line-height:1.1;padding:8px;overflow:hidden;word-break:break-word}
 }
+#offerText{white-space:pre-line}
 @media (prefers-reduced-motion:reduce){.stars.flash i.on{animation:none}.cine .lb{animation:none}}
 </style>
 
@@ -485,7 +486,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
           <button class="mode grow" data-role="grower"><span class="tag">Start $600 + house</span><strong>Grower</strong><small>Your uncle left you a grow house. Plant, water, harvest, and sell to The Plug before the cops raid it.</small></button>
           <button class="mode owner" data-role="owner"><span class="tag">Start $3,000 + club</span><strong>Club owner</strong><small>You own the Velvet club. Book DJs, hire security, handle fights, and deal with Rico wanting a cut.</small></button>
           <button class="mode dancer" data-role="dancer"><span class="tag">Start $100</span><strong>Dancer</strong><small>Work the stage at Velvet for tips and fans. Overhear the wrong conversation. Save up to buy in.</small></button>
-          <button class="mode escort" data-role="escort"><span class="tag">Start $150</span><strong>Escort</strong><small>Your phone rings, you set the price. Dodge vice stings and bad dates, build a client list and run your own agency.</small></button>
+          <button class="mode escort" data-role="escort"><span class="tag">Start $150</span><strong>Escort</strong><small>Your phone rings, you set the price. Dodge vice stings and bad dates, build a client list, sell what you hear, and climb to Madam.</small></button>
           <button class="mode pimp" data-role="pimp"><span class="tag">Start $1,000</span><strong>Pimp</strong><small>Recruit at Velvet, protect your people, keep the cut fair or they walk. Vice is always watching.</small></button>
           <button class="mode cop" data-role="cop"><span class="tag">Start $200 + cruiser</span><strong>Cop</strong><small>Rookie officer. Answer dispatch, chase getaway cars, cuff suspects and wanted players.</small></button>
         </div>
@@ -860,7 +861,8 @@ function laneReq(t){const r=laneOf(),d=save.dancer||{},e=save.escort||{},p=save.
     pimp:[[],[],[['1 in your stable',st>=1]],[['3 in your stable',st>=3],['$12,000 earned',(p.earned||0)>=12000]],[['5 in your stable',st>=5],['$40,000 earned',(p.earned||0)>=40000]]]};
   return (T[r]&&T[r][t])||[]}
 const WORK=[0,2,6,15,30,45];
-const workReq=t=>[[`${WORK[t]} missions done`,(save.m||0)>=WORK[t]]];
+const workN=()=>Math.max(0,(save.m||0))+(save.mCarry||0);
+const workReq=t=>[[`${WORK[t]} missions done`,workN()>=WORK[t]]];
 const CROWN=[
   {n:'Corner',req:()=>[]},
   {n:'Runner',req:()=>[['20 rep',save.rep>=20]].concat(workReq(1))},
@@ -872,7 +874,7 @@ const CROWN=[
 function props(){return stashes.filter(s=>s.owned).length+Math.floor(myRacketCount()/2)+Math.floor(myBlocks()/2)+(save.grow&&save.grow.lvl>=3?1:0)+(save.role==='owner'?1:0)+(save.smug&&save.smug.truck>=1?1:0)+(save.pimp&&save.pimp.stable&&save.pimp.stable.length>=3?1:0)+(save.dancer&&save.dancer.fans>=150?1:0)+(save.escort&&save.escort.dates>=30?1:0)+Object.keys(FRONTS).filter(k=>myFront(k)).length}
 let crownT=1;
 function crownTick(dt){if(save.mode!=='crook')return;crownT-=dt;if(crownT>0)return;crownT=1;save.crown=save.crown||0;
-  if(save.crown>0&&(save.m||0)<WORK[save.crown]){let t=save.crown;while(t>0&&(save.m||0)<WORK[t])t--;const was=laneName(save.crown);save.crown=t;persist();hudKey='';safeOffer('The streets recounted',`${was} takes ${WORK[save.crown+1]} missions of real work. You've done ${save.m||0}. Your rank is ${laneName(t)} until you put the work in. Everything you own stays yours.`,[{l:'Back to work',go:1,f:()=>{}}]);return}
+  if(save.crown>0&&workN()<WORK[save.crown]){let t=save.crown;while(t>0&&workN()<WORK[t])t--;const was=laneName(save.crown);save.crown=t;persist();hudKey='';safeOffer('The streets recounted',`${was} takes ${WORK[save.crown+1]} missions of real work. You've done ${workN()}. Your rank is ${laneName(t)} until you put the work in. Everything you own stays yours.`,[{l:'Back to work',go:1,f:()=>{}}]);return}
   if(save.crown<3&&(save.flags.ricoDown||save.rep>=150)&&laneReq(2).concat(laneReq(3),workReq(3)).every(r=>r[1])){save.crown=3;persist();hudKey='';titleCard(laneName(3),'Locked in.');toast(`${laneName(3)} status saved to your rank. Next up: ${laneName(4)}.`,3);return}
   while(CROWN[save.crown+1]&&CROWN[save.crown+1].req().every(r=>r[1])){save.crown++;persist();hudKey='';titleCard('Promoted',laneName(save.crown));toast(save.crown===3?`You run things now. Everyone on the map sees your crown, ${laneName(3)}.`:`New rank: ${laneName(save.crown)}.`,3)}}
 function lbScore(){const e=save.empire||{},season=save.m>=scriptedLen()?seasonOf(save.m-scriptedLen()):0;
@@ -887,7 +889,7 @@ function hud(){
   $('cash').textContent=money(save.cash)+(save.bank>0?` · stash ${money(save.bank)}`:'');
   const st=$('stars');
   if(save.mode==='crook'){st.hidden=false;st.innerHTML=[0,1,2,3,4].map(i=>`<i class="${i<stars?'on':''}">★</i>`).join('');st.classList.toggle('flash',stars>0&&calm>0);$('badge').textContent='';$('iaWrap').hidden=true}
-  else{st.hidden=true;$('badge').textContent=`${RANKS_COP(save.arrests)} · ${save.arrests} arrests · ${save.flags.crooked?'dirty':'clean'}`;$('iaWrap').hidden=!save.flags.crooked;$('ia').style.width=clamp(save.ia,0,100)+'%'}
+  else{st.hidden=true;$('badge').textContent=`${copName()} · ${save.arrests} arrests · ${save.flags.crooked?'dirty':'clean'}`;$('iaWrap').hidden=!save.flags.crooked;$('ia').style.width=clamp(save.ia,0,100)+'%'}
   $('hp').style.width=clamp(player.hp,0,100)+'%';$('hp').style.background=player.hp<35?'var(--siren-red)':'var(--good)';
   $('ar').style.width=clamp(save.armor,0,100)+'%';
   const w=WEAPONS[curW];$('weap').innerHTML=w.melee?'Fists':`${w.name}<span>${save.ammo[curW]||0}</span>`;
@@ -2330,9 +2332,9 @@ const DANCER=[
    obj:()=>`Reach 120 fans (${save.dancer.fans}/120)`,target:()=>inClub()?int.stage[2]:CLUB_DOOR,check:()=>save.dancer.fans>=120},
   {title:'Her Own Stage',
    intro:()=>[{who:'Jade',text:`The owner wants out. You keep stacking like this and you could buy in.`}],
-   obj:()=>`Save $8,000 to buy into ${NM('club')} (${money(save.cash)})`,target:()=>inClub()?null:CLUB_DOOR,check:()=>save.cash>=8000,
+   obj:()=>`Save $8,000 to buy into ${NM('club')}: $6,000 buy-in plus a cushion (${money(save.cash)})`,target:()=>inClub()?null:CLUB_DOOR,check:()=>save.cash>=8000,
    outro:()=>[{who:'Jade',text:`Your name is on the door now. You don't work the stage anymore. You own it.`},{who:'Narrator',text:`End of the dancer story. Your club owner story starts now.`}],
-   done:()=>{save.cash-=6000;save.role='owner';save.m=-1;roleState();persist();hudKey=''}}
+   done:()=>{save.cash-=6000;save.mCarry=(save.mCarry||0)+(save.m||0)+1;save.role='owner';save.m=-1;roleState();persist();hudKey=''}}
 ];
 
 /* ================= escort + pimp ================= */
@@ -2703,7 +2705,7 @@ const orgEmpty=()=>Object.keys(ORG_ROLES).filter(k=>!orgFix()[k]);
 function orgHire(k,name){const o=orgFix();o[k]={name,loyalty:70,since:Date.now()};persist();hudKey='';titleCard('New hire',`${name} · ${ORG_ROLES[k].n}`);toast(`${name} is your ${ORG_ROLES[k].n}. ${ORG_ROLES[k].perk} Pays ${money(ORG_ROLES[k].pay)} every 10 minutes.`,5)}
 function orgTick(dt){if(save.mode!=='crook'||!save.org||!running())return;const o=save.org,staff=Object.keys(ORG_ROLES).filter(k=>o[k]);if(!staff.length)return;
   o.payT-=dt;if(o.payT>0)return;o.payT=600;const bill=staff.reduce((a,k)=>a+ORG_ROLES[k].pay,0);
-  if(orgHas('accountant')&&save.bank>0){const i=Math.round(save.bank*.02);save.bank+=i}
+  if(orgHas('accountant')&&save.bank>0){const i=Math.min(1500,Math.round(save.bank*.02));save.bank+=i}
   if(save.cash+(save.bank||0)>=bill){payFrom(bill);staff.forEach(k=>o[k].loyalty=Math.min(100,o[k].loyalty+5));toast(`Payday: ${money(bill)} to your people.`,2.6)}
   else{staff.forEach(k=>o[k].loyalty-=20);toast(`You couldn't make payroll (${money(bill)}). Your people are talking.`,3.4);
     for(const k of staff){if(o[k].loyalty<30){const nm=o[k].name;o[k]=null;if(Math.random()<.35){const e=empireState();e.fed=Math.min(100,e.fed+25);radio(`${nm} walked out and went straight to the feds. Federal heat +25.`,6)}else radio(`${nm} quit. You need a new ${ORG_ROLES[k].n}.`,5)}}}
@@ -2872,7 +2874,7 @@ function renderEmpire(force){const ae0=document.activeElement;if(!force&&ae0&&ae
      for(const k of Object.keys(HUSTLES)){if(has(k))continue;const H=HUSTLES[k];any=true;const b=document.createElement('button');b.className='small';b.dataset.hz=k;b.textContent=`Start: ${H.n} · ${money(H.cost)}${H.need&&!H.req()?` (needs ${H.need})`:''}`;b.disabled=save.cash<H.cost||!H.req();d.appendChild(b)}
      if(any)el.appendChild(d);
      {const c=caliFix();const d2=document.createElement('div');d2.className='btnrow';if(!c.on){row('California grow',(save.crown||0)>=4?'Legal out west. $50,000 to set up.':'Unlocks at Kingpin');if((save.crown||0)>=4)d2.innerHTML='<button class="small go" data-cali="start">Set up a California grow · $50,000</button>'}else{row('California grow',`${c.ready} bags waiting · next harvest ${mmss(c.nextT-Date.now())} · ${c.shipped} brought home`);if(c.ready)d2.innerHTML='<button class="small go" data-cali="run">Drive it in yourself (all of it)</button><button class="small" data-cali="truck">Pay a trucker (30% cut, 25% risk)</button>'}el.appendChild(d2)}
-     orgRows(el,row);alliesRows(el,row);cityRows(el,row);defRows2(el,row);datesRows(el,row);ratRows2(el,row);refRows(el,row);
+     orgTypeRows(el,row);alliesRows(el,row);cityRows(el,row);defRows2(el,row);datesRows(el,row);ratRows2(el,row);refRows(el,row);
      {const d=document.createElement('div');d.className='btnrow';d.innerHTML=`<button class="small" data-rn="1">Change your street name</button>`;el.appendChild(d)}
      if(legacyN())row('Legend',`${'★'.repeat(Math.min(5,legacyN()))} · best net worth ${money(save.legacy.best||0)}`);
      if((save.crown||0)>=5){const d3=document.createElement('div');d3.className='btnrow';d3.innerHTML='<button class="small go" data-legit="1">Go legit and become a legend</button>';el.appendChild(d3)}
@@ -2898,7 +2900,7 @@ function renderEmpire(force){const ae0=document.activeElement;if(!force&&ae0&&ae
       if(!hitOn(id))btn('Put a hit · $2,000','hit',2000);
       {const mb=document.createElement('button');mb.className='small go';mb.textContent='Set up a sit-down';mb.dataset.meet=id;mb.dataset.mn=name;d.appendChild(mb);if(p&&p.state==='partner'){const xb=document.createElement('button');xb.className='small';xb.textContent='End the partnership';xb.dataset.pa='war';xb.dataset.pid=id;xb.dataset.pn=name;xb.dataset.pt=0;d.appendChild(xb)}}
       el.appendChild(d)}
-    if((save.crown||0)<3&&others.size){row('','Reach Boss rank to call sit-downs and declare war.')}}
+    }
   renderBadge(el,row);
   if(save.mode==='cop'&&window.__crew){const h=document.createElement('b');h.textContent='Stakeouts';h.style.marginTop='6px';el.appendChild(h);
     if(save.copCase)row('Open case',`[${save.copCase.tag}] ${save.copCase.name} · you get a wiretap alert when they pull a heist, and $2,000 extra per member you cuff`);
@@ -3406,7 +3408,7 @@ const isDirty=()=>save.mode==='cop'&&!!save.flags.crooked;
 const shakeOut={},paidOut={},refusedOut={},iaOut={},seenShake={},seenPaid={},seenRefused={},seenIa={};
 let salaryT=120,stingCd=0,warrantRows=[],warrantT=8;
 function copTick(dt){if(save.mode!=='cop'||!started)return;
-  salaryT-=dt;if(salaryT<=0){salaryT=120;const rk=(save.empire&&save.empire.copRank)||0,base=200+rk*100+copTier()*120,pay=Math.round(base*(isDirty()?1:1.5)*copPayMult());save.cash+=pay;hudKey='';persist();toast(`Paycheck: ${money(pay)}${isDirty()?'':' (includes your clean-record bonus)'}.`,2.4)}
+  salaryT-=dt;if(salaryT<=0&&Date.now()-lastAct>180000){salaryT=60;return}if(salaryT<=0){salaryT=120;const rk=(save.empire&&save.empire.copRank)||0,base=200+rk*100+copTier()*120,pay=Math.round(base*(isDirty()?1:1.5)*copPayMult());save.cash+=pay;hudKey='';persist();toast(`Paycheck: ${money(pay)}${isDirty()?'':' (includes your clean-record bonus)'}.`,2.4)}
   if(stingCd>0)stingCd-=dt;
   warrantT-=dt;if(warrantT<=0){warrantT=30;if(window.__law&&window.__law.warrantsAll)window.__law.warrantsAll(CITY_ID).then(r=>{warrantRows=r||[]}).catch(()=>{})}}
 const warrantOn=pid=>pid&&warrantRows.find(w=>w.target_id===pid&&w.status==='open');
@@ -3564,7 +3566,7 @@ $('jPD').addEventListener('click',publicDefender);$('jBail').addEventListener('c
 $('slotBtn').addEventListener('click',switchSlot);
 (function(){const other=(()=>{try{return JSON.parse(localStorage.getItem(SLOT==='1'?'uws-v4-s2':'uws-v4')||'null')}catch(e){return null}})();
   const nm=other&&other.profile&&other.profile.name;$('slotBtn').textContent=nm?`Switch to ${nm}${other.jail&&Date.now()<other.jail.until?` (in jail ${mmss(other.jail.until-Date.now())})`:''}`:`Make a second character`;
-  $('subhead').textContent=`17+ · v4.2 · Level ${CITY_ORDER.indexOf(CITY_ID)+1}: ${CITY.name}, ${CITY.st} · Fictional game.`;$('introCity').textContent=`${CITY.name}, ${CITY.st}. After midnight. ${CITY.rules.txt} Gangs, mafia families, cartels and syndicates: every network here breaks the rules for gain. Pick who you are.`;$('mapTitle').textContent=`${CITY.name}, ${CITY.st}`;
+  $('subhead').textContent=`17+ · v4.3 · Level ${CITY_ORDER.indexOf(CITY_ID)+1}: ${CITY.name}, ${CITY.st} · Fictional game.`;$('introCity').textContent=`${CITY.name}, ${CITY.st}. After midnight. ${CITY.rules.txt} Gangs, mafia families, cartels and syndicates: every network here breaks the rules for gain. Pick who you are.`;$('mapTitle').textContent=`${CITY.name}, ${CITY.st}`;
   if(save.jail&&Date.now()<save.jail.until)setTimeout(showJail,50);else if(save.jail){save.jail=null;persist()}})();
 /* ---------- TRAP: street dealing, the Exchange, protection, scams ---------- */
 const TRAP_TIERS=[
@@ -3815,6 +3817,7 @@ function towersTick(dt){towersT-=dt;if(towersT<=0){towersT=20;towersSync()}
     if(!t.evict&&Math.random()<.5){t.heat=Math.max(0,t.heat-25);radio('A tenant called you: SWAT is staging around the corner. Your people moved the product out.',6)}
     else{const lost=t.cook?t.cook.n:0;t.cook=null;t.heat=20;const b=Math.floor(save.grow.bags*.3);if(dist(player,TOWERS_DOOR)<600){addStars(2,'SWAT is hitting Kingsley Towers!');save.grow.bags-=b}radio(`SWAT raided the cook floor.${lost?` They took ${lost} bags off the stove.`:''} The building is still yours.`,6)}persist()}}}
 /* cop career: street cop to CIA */
+let lastAct=Date.now();['pointerdown','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>{lastAct=Date.now()},{passive:true}));
 const COP_CAREER=[
   {n:'Patrol Officer',a:0,r:0},{n:'Corporal',a:5,r:20},{n:'Sergeant',a:12,r:50},{n:'Detective',a:20,r:80},{n:'Lieutenant',a:30,r:130},
   {n:'FBI Special Agent',a:45,r:200,fed:1},{n:'FBI Special Agent in Charge',a:65,r:300,fed:1},
@@ -4396,7 +4399,7 @@ function pickOrg(k){const o=ORGT[k];if(!o||save.mode!=='crook')return;const cur=
   offer(cur?`Become a ${o.n}?`:`Run a ${o.n}?`,`${o.up}. The catch: ${o.down}.${cur?` Restructuring costs ${money(cost)} and you can't change again for 24 hours.`:''}`,[
     {l:cur?`Restructure · ${money(cost)}`:`Run a ${o.n}`,go:1,f:()=>{save.cash-=cost;save.orgType=k;save.orgT=Date.now()+86400000;persist();hudKey='';lbEnsure&&lbEnsure();titleCard(o.n,(save.profile&&save.profile.name)||'');if(empOpen)renderEmpire(true)}},
     {l:'Not now',f:()=>{}}])}
-function orgRows(el,row){if(save.mode!=='crook')return;const o=orgType();
+function orgTypeRows(el,row){if(save.mode!=='crook')return;const o=orgType();
   row('Your organization',o?`${ORGT[o].n} · ${ORGT[o].up} · catch: ${ORGT[o].down}`:'Not set. Pick what kind of network you run.');
   const d=document.createElement('div');d.className='btnrow';d.innerHTML=Object.keys(ORGT).map(k=>`<button class="small${k===o?' go':''}" data-otype="${k}" ${k===o?'disabled':''}>${ORGT[k].n}</button>`).join('');el.appendChild(d)}
 setInterval(()=>{if(started&&!cineOn&&save.mode==='crook'&&!save.orgType&&(save.rep||0)>=20&&!save.orgAsked){save.orgAsked=1;persist();safeOffer('What kind of network do you run?','Every organization breaks the rules for gain, but they make money differently. Street gangs hold corners. Mafia families tax businesses. Cartels control supply. Syndicates run scams. Pick yours in Empire any time.',[{l:'Open Empire',go:1,f:()=>{try{$('empBtn').click()}catch(e){}}},{l:'Later',f:()=>{}}])}},30000);
@@ -4417,7 +4420,8 @@ const newsText=n=>{const a=clip(n.a_name||'Somebody'),b=n.b_name?clip(n.b_name):
   return ''};
 const ago=t=>{const m=Math.max(0,Math.round((Date.now()-new Date(t))/60000));return m<1?'just now':m<60?`${m}m ago`:m<1440?`${Math.round(m/60)}h ago`:`${Math.round(m/1440)}d ago`};
 async function newsSync(){if(!window.__news)return;try{const rows=await window.__news.list(CITY_ID);newsRows=rows||[];const top=newsRows.length?newsRows[0].id:0;
-  if(newsLast===null){newsLast=save.newsSeen&&save.newsSeen>0?save.newsSeen:top}
+  if(newsLast===null){const first=!!(save.newsSeen&&save.newsSeen>0);newsLast=first?save.newsSeen:top;
+    if(first){const miss=newsRows.filter(n=>n.id>newsLast).map(newsText).filter(Boolean);if(miss.length>=2){newsLast=top;save.newsSeen=top;persist();safeOffer('While you were gone',miss.slice(0,8).join('\n')+(miss.length>8?`\n…and ${miss.length-8} more in Ranks.`:''),[{l:'Got it',go:1,f:()=>{}}])}}}
   const fresh=newsRows.filter(n=>n.id>newsLast).reverse().slice(-4);if(fresh.length){newsLast=top;save.newsSeen=top;persist();for(const n of fresh){const t=newsText(n);if(t)newsQ.push(t)}}
   if(lbOpen)renderNewsBox()}catch(e){}}
 async function weekSync(){if(!window.__news)return;try{weekS=await window.__news.week(CITY_ID);
