@@ -503,7 +503,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
         <li><b>The life:</b> gangs, mafia families, cartels and syndicates. Every network breaks the rules for gain. Pick yours in Empire.</li>
         <li><b>Every lane goes to the top:</b> gang member, smuggler, grower, club owner, dancer, escort, pimp. Each has its own 6-rank ladder to The Crown and its own leaderboard (Ranks → My lane).</li>
         <li><b>Come up:</b> rob stash houses, run jobs, deal at the Trap, scam, smuggle. Hire a crew and build your organization.</li>
-        <li><b>Own it:</b> take blocks at the corner flag, take houses, tax shops. One owner per house and block.</li>
+        <li><b>Own it:</b> take blocks at the corner flag, take houses, tax shops. One owner per house and block. Leave your houses unguarded while you're offline and someone can take them.</li>
         <li><b>Take from players:</b> if they're online, put them down or catch them locked up first. Offline, you fight their shooters. Rookies under 3,000 score are safe until they attack.</li>
         <li><b>Run the city:</b> you need 3+ blocks. The seat changes hands only by death, jail, 3 days gone, or the boss losing their corners.</li>
         <li><b>Sit-downs:</b> meet other bosses in Empire. Leave as partners or rivals.</li>
@@ -3537,7 +3537,7 @@ $('jPD').addEventListener('click',publicDefender);$('jBail').addEventListener('c
 $('slotBtn').addEventListener('click',switchSlot);
 (function(){const other=(()=>{try{return JSON.parse(localStorage.getItem(SLOT==='1'?'uws-v4-s2':'uws-v4')||'null')}catch(e){return null}})();
   const nm=other&&other.profile&&other.profile.name;$('slotBtn').textContent=nm?`Switch to ${nm}${other.jail&&Date.now()<other.jail.until?` (in jail ${mmss(other.jail.until-Date.now())})`:''}`:`Make a second character`;
-  $('subhead').textContent=`17+ · v3.4 · Level ${CITY_ORDER.indexOf(CITY_ID)+1}: ${CITY.name}, ${CITY.st} · Fictional game.`;$('introCity').textContent=`${CITY.name}, ${CITY.st}. After midnight. ${CITY.rules.txt} Gangs, mafia families, cartels and syndicates: every network here breaks the rules for gain. Pick who you are.`;$('mapTitle').textContent=`${CITY.name}, ${CITY.st}`;
+  $('subhead').textContent=`17+ · v3.5 · Level ${CITY_ORDER.indexOf(CITY_ID)+1}: ${CITY.name}, ${CITY.st} · Fictional game.`;$('introCity').textContent=`${CITY.name}, ${CITY.st}. After midnight. ${CITY.rules.txt} Gangs, mafia families, cartels and syndicates: every network here breaks the rules for gain. Pick who you are.`;$('mapTitle').textContent=`${CITY.name}, ${CITY.st}`;
   if(save.jail&&Date.now()<save.jail.until)setTimeout(showJail,50);else if(save.jail){save.jail=null;persist()}})();
 /* ---------- TRAP: street dealing, the Exchange, protection, scams ---------- */
 const TRAP_TIERS=[
@@ -4284,10 +4284,10 @@ const deedOther=s=>{const d=deedOf(s);return d&&d.owner_id!==save.lbId?d:null};
 const ownerDown=id=>{const d=defRows[id];if(!d)return false;return !!(d.down_until&&new Date(d.down_until)>Date.now()&&(!d.down_by||d.down_by===save.lbId))};
 const ownerOnline=id=>{const d=defRows[id];return !!(d&&d.updated_at&&Date.now()-new Date(d.updated_at)<300000)};
 function loseHouse(s,who){s.owned=false;save.empire.terr=(save.empire.terr||[]).filter(i=>i!==s.id);save.deedLost=save.deedLost||{};save.deedLost[s.id]=1;
-  rollStash(s);spawnOutsideGuards(s);persist();hudKey='';radio(who==='Nobody'?`You're stretched too thin. ${s.boss}'s ${s.main?'main house':'stash house'} isn't yours.`:`${who} holds the deed to ${s.boss}'s ${s.main?'main house':'stash house'} now. It's not yours.`,6)}
+  rollStash(s);spawnOutsideGuards(s);persist();hudKey='';radio(who==='Nobody'?`You're stretched too thin. ${s.boss}'s ${s.main?'main house':'stash house'} isn't yours.`:`${who} holds the deed to ${s.boss}'s ${s.main?'main house':'stash house'} now. Take it back when they're away, locked up, or put down.`,6)}
 async function deedClaim(s,quiet){if(!window.__deeds||!save.lbId||save.mode!=='crook')return 'local';
   s._claiming=Date.now();try{await lbEnsure();const r=await window.__deeds.claim(save.lbId,save.lbSecret,CITY_ID,s.id,prof().name);
-    if(/^held:/.test(r)){loseHouse(s,clip(r.slice(5)));if(!quiet)safeOffer('Somebody already owns it',`${clip(r.slice(5))} holds the deed to this house. You got what was inside, not the house. Houses change hands when the owner is put down by you, locked up, or gone for three days. Then kick in their door and the house is yours.`,[{l:'Understood',go:1,f:()=>{}}]);return r}
+    if(/^held:/.test(r)){loseHouse(s,clip(r.slice(5)));if(!quiet)safeOffer('Somebody already owns it',`${clip(r.slice(5))} holds the deed to this house. You got what was inside, not the house. Houses change hands when the owner is away (offline), put down by you, or locked up. Then kick in the door, clear it, and the house is yours.`,[{l:'Understood',go:1,f:()=>{}}]);return r}
     if(r==='limit'){loseHouse(s,'Nobody');if(!quiet)toast('You can only run 4 houses in one city. Let one go before you take another.',3.6);return r}
     if(r==='slow')return r;
     if(/^(ok|yours|taken:)/.test(r||'')&&deedRows){deedRows[s.id]={stash:s.id,owner_id:save.lbId,owner_name:prof().name}}if(save.deedLost)delete save.deedLost[s.id];if(/^taken:/.test(r)&&!quiet)toast(`You took the deed from ${clip(r.slice(6))}.`,3.4);deedT=0;return r}catch(e){return 'err'}finally{s._claiming=0}}
@@ -4302,9 +4302,10 @@ async function deedSync(){if(!window.__deeds||deedBusy||save.mode!=='crook')retu
   deedBusy=false}
 function deedTick(dt){deedT-=dt;if(deedT<=0){deedT=30;deedSync();if(typeof defSync==='function')defSync()}}
 const ownerGone=id=>{const d=defRows[id];return !!(d&&d.updated_at&&Date.now()-new Date(d.updated_at)>259200000)};
-const ownerOpen=id=>ownerDown(id)||ownerGone(id);
+const ownerRookie=id=>!!(defRows[id]&&defRows[id].rookie);
+const ownerOpen=id=>!ownerRookie(id)&&(ownerDown(id)||ownerGone(id)||!ownerOnline(id));
 function deedContext(s){const d=deedOther(s);if(!d||s.hq||(s.main&&!save.flags.ricoDown))return null;
-  if(ownerOpen(d.owner_id))return{t:'enter',label:`${clip(d.owner_name)} is down. Kick in the door and take the house`,s};
+  if(ownerOpen(d.owner_id))return{t:'enter',label:ownerDown(d.owner_id)?`${clip(d.owner_name)} is down. Kick in the door and take the house`:`${clip(d.owner_name)} is away. Kick in the door and take the house`,s};
   return{t:'enter',label:`Hit ${clip(d.owner_name)}'s house · the deed stays theirs`,s}}
 const houseLabel=s=>{const d=deedOther(s);return d?`${clip(d.owner_name).toUpperCase()}'S HOUSE`:null};
 
