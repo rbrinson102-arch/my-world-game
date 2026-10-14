@@ -258,6 +258,11 @@ canvas#mini{cursor:pointer;pointer-events:auto}
   .touch #actbtn{width:96px;height:96px;font-size:11px;line-height:1.1;padding:8px;overflow:hidden;word-break:break-word}
 }
 #offerText{white-space:pre-line}
+/* v5.4.2 the HUD gets out of your way */
+.hud .dodge{opacity:.12!important;pointer-events:none!important}
+.obj,.loc,.radio,.door,.players,.prog,canvas#mini{transition:opacity .2s,transform .3s ease}
+.obj{pointer-events:auto;cursor:pointer}
+.obj.tiny{padding:3px 10px;opacity:.78}.obj.tiny #objT{display:none}.obj.tiny b{font-size:12px;font-weight:500}.obj.tiny #objS{margin-top:2px!important;font-size:10.5px}
 @media (prefers-reduced-motion:reduce){.stars.flash i.on{animation:none}.cine .lb{animation:none}}
 @media (orientation:landscape) and (max-height:540px){.stage{height:calc(100vh - 10px);height:calc(100dvh - 10px);min-height:300px}.touch .hud .tr{left:8px;right:8px;top:6px}.touch .row2{position:absolute!important;top:0!important;left:180px!important;right:200px!important;width:auto!important;max-width:none!important;flex-wrap:nowrap!important;justify-content:flex-start!important;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}.touch .row2 .pill{flex:0 0 auto;padding:4px 8px;font-size:10.5px}.touch .obj{top:44px!important;bottom:auto!important}.touch .toast{top:104px;bottom:auto;max-width:46%;font-size:12px;pointer-events:none}.touch .radio{top:auto;bottom:8px;left:50%;right:auto;transform:translateX(-50%);max-width:48%;font-size:11.5px;padding:5px 9px;pointer-events:none}}
 .touch .row2{-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent);mask-image:linear-gradient(90deg,#000 82%,transparent)}
@@ -1812,7 +1817,7 @@ function dailyReward(){
 
 /* ================= draw ================= */
 const ctx=cv.getContext('2d'),mini=$('mini'),mctx=mini.getContext('2d');
-const BUILD='5.4.1';let vw=0,vh=0,dpr=1,camX=0,camY=0,camInit=false,youT=0;
+const BUILD='5.4.2';let vw=0,vh=0,dpr=1,camX=0,camY=0,camInit=false,youT=0;
 function resize(){const r=cv.getBoundingClientRect();dpr=Math.min(2,window.devicePixelRatio||1);vw=r.width;vh=r.height;cv.width=Math.round(vw*dpr);cv.height=Math.round(vh*dpr)}
 addEventListener('resize',resize);
 function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
@@ -5071,10 +5076,26 @@ function updateLoc(){
 /* ================= loop ================= */
 let last=performance.now(),actLabel=null,miniT=0,started=false,FDT=1/60;
 const running=()=>started&&!cineOn&&!shopOpen&&!mapOpen&&!growOpen&&!clubOpen&&!beat&&!empOpen&&!lbOpen&&!frontOpen&&!trapOpen&&!offerOpen&&!towOpen&&!jobsOpen&&!meetOpen&&!ext&&$('tut').hidden;
+/* v5.4.2 the HUD gets out of your way: the episode banner shrinks after a few seconds (tap it to see it again), anything on top of your player fades, and the minimap slides down out of your way */
+let hudObjKey='',hudObjAt=0,hudMiniY=0,hudMiniX=0,hudT=0;
+const HUD_DODGE=['obj','loc','radio','door','players','prog','toast'];
+const hudHit=(r,x,y,p)=>x>r.left-p&&x<r.right+p&&y>r.top-p&&y<r.bottom+p;
+$('obj').addEventListener('click',()=>{$('obj').classList.remove('tiny');hudObjAt=performance.now()});
+function hudTick(now){if(now-hudT<100)return;hudT=now;
+  const o=$('obj'),key=$('objT').textContent+'|'+$('objB').textContent+'|'+($('objS').hidden?'':$('objS').textContent);
+  if(key!==hudObjKey){hudObjKey=key;hudObjAt=now;o.classList.remove('tiny')}
+  else if(!o.classList.contains('tiny')&&now-hudObjAt>6000)o.classList.add('tiny');
+  const cr=cv.getBoundingClientRect(),on=youAt&&now-youAt[2]<400&&!cineOn,px=on?cr.left+youAt[0]:-1e5,py=on?cr.top+youAt[1]:-1e5;
+  for(const id of HUD_DODGE){const el=$(id);if(!el)continue;const r=el.getBoundingClientRect();el.classList.toggle('dodge',r.width>0&&r.height>0&&hudHit(r,px,py,30))}
+  const mr=mini.getBoundingClientRect(),base={left:mr.left-hudMiniX,right:mr.right-hudMiniX,top:mr.top-hudMiniY,bottom:mr.bottom-hudMiniY};
+  let wy=0,wx=0;if(hudHit(base,px,py,hudMiniY||hudMiniX?56:36)){const h=mr.bottom-mr.top,need=py+60-base.top,room=cr.bottom-(stage.classList.contains('touch')?270:20)-h-base.top;
+    if(room>=need)wy=Math.max(0,need);else wx=Math.min(0,Math.max(cr.left+8-base.left,px-60-base.right))}
+  if(Math.abs(wy-hudMiniY)>2||Math.abs(wx-hudMiniX)>2){hudMiniY=wy;hudMiniX=wx;mini.style.transform=wy||wx?`translate(${Math.round(wx)}px,${Math.round(wy)}px)`:'';mini.style.pointerEvents=wy||wx?'none':''}
+  const nr={left:base.left+hudMiniX,right:base.right+hudMiniX,top:base.top+hudMiniY,bottom:base.bottom+hudMiniY};mini.classList.toggle('dodge',hudHit(nr,px,py,24))}
 function frame(now){requestAnimationFrame(frame);try{frameBody(now)}catch(e){try{ctx.setTransform(1,0,0,1,0,0);console.error(e)}catch(_){}}}
 function frameBody(now){
   const dt=Math.min(.05,(now-last)/1000);last=now;const t=now/1000;FDT=dt;
-  cineTick(dt);beatTick();
+  cineTick(dt);beatTick();try{hudTick(now)}catch(e){}
   if(started){growTick(dt);clubTick(dt);empireTick(dt);crownTick(dt);lbTick(dt);cloudTick(dt);jobsTick(dt);sirenTick();turfTick(dt);lawTick(dt);frontsTick(dt);sideTick();cityTick(dt);meetTick(dt);defTick(dt);paperTick(dt);deedTick(dt);newsTick(dt);refTick(dt);evTick(dt);citiesTick(dt);ratTick(dt);datesTick(dt);npcTipTick(dt);ctTick(dt);homeTick(dt);caliTick();alliesTick(dt);bkTick();weatherTick(dt);trapTick(dt);scamTick(dt);orgTick(dt);towersTick(dt);careerTick(dt);crewTick(dt);safeTick(dt);heistTick(dt);ciTick(dt);copTick(dt);racketTick(dt);stakeTick(dt);extTick(dt);cityUnlockTick();if(running()){escortTick(dt);pimpTick(dt);escortBadCheck()}stage.classList.toggle('hasbombs',(save.bombs||0)>0);if(empOpen){empRT-=dt;if(empRT<=0){empRT=1;const ae=document.activeElement;if(!(ae&&ae.tagName==='INPUT'&&$('empBody').contains(ae))&&!(ae&&ae.tagName==='INPUT'&&ae.value))renderEmpire()}}if(save.dancer){save.dancer.cd=Math.max(0,save.dancer.cd-dt);save.dancer.vipCd=Math.max(0,save.dancer.vipCd-dt)}}
   if(running()){
     if(frozen>0)frozen-=dt;
