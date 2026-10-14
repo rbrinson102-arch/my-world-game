@@ -1812,11 +1812,11 @@ function dailyReward(){
 
 /* ================= draw ================= */
 const ctx=cv.getContext('2d'),mini=$('mini'),mctx=mini.getContext('2d');
-let vw=0,vh=0,dpr=1,camX=0,camY=0,camInit=false,youT=0;
+const BUILD='5.4.1';let vw=0,vh=0,dpr=1,camX=0,camY=0,camInit=false,youT=0;
 function resize(){const r=cv.getBoundingClientRect();dpr=Math.min(2,window.devicePixelRatio||1);vw=r.width;vh=r.height;cv.width=Math.round(vw*dpr);cv.height=Math.round(vh*dpr)}
 addEventListener('resize',resize);
 function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
-let youAt=null;function youMark(x,y,r){const n=performance.now(),M=ctx.getTransform();youAt=[(M.a*x+M.c*y+M.e)/dpr,(M.b*x+M.d*y+M.f)/dpr,n];ctx.save();ctx.strokeStyle='rgba(94,208,139,.75)';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(x,y,r+Math.sin(n/260)*3,0,Math.PI*2);ctx.stroke();if(youT>0){youT=Math.max(0,youT-.016);ctx.globalAlpha=Math.min(1,youT);ctx.fillStyle='#5ed08b';ctx.font='700 13px "JetBrains Mono",monospace';ctx.textAlign='center';ctx.fillText('▼ YOU',x,y-r-10)}ctx.restore()}
+let youAt=null;function youMark(x,y,r){const n=performance.now(),M=ctx.getTransform();youAt=[(M.a*x+M.c*y+M.e)/dpr,(M.b*x+M.d*y+M.f)/dpr,n];ctx.save();ctx.fillStyle='rgba(94,208,139,.16)';ctx.beginPath();ctx.arc(x,y,r-2,0,Math.PI*2);ctx.fill();ctx.strokeStyle='rgba(94,208,139,.9)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,r+Math.sin(n/260)*3,0,Math.PI*2);ctx.stroke();if(youT>0){youT=Math.max(0,youT-.016);ctx.globalAlpha=Math.min(1,youT);ctx.fillStyle='#5ed08b';ctx.font='700 13px "JetBrains Mono",monospace';ctx.textAlign='center';ctx.fillText('▼ YOU',x,y-r-10)}ctx.restore()}
 function drawPerson(p,shirt,skin,scale,ring,gun){
   const s=scale||1,bob=Math.sin(p.walk||0)*2.4;
   ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.ang||0);
@@ -3108,10 +3108,21 @@ const CODE_AB='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 function saveCode(){if(!save.saveCode){const a=new Uint8Array(12);crypto.getRandomValues(a);save.saveCode=[...a].map(x=>CODE_AB[x%32]).join('');persist()}return save.saveCode}
 const fmtCode=c=>c?c.replace(/(.{4})(.{4})(.{4})/,'$1-$2-$3'):'';
 let cloudT=5,cloudOk=null,cloudLast='';
-function cloudPush(force){if(!window.__cloud||!save.mode)return;saveCode();const js=JSON.stringify(save);if(!force&&js===cloudLast)return;cloudLast=js;window.__cloud.save(save.saveCode,save).then(()=>{if(cloudOk!==true){cloudOk=true}}).catch(()=>{cloudOk=false;cloudLast=''})}
+function cloudPush(force){if(!window.__cloud||!save.mode)return;saveCode();save.ver=BUILD;const js=JSON.stringify(save);if(!force&&js===cloudLast)return;cloudLast=js;window.__cloud.save(save.saveCode,save).then(()=>{if(cloudOk!==true){cloudOk=true}}).catch(()=>{cloudOk=false;cloudLast=''})}
 function cloudTick(dt){cloudT-=dt;if(cloudT<=0){cloudT=20;cloudPush()}}
 addEventListener('pagehide',()=>{try{cloudPush()}catch(e){}});
-document.addEventListener('visibilitychange',()=>{if(document.hidden)try{cloudPush()}catch(e){}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)try{cloudPush()}catch(e){}else verCheck()});
+let verT=0,verNew=null;
+async function verCheck(){if(!/github\.io$/.test(location.hostname))return;const n=Date.now();if(n-verT<60000)return;verT=n;
+  try{const r=await fetch('version.json?t='+n,{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(!j||!j.v||j.v===BUILD)return;verNew=j.v;
+    const busy=started&&$('jail').hidden&&(stars>0||(int&&scene==='interior'));
+    let tried=null;try{tried=sessionStorage.getItem('uws-upd')}catch(e){}
+    if(!busy&&tried!==j.v){try{sessionStorage.setItem('uws-upd',j.v)}catch(e){}try{persist();cloudPush(true)}catch(e){}setTimeout(verGo,400);return}
+    let b=document.getElementById('updBar');if(!b){b=document.createElement('button');b.id='updBar';b.textContent='Update ready. Tap to get the newest version';
+      b.style.cssText='position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:9999;background:#5ed08b;color:#07090e;border:0;border-radius:20px;padding:9px 16px;font:600 13px "IBM Plex Sans Condensed",sans-serif;box-shadow:0 4px 18px rgba(0,0,0,.5)';
+      b.addEventListener('click',()=>{try{persist();cloudPush(true)}catch(e){}setTimeout(verGo,300)});document.body.appendChild(b)}}catch(e){}}
+function verGo(){const u=new URL(location.href);u.searchParams.set('v',verNew||Date.now());location.replace(u.toString())}
+setInterval(verCheck,120000);setTimeout(verCheck,4000);
 let loadArmed=null;
 $('loadBtn').addEventListener('click',async()=>{restoreOff=true;const m=$('loadMsg');m.hidden=false;
   const code=$('loadCode').value.toUpperCase().replace(/[^A-Z0-9]/g,'');
