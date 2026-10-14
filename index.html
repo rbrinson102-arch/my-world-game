@@ -258,14 +258,14 @@ canvas#mini{cursor:pointer;pointer-events:auto}
   .touch #actbtn{width:96px;height:96px;font-size:11px;line-height:1.1;padding:8px;overflow:hidden;word-break:break-word}
 }
 #offerText{white-space:pre-line}
+@media (prefers-reduced-motion:reduce){.stars.flash i.on{animation:none}.cine .lb{animation:none}}
+@media (orientation:landscape) and (max-height:540px){.stage{height:calc(100vh - 10px);height:calc(100dvh - 10px);min-height:300px}.touch .hud .tr{left:8px;right:8px;top:6px}.touch .row2{position:absolute!important;top:0!important;left:180px!important;right:200px!important;width:auto!important;max-width:none!important;flex-wrap:nowrap!important;justify-content:flex-start!important;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}.touch .row2 .pill{flex:0 0 auto;padding:4px 8px;font-size:10.5px}.touch .obj{top:44px!important;bottom:auto!important}.touch .toast{top:104px;bottom:auto;max-width:46%;font-size:12px;pointer-events:none}.touch .radio{top:auto;bottom:8px;left:50%;right:auto;transform:translateX(-50%);max-width:48%;font-size:11.5px;padding:5px 9px;pointer-events:none}}
+.touch .row2{-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent);mask-image:linear-gradient(90deg,#000 82%,transparent)}
 /* v5.4.2 the HUD gets out of your way */
 .hud .dodge{opacity:.12!important;pointer-events:none!important}
 .obj,.loc,.radio,.door,.players,.prog,canvas#mini{transition:opacity .2s,transform .3s ease}
 .obj{pointer-events:auto;cursor:pointer}
 .obj.tiny{padding:3px 10px;opacity:.78}.obj.tiny #objT{display:none}.obj.tiny b{font-size:12px;font-weight:500}.obj.tiny #objS{margin-top:2px!important;font-size:10.5px}
-@media (prefers-reduced-motion:reduce){.stars.flash i.on{animation:none}.cine .lb{animation:none}}
-@media (orientation:landscape) and (max-height:540px){.stage{height:calc(100vh - 10px);height:calc(100dvh - 10px);min-height:300px}.touch .hud .tr{left:8px;right:8px;top:6px}.touch .row2{position:absolute!important;top:0!important;left:180px!important;right:200px!important;width:auto!important;max-width:none!important;flex-wrap:nowrap!important;justify-content:flex-start!important;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}.touch .row2 .pill{flex:0 0 auto;padding:4px 8px;font-size:10.5px}.touch .obj{top:44px!important;bottom:auto!important}.touch .toast{top:104px;bottom:auto;max-width:46%;font-size:12px;pointer-events:none}.touch .radio{top:auto;bottom:8px;left:50%;right:auto;transform:translateX(-50%);max-width:48%;font-size:11.5px;padding:5px 9px;pointer-events:none}}
-.touch .row2{-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent);mask-image:linear-gradient(90deg,#000 82%,transparent)}
 </style>
 
 <div class="wrap">
@@ -797,7 +797,7 @@ const FRESH=()=>({mode:null,cash:200,rep:0,m:0,flags:{},weapons:{fist:true},ammo
 let save=FRESH();
 try{const s=JSON.parse(localStorage.getItem(SAVE_KEY));if(s&&s.flags)save=Object.assign(FRESH(),s)}catch(e){}
 save.city=CITY_ID;save.visited=save.visited||{};save.visited[CITY_ID]=true;if(save.turfCity!==CITY_ID){save.turfAll=save.turfAll||{};save.turfAll[save.turfCity||'raleigh']=save.turf||{};save.turf=save.turfAll[CITY_ID]||{};save.turfCity=CITY_ID}
-const persist=()=>{if(save.mode)save.slot=SLOT;try{localStorage.setItem(SAVE_KEY,JSON.stringify(save))}catch(e){}};
+const persist=()=>{if(save.mode)save.slot=SLOT;try{if(typeof started!=='undefined'&&started&&save.mode==='crook')save.heat={s:stars,at:Date.now(),c:CITY_ID}}catch(e){}try{localStorage.setItem(SAVE_KEY,JSON.stringify(save))}catch(e){}};
 stashes.forEach(rollStash);
 
 /* ================= weapons ================= */
@@ -1794,7 +1794,7 @@ function renderPlayers(){
   }
   $('pnote').textContent=room?(elsewhere.size&&!remote.size?`Nobody else in ${CITY.name} right now. Players in other cities are listed above. Travel there from the Map.`:remote.size?'':'Nobody else is on right now. Send your friends the link and they show up here.'):'Can\'t reach the multiplayer server right now. You can still play solo.';
 }
-$('plist').addEventListener('click',e=>{const g=e.target.closest('button[data-go]');if(!g)return;const id=g.dataset.go;if(!cityUnlocked(id)){toast(`${CITY_DEFS[id].name} is locked until ${cityNeed(id)}.`,2.4);return}renderTravel();const t=$('travelRow').querySelector(`button[data-city="${id}"]`);if(t)t.click()});
+$('plist').addEventListener('click',e=>{const g=e.target.closest('button[data-go]');if(!g)return;const id=g.dataset.go;if(!cityUnlocked(id)){toast(`${CITY_DEFS[id].name} isn't open yet.`,2.4);return}renderTravel();const t=$('travelRow').querySelector(`button[data-city="${id}"]`);if(t)t.click()});
 $('onlineBtn').addEventListener('click',()=>{playersOpen=!playersOpen;$('players').hidden=!playersOpen;if(playersOpen)renderPlayers()});
 /* chat */
 const PRESETS=['What\'s good','Respect ✊','Run it up','Watch out','Cops coming','Need backup','GG'];
@@ -1817,7 +1817,8 @@ function dailyReward(){
 
 /* ================= draw ================= */
 const ctx=cv.getContext('2d'),mini=$('mini'),mctx=mini.getContext('2d');
-const BUILD='5.4.2';let vw=0,vh=0,dpr=1,camX=0,camY=0,camInit=false,youT=0;
+const BUILD='5.5';let vw=0,vh=0,dpr=1,camX=0,camY=0,camInit=false,youT=0;
+
 function resize(){const r=cv.getBoundingClientRect();dpr=Math.min(2,window.devicePixelRatio||1);vw=r.width;vh=r.height;cv.width=Math.round(vw*dpr);cv.height=Math.round(vh*dpr)}
 addEventListener('resize',resize);
 function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
@@ -3115,7 +3116,7 @@ const fmtCode=c=>c?c.replace(/(.{4})(.{4})(.{4})/,'$1-$2-$3'):'';
 let cloudT=5,cloudOk=null,cloudLast='';
 function cloudPush(force){if(!window.__cloud||!save.mode)return;saveCode();save.ver=BUILD;const js=JSON.stringify(save);if(!force&&js===cloudLast)return;cloudLast=js;window.__cloud.save(save.saveCode,save).then(()=>{if(cloudOk!==true){cloudOk=true}}).catch(()=>{cloudOk=false;cloudLast=''})}
 function cloudTick(dt){cloudT-=dt;if(cloudT<=0){cloudT=20;cloudPush()}}
-addEventListener('pagehide',()=>{try{cloudPush()}catch(e){}});
+addEventListener('pagehide',()=>{try{persist();cloudPush()}catch(e){}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)try{cloudPush()}catch(e){}else verCheck()});
 let verT=0,verNew=null;
 async function verCheck(){if(!/github\.io$/.test(location.hostname))return;const n=Date.now();if(n-verT<60000)return;verT=n;
@@ -3323,7 +3324,7 @@ async function jailSync(){
   renderJail();
 }
 function releaseJail(msg){
-  const j=save.jail;if(!j)return;if(j.caseId&&j.status==='open'&&j.refund){save.cash+=j.refund}
+  const j=save.jail;if(!j)return;save.heat=null;save.hotArrive=0;if(j.caseId&&j.status==='open'&&j.refund){save.cash+=j.refund}
   if(window.__law&&j.caseId)window.__law.close(save.lbId,save.lbSecret).catch(()=>{});
   save.jail=null;persist();hideJail();toast(msg||"You're out. Watch your back.",3);
   if(save.mode&&!$('intro').hidden){charTags();return}
@@ -3631,8 +3632,7 @@ function toggleSound(){soundOn=!soundOn;try{localStorage.setItem('uws-sound',sou
 /* ================= city levels ================= */
 const CITY_ORDER=['goldsboro','raleigh','durham','charlotte','chicago'];
 const CITY_NEED_CROWN=[0,1,2,3,4],CITY_NEED_ARRESTS=[0,5,12,25,40];
-function cityUnlocked(id){const i=CITY_ORDER.indexOf(id);if(i<=0)return true;if(!OPEN_CITIES.includes(id))return false;save.visited=save.visited||{};if(save.visited[id])return true;
-  return save.mode==='cop'?(save.arrests||0)>=CITY_NEED_ARRESTS[i]:(save.crown||0)>=CITY_NEED_CROWN[i]}
+function cityUnlocked(id){const i=CITY_ORDER.indexOf(id);if(i<=0)return true;return OPEN_CITIES.includes(id)||!!HOME_OPEN.includes(id)}
 function cityNeed(id){const i=CITY_ORDER.indexOf(id);if(!OPEN_CITIES.includes(id))return 'somebody conquers the city before it';return save.mode==='cop'?`${CITY_NEED_ARRESTS[i]} arrests`:`${CROWN[CITY_NEED_CROWN[i]].n} rank`}
 let unlockSeen=null;
 function cityUnlockTick(){if(!started||HUB_CITY)return;const now=CITY_ORDER.filter(cityUnlocked).join(',');if(unlockSeen===null){unlockSeen=now;return}
@@ -3740,7 +3740,7 @@ $('jRoster').addEventListener('click',async e=>{const b=e.target.closest('button
 $('jPD').addEventListener('click',publicDefender);$('jBail').addEventListener('click',postBail);$('jAlt').addEventListener('click',switchSlot);$('jName').addEventListener('click',()=>renameDlg());
 $('slotBtn').addEventListener('click',switchSlot);
 (function(){
-  $('subhead').textContent=`17+ · v5.4 · ${CITY.home?'Hometown':`Level ${CITY_ORDER.indexOf(CITY_ID)+1}`}: ${CITY.name}${CITY.st?', '+CITY.st:''} · Fictional game.`;$('introCity').textContent=`${CITY.name}, ${CITY.st}. After midnight. ${CITY.rules.txt} Gangs, mafia families, cartels and syndicates: every network here breaks the rules for gain. Pick who you are.`;$('mapTitle').textContent=`${CITY.name}, ${CITY.st}`;
+  $('subhead').textContent=`17+ · v5.5 · ${CITY.home?'Hometown':`Level ${CITY_ORDER.indexOf(CITY_ID)+1}`}: ${CITY.name}${CITY.st?', '+CITY.st:''} · Fictional game.`;$('introCity').textContent=`${CITY.name}, ${CITY.st}. After midnight. ${CITY.rules.txt} Gangs, mafia families, cartels and syndicates: every network here breaks the rules for gain. Pick who you are.`;$('mapTitle').textContent=`${CITY.name}, ${CITY.st}`;
   if(save.jail&&Date.now()<save.jail.until)setTimeout(showJail,50);else if(save.jail){save.jail=null;persist()}})();
 /* ---------- TRAP: street dealing, the Exchange, protection, scams ---------- */
 const TRAP_TIERS=[
@@ -4662,6 +4662,11 @@ const newsText=n=>{const a=clip(n.a_name||'Somebody'),b=n.b_name?clip(n.b_name):
   if(n.kind==='witsec_found')return `${a} found ${b} in hiding and finished it. A new city is open.`;
   if(n.kind==='expand')return `${a} conquered ${CITY.name} and opened ${CITY_DEFS[n.b_name]?CITY_DEFS[n.b_name].name:'a new city'}. The game just got bigger.`;
   if(n.kind==='shipment')return `${a} unloaded the Tuesday shipment at the docks. +$10,000.`;
+  if(n.kind==='left')return n.ref===1?`Officer ${a} transferred out to ${b||'another city'}.`:`${a} packed up and left for ${b||'another city'}. Whatever ${a} had here is sitting unwatched.`;
+  if(n.kind==='arrived')return n.ref===1?`New cop in town: ${a}, transferred in from ${b||'out of town'}.`:`New face: ${a} just rolled in from ${b||'out of town'}. Nobody knows who ${a} answers to yet.`;
+  if(n.kind==='left_rat')return `${a} vanished the same week the feds came through. Street says ${a} flipped. Known rat, location unknown. Pookie might know.`;
+  if(n.kind==='arrived_rat')return `Heads up: ${a} just showed up from ${b||'out of town'}, and ${a} is a known rat. Watch what you say around ${a}.`;
+  if(n.kind==='left_build')return `${a} left to build ${b||'a new city'}. Ride out there for a piece of it, an alliance, or a war.`;
   if(n.kind==='bossjail')return `${a}, the boss of ${CITY.name}, just got locked up. The seat is open.`;
   return ''};
 const ago=t=>{const m=Math.max(0,Math.round((Date.now()-new Date(t))/60000));return m<1?'just now':m<60?`${m}m ago`:m<1440?`${Math.round(m/60)}h ago`:`${Math.round(m/1440)}d ago`};
@@ -4803,10 +4808,9 @@ async function buyIntel(pid,name,src){const I=INTEL[src];if(!I||!window.__rats)r
     if(r==='self'){save.cash+=I.c;persist();return}
     if(/^found:|^listed:/.test(r)){const c=r.split(':')[1];toast(`${clip(name)} is hiding in ${CITY_DEFS[c]?CITY_DEFS[c].name:c}. Everybody can see it on the board now.`,4.5);ratT=0}
     else if(r==='dry')toast(`${I.n} took your money and gave you nothing real.`,3.4);else{save.cash+=I.c;persist();toast('Nobody to find right now. Money back.',2.4)}}catch(e){toast('Your contact went quiet. Check the board in a minute.',2.6);ratT=0}}
-function flyTo(city,who){if(!bossLeaving.ok&&cityState&&cityState.boss_id===save.lbId&&!cityState.underboss_id&&save.mode==='crook'){bossLeaving(()=>flyTo(city,who));return}if(save.cash<2000){toast('A flight costs $2,000.',2.4);return}if(stars>0){toast('Not with the cops on you.',2.4);return}
-  save.cash-=2000;save.flight={city,until:Date.now()+3*3600000,who};save.turfAll=save.turfAll||{};save.turfAll[CITY_ID]=save.turf||{};save.city=city;persist();try{cloudPush(true)}catch(e){}
-  try{if(myCrew&&typeof sendCrewMsg==='function')sendCrewMsg(`Flying to ${CITY_DEFS[city].name} to find ${clip(who)}. Meet me there.`)}catch(e){}
-  big('win','Wheels up',`${CITY_DEFS[city].name}. ${clip(who)} is somewhere in this city.`,3);setTimeout(()=>location.reload(),3200)}
+function flyTo(city,who){if(!bossLeaving.ok&&cityState&&cityState.boss_id===save.lbId&&!cityState.underboss_id&&save.mode==='crook'){bossLeaving(()=>flyTo(city,who));return}
+  try{if(myCrew&&typeof sendCrewMsg==='function'&&save.cash>=2000)sendCrewMsg(`Flying to ${CITY_DEFS[city].name} to find ${clip(who)}. Meet me there.`)}catch(e){}
+  travelGo(city,2000,0,{flight:{city,until:Date.now()+3*3600000,who}})}
 function ratRows2(el,row){if(!window.__rats||save.mode!=='crook')return;
   if(myRat&&myRat.heat>0)row('Your heat with the street',`${myRat.heat}/100${myRat.exposed?' · KNOWN RAT':''}${myRat.witsec_city?` · in witness protection in ${CITY_DEFS[myRat.witsec_city].name}${myRat.listed?` (FOUND by ${clip(myRat.listed_by)})`:''}`:''}`);
   if(myRat&&myRat.witsec_city){const e2=wsElapsed(),ok=e2>=24*3600000;
@@ -4894,8 +4898,17 @@ async function homeSync(){if(!window.__home||!save.lbId)return;try{
   homeSeen=true;const mh=myHome();if(mh&&mh.founder_id&&String(mh.founder_id)===String(save.lbId)){const paid=save.homePaid||1,n=Math.min(11,+mh.locals||1);if(n>paid){const amt=(n-paid)*2500;save.cash+=amt;save.homePaid=n;persist();hudKey='';toast(`${n-paid} more ${n-paid>1?'people':'person'} from ${clip(mh.name)} joined. Founder's cut: +${money(amt)}.`,4)}}
   if(empOpen)renderEmpire()}catch(e){}}
 function bossLeaving(go){const cs=cityState;if(save.mode==='crook'&&cs&&cs.boss_id&&cs.boss_id===save.lbId&&!cs.underboss_id&&!bossLeaving.ok){safeOffer(`You run ${CITY.name}`,`If you're gone 24 hours with nobody holding it, anybody with 3 blocks here can take your seat. Name an underboss from your crew or organization in Empire first, or go and come back in time.`,[{l:'Name an underboss',go:1,f:()=>openEmpire()},{l:'Go anyway',f:()=>{bossLeaving.ok=1;go()}}]);return false}go();return true}
-function hgoTravel(id){if(!bossLeaving.ok&&cityState&&cityState.boss_id===save.lbId&&!cityState.underboss_id&&save.mode==='crook'){bossLeaving(()=>hgoTravel(id));return}if(save.m<scriptedLen()){toast('Finish your Goldsboro story first.',2.6);return}if(stars>0||turfWar){toast('Not with the heat on you. Lose the cops first.',2.4);return}if(save.cash<900){toast('The ride costs $900.',2.2);return}
-  save.cash-=900;save.city=id;save.turfAll=save.turfAll||{};save.turfAll[CITY_ID]=save.turf||{};persist();try{cloudPush(true)}catch(x){}setTimeout(()=>location.reload(),300)}
+function travelGo(id,cost,wasHot,opt){const hs=Math.max(stars,wasHot||0),hot=hs>0||!!turfWar,c=hs>0?Math.max(cost*2,500*hs):cost,nm=CITY_DEFS[id]?CITY_DEFS[id].name:id;
+  if(lastHitPid&&performance.now()-lastHitT<8000){toast('You are in a shootout. Get clear before you try to leave town.',2.6);return}
+  if(hot&&!travelGo.ok){const why=hs>0?`The cops are on you (${hs} star${hs>1?'s':''}). A driver will still get you out, but it costs ${money(c)} and your warrant follows you: ${nm} police will have your picture when you land.`:'';
+    safeOffer('Leaving hot',`${why}${turfWar?`${why?' ':''}You are in the middle of a turf war. Leave now and you forfeit it.`:''}`,[{l:c>cost?`Pay ${money(c)} and go`:'Leave anyway',go:1,f:()=>{travelGo.ok=1;travelGo(id,cost,stars,opt)}},{l:'Stay and handle it',f:()=>{bossLeaving.ok=0}}]);return}
+  travelGo.ok=0;if(save.cash<c){toast(`The ride costs ${money(c)}.`,2.2);return}
+  save.cash-=c;if(hs>0)save.hotArrive=Math.min(3,hs);turfWar=null;save.heat=null;save.cameFrom=CITY_ID;save.flight=(opt&&opt.flight)||null;bossLeaving.ok=0;
+  save.turfAll=save.turfAll||{};save.turfAll[CITY_ID]=save.turf||{};save.city=id;stars=0;persist();try{cloudPush(true)}catch(x){}
+  try{if(myCrew&&typeof sendCrewMsg==='function')sendCrewMsg(`Leaving ${CITY.name} for ${nm}.`)}catch(x){}
+  try{localStorage.setItem('uws-go',JSON.stringify({r:SLOT}))}catch(x){}
+  toast(hot?`Ducking out of ${CITY.name}…`:`Heading to ${nm}…`,2);setTimeout(()=>location.reload(),900)}
+function hgoTravel(id){if(!bossLeaving.ok&&cityState&&cityState.boss_id===save.lbId&&!cityState.underboss_id&&save.mode==='crook'){bossLeaving(()=>hgoTravel(id));return}travelGo(id,900)}
 function homeTick(dt){homeT-=dt;if(homeT<=0){homeT=60;homeSync()}}
 async function homeFound(){if(!window.__home)return;const c=($('hmCity')||{}).value||'',r=($('hmReg')||{}).value||'',sz=($('hmSize')||{}).value||'small';
   if(save.m<scriptedLen()){toast('Finish your Goldsboro story first. Everybody earns their name here before they go home.',3.4);return}
@@ -4998,24 +5011,21 @@ function pushRows(el,row){if(!window.__push)return;if(save.pushOn){const d0=docu
 
 /* travel between cities */
 function renderTravel(){const el=$('travelRow');el.textContent='';
-  if(!OPEN_CITIES.includes(CITY_ID)||(window.__rats&&save.witsec&&save.witsec.city===CITY_ID)){const b=document.createElement('button');b.className='small go';const w=!!(window.__rats&&save.witsec&&save.witsec.city===CITY_ID);if(!window.__rats&&save.witsec){save.witsec=null;persist()}b.textContent=w?(wsElapsed()>=24*3600000?'Leave witness protection: go home to Goldsboro':`Witness protection: ${hm(24*3600000-wsElapsed())} until you can surface. Walk out early?`):'Fly home to Goldsboro · $2,000';if(w)b.addEventListener('click',leaveWitsec);if(!w)b.addEventListener('click',function flyHome(){if(!bossLeaving.ok&&cityState&&cityState.boss_id===save.lbId&&!cityState.underboss_id&&save.mode==='crook'){bossLeaving(()=>flyHome());return}if(save.cash<2000){toast('A flight costs $2,000.',2);return}save.cash-=2000;save.flight=null;save.city='goldsboro';persist();try{cloudPush(true)}catch(e){}setTimeout(()=>location.reload(),300)});el.appendChild(b);
-    if(CITY.home&&!(window.__rats&&save.witsec&&save.witsec.city===CITY_ID)){for(const id of CITY_ORDER.filter(x=>x!=='goldsboro'&&OPEN_CITIES.includes(x)&&cityUnlocked(x)).concat(HOME_OPEN.filter(x=>x!==CITY_ID&&CITY_DEFS[x]))){const c2=document.createElement('button');c2.className='small';c2.textContent=`Ride to ${CITY_DEFS[id].name} · $900`;c2.dataset.hgo=id;el.appendChild(c2)}}
+  if(!OPEN_CITIES.includes(CITY_ID)||(window.__rats&&save.witsec&&save.witsec.city===CITY_ID)){const b=document.createElement('button');b.className='small go';const w=!!(window.__rats&&save.witsec&&save.witsec.city===CITY_ID);if(!window.__rats&&save.witsec){save.witsec=null;persist()}b.textContent=w?(wsElapsed()>=24*3600000?'Leave witness protection: go home to Goldsboro':`Witness protection: ${hm(24*3600000-wsElapsed())} until you can surface. Walk out early?`):'Fly home to Goldsboro · $2,000';if(w)b.addEventListener('click',leaveWitsec);if(!w)b.addEventListener('click',function flyHome(){if(!bossLeaving.ok&&cityState&&cityState.boss_id===save.lbId&&!cityState.underboss_id&&save.mode==='crook'){bossLeaving(()=>flyHome());return}travelGo('goldsboro',2000)});el.appendChild(b);
+    if(CITY.home&&!(window.__rats&&save.witsec&&save.witsec.city===CITY_ID)){for(const id of CITY_ORDER.filter(x=>x!==CITY_ID&&OPEN_CITIES.includes(x)).concat(HOME_OPEN.filter(x=>x!==CITY_ID&&CITY_DEFS[x]))){const c2=document.createElement('button');c2.className='small';c2.textContent=`Ride to ${CITY_DEFS[id].name} · $900`;c2.dataset.hgo=id;el.appendChild(c2)}}
     return}
   if(HUB_CITY){const p=document.createElement('p');p.className='muted2';p.textContent=`Everybody plays in ${CITY.name} until somebody conquers it. The boss of ${CITY.name} who holds 6 blocks or 5 houses can expand the whole game to ${CITY_DEFS[CITY_ORDER[CITY_ORDER.indexOf(CITY_ID)+1]]?CITY_DEFS[CITY_ORDER[CITY_ORDER.indexOf(CITY_ID)+1]].name:'the next city'} from Empire. Then Durham, Charlotte, Chicago, and beyond.`;el.appendChild(p);return}
   for(const id of CITY_ORDER){const c=CITY_DEFS[id];const lv=CITY_ORDER.indexOf(id)+1,mk=market(id);const b=document.createElement('button');b.className='small'+(id===CITY_ID?' go':'');
     if(id===CITY_ID){b.textContent=`Level ${lv} · ${c.name} (you are here) · ${mk.txt}`;b.disabled=true}
-    else if(!cityUnlocked(id)){const tg=(typeof ratRows!=='undefined'&&ratRows.targets||[]).find(t=>t.city===id&&String(t.pid)!==String(save.lbId));
+    else if(!OPEN_CITIES.includes(id)){const tg=(typeof ratRows!=='undefined'&&ratRows.targets||[]).find(t=>t.city===id&&String(t.pid)!==String(save.lbId));
       if(tg&&save.mode==='crook'){b.className='small go';b.textContent=`${c.name}: ${clip(tg.name)} is hiding there · fly in after them · $2,000`;b.dataset.fly=id;b.dataset.who=tg.name}
-      else{b.textContent=`Level ${lv} · ${c.name} · locked until ${cityNeed(id)}`;b.disabled=true}}
+      else{b.textContent=`${c.name} · not open yet. A city boss opens it by expanding the map from Empire`;b.disabled=true}}
     else{const cost=(save.mode==='cop'&&copTier()>=5)||orgHas('driver')?0:c.st===CITY.st?250:900;b.textContent=`Level ${lv} · ${c.name}, ${c.st} · ${money(cost)} · ${mk.txt}`;b.title=c.rules.txt;b.dataset.city=id;b.dataset.cost=cost}
     el.appendChild(b)}
   for(const id of HOME_OPEN){if(id===CITY_ID||!CITY_DEFS[id])continue;const c=CITY_DEFS[id],b=document.createElement('button');b.className='small';
-    if(save.m<scriptedLen()){b.textContent=`Hometown · ${c.name} · finish your Goldsboro story first`;b.disabled=true}else{b.textContent=`Hometown · ${c.name}${c.st?', '+c.st:''} · $900 · ${c.status==='open'?'established':'new city'}`;b.dataset.city=id;b.dataset.cost=900}el.appendChild(b)}}
+    b.textContent=`Hometown · ${c.name}${c.st?', '+c.st:''} · $900 · ${c.status==='open'?'established':'new city'}`;b.dataset.city=id;b.dataset.cost=900;el.appendChild(b)}}
 $('travelRow').addEventListener('click',e=>{const b=e.target.closest('button');if(b&&!b.disabled&&b.dataset.hgo){hgoTravel(b.dataset.hgo);return}if(b&&!b.disabled&&b.dataset.fly){flyTo(b.dataset.fly,b.dataset.who);return}if(!b||b.disabled||!b.dataset.city)return;
-  if(!bossLeaving.ok&&cityState&&cityState.boss_id===save.lbId&&!cityState.underboss_id&&save.mode==='crook'){bossLeaving(()=>b.click());return}const cost=+b.dataset.cost;
-  if(stars>0||turfWar){toast('Not with the heat on you. Lose the cops first.',2.4);return}if(save.cash<cost){toast(`The ticket costs ${money(cost)}.`,2);return}
-  save.cash-=cost;save.city=b.dataset.city;save.turfAll=save.turfAll||{};save.turfAll[CITY_ID]=save.turf||{};persist();try{cloudPush(true)}catch(x){}
-  toast(`${cost>250?'Flying':'Riding'} to ${CITY_DEFS[save.city].name}…`,2);setTimeout(()=>location.reload(),900)});
+  if(!bossLeaving.ok&&cityState&&cityState.boss_id===save.lbId&&!cityState.underboss_id&&save.mode==='crook'){bossLeaving(()=>b.click());return}travelGo(b.dataset.city,+b.dataset.cost)});
 
 $('lbBtn').addEventListener('click',openLb);$('evBtn').addEventListener('click',()=>{if(started&&!cineOn)evInfo()});
 $('extHold').addEventListener('pointerdown',e=>{e.preventDefault();if(ext)ext.hold=true});['pointerup','pointerleave','pointercancel'].forEach(ev=>$('extHold').addEventListener(ev,()=>extRelease()));
@@ -5074,8 +5084,6 @@ function updateLoc(){
 }
 
 /* ================= loop ================= */
-let last=performance.now(),actLabel=null,miniT=0,started=false,FDT=1/60;
-const running=()=>started&&!cineOn&&!shopOpen&&!mapOpen&&!growOpen&&!clubOpen&&!beat&&!empOpen&&!lbOpen&&!frontOpen&&!trapOpen&&!offerOpen&&!towOpen&&!jobsOpen&&!meetOpen&&!ext&&$('tut').hidden;
 /* v5.4.2 the HUD gets out of your way: the episode banner shrinks after a few seconds (tap it to see it again), anything on top of your player fades, and the minimap slides down out of your way */
 let hudObjKey='',hudObjAt=0,hudMiniY=0,hudMiniX=0,hudT=0;
 const HUD_DODGE=['obj','loc','radio','door','players','prog','toast'];
@@ -5092,6 +5100,8 @@ function hudTick(now){if(now-hudT<100)return;hudT=now;
     if(room>=need)wy=Math.max(0,need);else wx=Math.min(0,Math.max(cr.left+8-base.left,px-60-base.right))}
   if(Math.abs(wy-hudMiniY)>2||Math.abs(wx-hudMiniX)>2){hudMiniY=wy;hudMiniX=wx;mini.style.transform=wy||wx?`translate(${Math.round(wx)}px,${Math.round(wy)}px)`:'';mini.style.pointerEvents=wy||wx?'none':''}
   const nr={left:base.left+hudMiniX,right:base.right+hudMiniX,top:base.top+hudMiniY,bottom:base.bottom+hudMiniY};mini.classList.toggle('dodge',hudHit(nr,px,py,24))}
+let last=performance.now(),actLabel=null,miniT=0,started=false,FDT=1/60;
+const running=()=>started&&!cineOn&&!shopOpen&&!mapOpen&&!growOpen&&!clubOpen&&!beat&&!empOpen&&!lbOpen&&!frontOpen&&!trapOpen&&!offerOpen&&!towOpen&&!jobsOpen&&!meetOpen&&!ext&&$('tut').hidden;
 function frame(now){requestAnimationFrame(frame);try{frameBody(now)}catch(e){try{ctx.setTransform(1,0,0,1,0,0);console.error(e)}catch(_){}}}
 function frameBody(now){
   const dt=Math.min(.05,(now-last)/1000);last=now;const t=now/1000;FDT=dt;
@@ -5173,6 +5183,10 @@ function startGame(mode,fresh,role){restoreOff=true;if(isTouch&&innerHeight<560)
   if(save.m===4&&mode==='crook')thugs=[];
   if(save.lastSeen&&mode==='crook'){const hrs=Math.min(8,(Date.now()-save.lastSeen)/3600000);if(hrs>.25){const per=myBlocks()*150+((save.empire&&save.empire.terr||[]).length)*350;const amt=Math.round(hrs*40*per*.25);if(amt>0){save.cash+=amt;setTimeout(()=>toast(`While you were gone, your blocks and houses made ${money(amt)}.`,4),2500)}}}
   save.lastSeen=Date.now();
+  if(save.hotArrive){const h=save.hotArrive;setTimeout(()=>{if(started&&mode==='crook'&&save.hotArrive){save.hotArrive=0;addStars(h,`Your warrant followed you. ${CITY.name} police have your picture.`);persist()}},4500)}
+  else if(save.heat&&mode==='crook'&&save.heat.c===CITY_ID&&save.heat.s>0&&Date.now()-save.heat.at<10*60000&&!jailActive()){const h=Math.min(3,save.heat.s);setTimeout(()=>{if(started&&stars<h){stars=h;calm=0;toast('The cops are still looking for you.',2.4)}},1500)}
+  save.heat=null;
+  if(save.cameFrom&&save.cameFrom!==CITY_ID){const fr=CITY_DEFS[save.cameFrom]?CITY_DEFS[save.cameFrom].name:'out of town';save.cameFrom=null;persist();setTimeout(()=>{if(started)radio(mode==='cop'?`Transfer to ${CITY.name} is done. Nobody in this precinct knows you yet, and the street already heard a cop came in from ${fr}.`:`New face in ${CITY.name}. The street already knows you came in from ${fr}. Nobody here owes you anything yet.`,5)},6500)}
   $('intro').hidden=true;started=true;hudKey='';last=performance.now();
   dailyReward();
   if(curMission())startMission();else toast('Free roam.',2);
