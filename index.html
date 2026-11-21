@@ -2008,7 +2008,7 @@ function dailyReward(){
 
 /* ================= draw ================= */
 const ctx=cv.getContext('2d'),mini=$('mini'),mctx=mini.getContext('2d');
-const BUILD='6.2';let vw=0,vh=0,dpr=1,camX=0,camY=0,camInit=false,youT=0;
+const BUILD='6.4';let vw=0,vh=0,dpr=1,camX=0,camY=0,camInit=false,youT=0;
 
 function resize(){const r=cv.getBoundingClientRect();dpr=Math.min(2,window.devicePixelRatio||1);vw=r.width;vh=r.height;cv.width=Math.round(vw*dpr);cv.height=Math.round(vh*dpr)}
 addEventListener('resize',resize);
@@ -3016,7 +3016,7 @@ function orgTick(dt){if(save.mode!=='crook'||!save.org||!running())return;const 
 function orgAct(k,a){const o=orgFix(),m=o[k];if(!m)return;if(a==='bonus'){if(save.cash<500){toast('A bonus is $500.',2);return}save.cash-=500;m.loyalty=Math.min(100,m.loyalty+15);toast(`${m.name} appreciates that.`,2)}
   if(a==='fire'){o[k]=null;toast(`You cut ${m.name} loose.`,2.4);if(m.loyalty<50&&Math.random()<.3){const e=empireState();e.fed=Math.min(100,e.fed+15);radio(`${m.name} is bitter. Word is they're talking to detectives.`,5)}}
   persist();hudKey='';if(empOpen)renderEmpire(true)}
-function orgRows(el,row){const o=orgFix();const h=document.createElement('b');h.textContent='Street hires (they work for pay)';h.style.marginTop='6px';el.appendChild(h);
+function orgRows(el,row){const o=orgFix();{const L=crewLeft(),n=(save.empire&&save.empire.crew||[]).length+(save.org&&save.org.enforcer?1:0)+(save.org&&save.org.lt?1:0);row(`Your crew in ${CITY.name}`,n?`${n} with you here. Crews don't travel: you can take one man when you leave, and everybody else stays and guards.`:`Nobody here yet. Put a crew together in ${CITY.name}: recruit, or bring your people up with a seat contract.`);if(L.length)row('Left behind',`${L.join(' · ')}. Two or more men left in other cities keep your defense up while you're away (+1). Go back and they're yours again.`)}const h=document.createElement('b');h.textContent='Street hires (they work for pay)';h.style.marginTop='6px';el.appendChild(h);
   for(const k in ORG_ROLES){const m=o[k];row(ORG_ROLES[k].n,m?`${m.name} · loyalty ${Math.round(m.loyalty)}% · ${money(ORG_ROLES[k].pay)}/10 min`:'Open: a recruiting job will come up in your episodes');
     if(m){const d=document.createElement('div');d.className='btnrow';d.innerHTML=`<button class="small" data-org="${k}" data-oa="bonus">Bonus $500</button><button class="small" data-org="${k}" data-oa="fire">Cut loose</button>`;el.appendChild(d)}}}
 /* step engine: each mission is a list of steps */
@@ -4823,7 +4823,7 @@ function defOf(id){const d=defRows[id];if(!d)return{lvl:0,mus:false,rookie:false
 const defCount=(id,rev)=>{const d=defOf(id);return Math.max(2,3+d.lvl+(d.mus?2:0)-(rev?2:0))};
 async function defSync(){if(!window.__def)return;const ids=[...new Set(Object.values(turfRows).concat(Object.values(typeof deedRows==='object'?deedRows:{})).map(r=>r&&r.owner_id).filter(x=>x&&x!==save.lbId))];if(!ids.length)return;
   try{const rows=await window.__def.list(ids);defRows={};for(const r of rows||[])defRows[r.owner_id]=r}catch(e){}}
-function defTick(dt){if(save.mode!=='crook'||!window.__def||!save.lbId)return;if(save.witsec){defPubT=120;return}defPubT-=dt;if(defPubT>0)return;defPubT=120;(window.__def.beat?window.__def.beat(save.lbId,save.lbSecret,myDefLvl(),!save.jail):window.__def.publish(save.lbId,save.lbSecret,myDefLvl())).catch(()=>{});defSync()}
+function defTick(dt){if(save.mode!=='crook'||!window.__def||!save.lbId)return;if(save.witsec){defPubT=120;return}defPubT-=dt;if(defPubT>0)return;defPubT=120;(window.__def.beat?window.__def.beat(save.lbId,save.lbSecret,pubDef(),!save.jail):window.__def.publish(save.lbId,save.lbSecret,pubDef())).catch(()=>{});defSync()}
 async function buyMuscle(){if(buyMuscle.busy)return;if(myMuscleOn()){toast(`Your muscle is already posted (${mmss(save.blockMuscle-Date.now())} left).`,2.4);return}if(save.cash<2500){toast('Street muscle on your blocks costs $2,500 for 24 hours.',2.6);return}if(!window.__def){toast('Block defense works on the online game link.',2.4);return}
   save.cash-=2500;persist();hudKey='';buyMuscle.busy=1;try{await lbEnsure();const u=await window.__def.muscle(save.lbId,save.lbSecret,24);save.blockMuscle=new Date(u).getTime();persist();toast('Hired muscle is posted on every block you own for 24 hours. Anybody who hits you fights two extra shooters with shotguns.',4)}catch(e){save.cash+=2500;persist();toast('Could not hire them. Try again.',2.4)}finally{buyMuscle.busy=0}
   if(empOpen)renderEmpire(true)}
@@ -5224,6 +5224,8 @@ function crewSwap(dest,escort,from){from=from||save.crewCity||CITY_ID;
   e.crew=(there.crew||[]).concat(keep);for(const k of ['enforcer','lt'])if(there[k]){if(o[k])e.crew.push(there[k]);else o[k]=there[k]}
   save.crewCity=dest;save.crewSplit=1}
 function crewSync(){if(save.mode!=='crook')return;if(!save.crewCity){save.crewCity=CITY_ID;return}if(save.crewCity!==CITY_ID)crewSwap(CITY_ID,null,save.crewCity)}
+function guardsLeft(){let n=0;for(const c in (save.crewAt||{})){if(c===CITY_ID)continue;const t=save.crewAt[c];n+=(t.crew||[]).length+(t.enforcer?1:0)+(t.lt?1:0)}return n}
+function pubDef(){return clamp(myDefLvl()+(guardsLeft()>=2?1:0),0,4)}
 function crewLeft(){const out=[];for(const c in (save.crewAt||{})){const t=save.crewAt[c];const n=((t.crew||[]).length)+(t.enforcer?1:0)+(t.lt?1:0);if(n)out.push(`${(CITY_DEFS[c]||{}).name||c} ×${n}`)}return out}
 function travelGo(id,cost,wasHot,opt,rc){const hs=Math.max(stars,wasHot||0),hot=hs>0||!!turfWar,c=hs>0?Math.max(cost*2,500*hs):cost,nm=CITY_DEFS[id]?CITY_DEFS[id].name:id;
   if(lastHitPid&&performance.now()-lastHitT<8000){toast('You are in a shootout. Get clear before you try to leave town.',2.6);return}
