@@ -2008,7 +2008,7 @@ function dailyReward(){
 
 /* ================= draw ================= */
 const ctx=cv.getContext('2d'),mini=$('mini'),mctx=mini.getContext('2d');
-const BUILD='6.6';let vw=0,vh=0,dpr=1,camX=0,camY=0,camInit=false,youT=0;
+const BUILD='6.6.1';let vw=0,vh=0,dpr=1,camX=0,camY=0,camInit=false,youT=0;
 
 function resize(){const r=cv.getBoundingClientRect();dpr=Math.min(2,window.devicePixelRatio||1);vw=r.width;vh=r.height;cv.width=Math.round(vw*dpr);cv.height=Math.round(vh*dpr)}
 addEventListener('resize',resize);
@@ -2757,7 +2757,7 @@ const KIN=[['your mother','Mama'],['your little brother','Lil Bro'],['your siste
 function empireState(){
   save.empire=save.empire||{fed:0,terr:[],front:false,crew:[],rival:null,eps:{},incomeT:90,caseFile:0,partner:null,copRank:0};
   const e=save.empire;
-  if(save.mode==='crook'){if(save.orgType==='gang'&&save.role!=='gang')delete save.orgType;if(isSetM()&&save.org)for(const k of Object.keys(save.org))if(k!=='lawyer')delete save.org[k];crewRosterSync()}
+  if(save.mode==='crook'){if(save.orgType==='gang'&&save.role!=='gang')delete save.orgType;crewRosterSync()}
   if(save.mode==='crook'&&e.crew.length<3&&!save.crewSplit){const r=mulberry(Date.now()%100000);let g=0;while(e.crew.length<3&&g++<50){const nm=`${NAMES1[Math.floor(r()*NAMES1.length)]} "${NICKS[Math.floor(r()*NICKS.length)]}"`;if(!e.crew.some(c=>c.name.split(' ')[0]===nm.split(' ')[0]))e.crew.push({name:nm,loyalty:55+Math.floor(r()*35)})}}
   if(save.flags.ricoDown&&CITY_ID==='goldsboro'&&!(save.deedLost&&save.deedLost[8])&&!e.terr.includes(8))e.terr.push(8);
   return e;
@@ -3006,7 +3006,7 @@ let orgSeats={};const SEAT_FOR={lawyer:'attorney',enforcer:'muscle',connect:'sup
 const orgHas=k=>save.mode==='crook'&&(!!(save.org&&save.org[k])||!!(SEAT_FOR[k]&&orgSeats[SEAT_FOR[k]]));
 const orgEmpty=()=>Object.keys(ORG_ROLES).filter(k=>!orgFix()[k]);
 function orgHire(k,name){const o=orgFix();o[k]={name,loyalty:70,since:Date.now()};persist();hudKey='';titleCard('New hire',`${name} · ${ORG_ROLES[k].n}`);toast(`${name} is your ${ORG_ROLES[k].n}. ${ORG_ROLES[k].perk} Pays ${money(ORG_ROLES[k].pay)} every 10 minutes.`,5)}
-function orgTick(dt){if(save.mode!=='crook'||!save.org||!running())return;const o=save.org,staff=Object.keys(ORG_ROLES).filter(k=>o[k]);if(!staff.length)return;
+function orgTick(dt){if(save.mode!=='crook'||!save.org||!running())return;if(typeof save.org.payT!=='number'||!(save.org.payT>=0))save.org.payT=600;const o=save.org,staff=Object.keys(ORG_ROLES).filter(k=>o[k]);if(!staff.length)return;
   o.payT-=dt;if(o.payT>0)return;o.payT=600;const bill=staff.reduce((a,k)=>a+ORG_ROLES[k].pay,0);
   if(orgHas('accountant')&&save.bank>0){const i=Math.min(1500,Math.round(save.bank*.02));save.bank+=i}
   if(save.cash+(save.bank||0)>=bill){payFrom(bill);staff.forEach(k=>o[k].loyalty=Math.min(100,o[k].loyalty+5));toast(`Payday: ${money(bill)} to your people.`,2.6)}
