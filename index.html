@@ -2008,7 +2008,7 @@ function dailyReward(){
 
 /* ================= draw ================= */
 const ctx=cv.getContext('2d'),mini=$('mini'),mctx=mini.getContext('2d');
-const BUILD='6.7';let vw=0,vh=0,dpr=1,camX=0,camY=0,camInit=false,youT=0;
+const BUILD='6.8';let vw=0,vh=0,dpr=1,camX=0,camY=0,camInit=false,youT=0;
 
 function resize(){const r=cv.getBoundingClientRect();dpr=Math.min(2,window.devicePixelRatio||1);vw=r.width;vh=r.height;cv.width=Math.round(vw*dpr);cv.height=Math.round(vh*dpr)}
 addEventListener('resize',resize);
@@ -2104,7 +2104,7 @@ function draw(t){
     ctx.textAlign='center';ctx.textBaseline='middle';
     for(const s of stashes){const b=s.b,x=(b.bx*BS+3)*T,y=(b.by*BS+1)*T+20;ctx.font='700 15px Anton, Impact, sans-serif';
       const txt=s.owned?'YOUR HOUSE':(houseLabel(s)||`${s.boss.toUpperCase()}'S ${s.main?'MAIN HOUSE':'STASH'}`);const w=ctx.measureText(txt).width+14;
-      ctx.fillStyle='rgba(7,9,14,.75)';ctx.fillRect(x-w/2,y-11,w,22);ctx.fillStyle=s.owned?'#5ed08b':houseLabel(s)?'#c99bff':s.cooldown>0?'#8e94a4':'#ffb23e';ctx.fillText(txt,x,y+1)}
+      ctx.fillStyle='rgba(7,9,14,.75)';ctx.fillRect(x-w/2,y-11,w,22);ctx.fillStyle=s.owned?'#5ed08b':houseLabel(s)?'#c99bff':s.cooldown>0?'#8e94a4':'#ffb23e';ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=12;ctx.fillText(txt,x,y+1);ctx.shadowBlur=0}
     for(const p of peds){if(p.down>0)drawBody(p);else drawPerson(p,p.shirt,p.skin,.9)}
     if(save.mode==='crook'&&stars===0&&!player.inCar){ctx.font='700 14px "IBM Plex Sans Condensed",sans-serif';ctx.textAlign='center';for(const p of peds){if(!p.want||p.down>0||p.flee>0||dist(p,player)>520)continue;ctx.fillStyle='rgba(7,9,14,.7)';ctx.beginPath();ctx.arc(p.x,p.y-22,8,0,Math.PI*2);ctx.fill();ctx.fillStyle='#5ed08b';ctx.fillText('$',p.x,p.y-17)}}
     if(save.mode==='crook'){drawPerson({x:POOKIE.x,y:POOKIE.y,ang:Math.atan2(player.y-POOKIE.y,player.x-POOKIE.x),walk:0},'#2f5f7f','#5c3a1e',1,'rgba(74,140,255,.6)');ctx.fillStyle='#8fb8ff';ctx.font='600 12px "IBM Plex Sans Condensed",sans-serif';ctx.textAlign='center';ctx.fillText(PKN,POOKIE.x,POOKIE.y-18)}
@@ -2131,11 +2131,11 @@ function draw(t){
   if(scene==='interior'&&int&&int.piles)for(const p of int.piles){if(p.taken)continue;ctx.fillStyle='#2f7a3f';ctx.fillRect(p.x-12,p.y-8,24,16);ctx.fillStyle='#5ed08b';ctx.fillRect(p.x-9,p.y-5,18,3);ctx.fillRect(p.x-9,p.y+1,18,3)}
   for(const fxi of fx){if(fxi.kind==='boom')continue;ctx.fillStyle=fxi.kind==='hit'?`rgba(200,30,40,${fxi.t*2.5})`:`rgba(255,220,140,${fxi.t*5})`;ctx.beginPath();ctx.arc(fxi.x,fxi.y,fxi.kind==='hit'?8:4,0,Math.PI*2);ctx.fill()}
   ctx.restore();
-  drawLighting(t);drawWeather(t);
+  drawLighting(t);drawWeather(t);drawGrade(t);
   const m=curMission();if(!cineOn){const tg=sideTargetJob()||(m&&missionActive?m.target():null)||sideTarget();if(tg)drawWaypoint(tg,t)}
   else if(save.mode==='cop'&&call&&!cineOn)drawWaypoint(callTarget(),t);
   const g=ctx.createRadialGradient(vw/2,vh/2,Math.min(vw,vh)*.25,vw/2,vh/2,Math.max(vw,vh)*.75);
-  g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,stars>2?'rgba(50,0,12,.6)':'rgba(0,0,0,.6)');ctx.fillStyle=g;ctx.fillRect(0,0,vw,vh);
+  g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,stars>2?'rgba(60,0,14,.7)':'rgba(0,0,0,.72)');ctx.fillStyle=g;ctx.fillRect(0,0,vw,vh);
   if(player.hp<35&&!cineOn){ctx.fillStyle=`rgba(160,0,20,${.15+Math.sin(t*6)*.08})`;ctx.fillRect(0,0,vw,vh)}
 }
 function drawMini(){
@@ -4457,7 +4457,7 @@ function bkTick(){if(!bkPings.length)return;const me=player.inCar||player;bkPing
 const lc=document.createElement('canvas'),lctx=lc.getContext('2d');
 let weather={k:'clear',until:0},wDrops=[];
 let lowGfx=(()=>{try{return localStorage.getItem('uws-gfx')==='low'}catch(e){return false}})();
-function darkness(){if(lowGfx)return 0;const h=new Date().getHours()+new Date().getMinutes()/60;const base=h>=20.5||h<5?.62:h>=18.5||h<6.5?.42:.14;return scene==='interior'?Math.min(.32,base*.6):base+(weather.k==='rain'?.08:0)}
+function darkness(){if(lowGfx)return 0;const h=new Date().getHours()+new Date().getMinutes()/60;const base=h>=20.5||h<5?.7:h>=18.5||h<6.5?.5:.24;return scene==='interior'?Math.min(.32,base*.6):base+(weather.k==='rain'?.08:0)}
 function drawLighting(t){const a=darkness();if(a<.05)return;const W=Math.ceil(vw),H=Math.ceil(vh);if(lc.width!==W||lc.height!==H){lc.width=W;lc.height=H}
   const L=lctx;L.globalCompositeOperation='source-over';L.clearRect(0,0,W,H);const night=a>.5;L.fillStyle=night?`rgba(4,7,22,${a})`:`rgba(20,12,30,${a})`;L.fillRect(0,0,W,H);
   L.globalCompositeOperation='destination-out';
@@ -4470,12 +4470,27 @@ function drawLighting(t){const a=darkness();if(a<.05)return;const W=Math.ceil(vw
   for(const b of bullets)hole(b.x,b.y,40,.6);for(const f of fx)if(f.kind==='boom')hole(f.x,f.y,200,.95);
   for(const a of curActors())if(a.flash>0)hole(a.x,a.y,70,.8);
   L.globalCompositeOperation='source-over';ctx.drawImage(lc,0,0,W,H);
-  if(scene==='city'&&night){ctx.globalCompositeOperation='lighter';for(let k=0;k<N;k++)for(let j=0;j<N;j++){const X=(BS*j+7)*T-camX,Y=(BS*k+7)*T-camY;if(X<-120||Y<-120||X>W+120||Y>H+120)continue;const g=ctx.createRadialGradient(X,Y,0,X,Y,110);g.addColorStop(0,`rgba(${CITY.style.light},.10)`);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(X-110,Y-110,220,220)}ctx.globalCompositeOperation='source-over'}}
+  if(scene==='city'&&a>.2){const NEON=['255,40,140','40,220,255','255,170,40','150,80,255','60,255,170'];ctx.globalCompositeOperation='lighter';
+    const wet=weather.k==='rain'?1.6:1;
+    for(let k=0;k<N;k++)for(let j=0;j<N;j++){const X=(BS*j+7)*T-camX,Y=(BS*k+7)*T-camY;if(X<-160||Y<-160||X>W+160||Y>H+160)continue;
+      const c=NEON[(j*3+k*5)%NEON.length],fl=.9+.1*Math.sin(t*(2+(j+k)%3)+j*7+k);
+      let g=ctx.createRadialGradient(X,Y,0,X,Y,150);g.addColorStop(0,`rgba(${c},${.16*wet*fl})`);g.addColorStop(.5,`rgba(${c},${.05*wet})`);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(X-150,Y-150,300,300)}
+    for(const c of cars){if(c.kind==='wreck'||c.kind==='parked')continue;const X=c.x-camX,Y=c.y-camY;if(X<-200||Y<-200||X>W+200||Y>H+200)continue;
+      const cs=Math.cos(c.ang),sn=Math.sin(c.ang),pol=c.kind==='police'||c.kind==='cruiser';
+      let g=ctx.createRadialGradient(X+cs*95,Y+sn*95,0,X+cs*95,Y+sn*95,90);g.addColorStop(0,'rgba(255,236,190,.22)');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(X+cs*95-90,Y+sn*95-90,180,180);
+      g=ctx.createRadialGradient(X-cs*24,Y-sn*24,0,X-cs*24,Y-sn*24,34);g.addColorStop(0,'rgba(255,40,50,.3)');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(X-cs*24-34,Y-sn*24-34,68,68);
+      if(pol){const r=Math.sin(t*14)>0;g=ctx.createRadialGradient(X,Y,0,X,Y,130);g.addColorStop(0,r?'rgba(255,30,50,.42)':'rgba(40,90,255,.42)');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(X-130,Y-130,260,260)}}
+    ctx.globalCompositeOperation='source-over'}}
+let grainP=null;
+function drawGrade(t){if(lowGfx)return;const a=darkness();if(a<.2)return;
+  if(!grainP){const g=document.createElement('canvas');g.width=g.height=96;const q=g.getContext('2d'),d=q.createImageData(96,96);for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255|0;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255}q.putImageData(d,0,0);grainP=ctx.createPattern(g,'repeat')}
+  ctx.save();ctx.globalAlpha=.05+a*.05;ctx.globalCompositeOperation='overlay';ctx.translate((Math.random()*96)|0,(Math.random()*96)|0);ctx.fillStyle=grainP;ctx.fillRect(-96,-96,vw+192,vh+192);ctx.restore();
+  ctx.save();ctx.globalCompositeOperation='soft-light';ctx.fillStyle=`rgba(40,60,140,${a*.22})`;ctx.fillRect(0,0,vw,vh);ctx.restore()}
 function weatherTick(dt){if(Date.now()>weather.until){const snowy=CITY.style.snow,r=Math.random();const k=snowy?(r<.45?'snow':r<.65?'rain':'clear'):(r<.3?'rain':'clear');const was=weather.k;weather={k,until:Date.now()+rnd(300000,600000)};
     if(k!==was&&started)radio(k==='rain'?'Rain is coming down. Cops can\'t see as far, and the streets clear out.':k==='snow'?'Snow\'s falling. Everybody\'s inside, and tire tracks lead right to you.':'The weather cleared up.',4)}}
 const weatherSight=()=>weather.k==='rain'?.85:weather.k==='snow'?.9:1;
 function drawWeather(t){if(lowGfx||weather.k==='clear'||scene!=='city')return;const W=vw,H=vh,n=weather.k==='rain'?140:90;while(wDrops.length<n)wDrops.push({x:Math.random()*W,y:Math.random()*H,s:rnd(.6,1.2)});
-  ctx.strokeStyle=weather.k==='rain'?'rgba(170,190,230,.35)':'rgba(240,245,255,.75)';ctx.fillStyle='rgba(240,245,255,.8)';ctx.lineWidth=1.2;ctx.beginPath();
+  ctx.strokeStyle=weather.k==='rain'?'rgba(190,215,255,.5)':'rgba(240,245,255,.75)';ctx.fillStyle='rgba(240,245,255,.8)';ctx.lineWidth=1.2;ctx.beginPath();
   for(const d of wDrops){if(weather.k==='rain'){d.y+=16*d.s;d.x-=3*d.s;ctx.moveTo(d.x,d.y);ctx.lineTo(d.x+3,d.y-14*d.s)}else{d.y+=1.6*d.s;d.x+=Math.sin(t*2+d.s*9)*.6;ctx.moveTo(d.x+2,d.y);ctx.arc(d.x,d.y,1.6*d.s,0,Math.PI*2)}if(d.y>H){d.y=-10;d.x=Math.random()*W}if(d.x<-10)d.x=W}
   if(weather.k==='rain')ctx.stroke();else ctx.fill();
   if(weather.k==='rain'){ctx.fillStyle='rgba(120,140,180,.06)';ctx.fillRect(0,0,W,H)}}
