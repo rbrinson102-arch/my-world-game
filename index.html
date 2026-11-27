@@ -459,7 +459,7 @@ canvas#mini{cursor:pointer;pointer-events:auto}
       <div class="mapbox">
         <header><h2 id="mapTitle">City map</h2><button class="ghost" id="mapClose">Close</button></header>
         <canvas id="bigmap" width="1440" height="1440"></canvas>
-        <div class="travel"><b>Travel</b><div class="btnrow" id="travelRow"></div><p class="muted2">Each city has its own players and its own turf. Your cash, rank and crew go with you.</p></div>
+        <div class="travel"><b>Travel</b><div class="btnrow" id="travelRow"></div><p class="muted2">Each city has its own players and its own turf. Your cash and rank go with you. Your crew doesn't: take one man, the rest stay and guard.</p></div>
         <div class="legend">
           <span><i style="background:#fff"></i>You</span>
           <span><i style="background:#ffb23e"></i>Stash house</span>
@@ -572,7 +572,7 @@ const ri=(a,b)=>Math.floor(rnd(a,b+1));
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const angDiff=(a,b)=>{let d=a-b;while(d>Math.PI)d-=Math.PI*2;while(d<-Math.PI)d+=Math.PI*2;return d};
-const money=n=>'$'+Math.round(n).toLocaleString();
+const money=n=>(n<0?'-$':'$')+Math.abs(Math.round(n)).toLocaleString();
 function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 
 /* ================= city ================= */
@@ -2008,7 +2008,7 @@ function dailyReward(){
 
 /* ================= draw ================= */
 const ctx=cv.getContext('2d'),mini=$('mini'),mctx=mini.getContext('2d');
-const BUILD='6.5';let vw=0,vh=0,dpr=1,camX=0,camY=0,camInit=false,youT=0;
+const BUILD='6.6';let vw=0,vh=0,dpr=1,camX=0,camY=0,camInit=false,youT=0;
 
 function resize(){const r=cv.getBoundingClientRect();dpr=Math.min(2,window.devicePixelRatio||1);vw=r.width;vh=r.height;cv.width=Math.round(vw*dpr);cv.height=Math.round(vh*dpr)}
 addEventListener('resize',resize);
@@ -2757,9 +2757,9 @@ const KIN=[['your mother','Mama'],['your little brother','Lil Bro'],['your siste
 function empireState(){
   save.empire=save.empire||{fed:0,terr:[],front:false,crew:[],rival:null,eps:{},incomeT:90,caseFile:0,partner:null,copRank:0};
   const e=save.empire;
-  if(save.mode==='crook')crewSync();
+  if(save.mode==='crook'){if(save.orgType==='gang'&&save.role!=='gang')delete save.orgType;if(isSetM()&&save.org)for(const k of Object.keys(save.org))if(k!=='lawyer')delete save.org[k];crewRosterSync()}
   if(save.mode==='crook'&&e.crew.length<3&&!save.crewSplit){const r=mulberry(Date.now()%100000);let g=0;while(e.crew.length<3&&g++<50){const nm=`${NAMES1[Math.floor(r()*NAMES1.length)]} "${NICKS[Math.floor(r()*NICKS.length)]}"`;if(!e.crew.some(c=>c.name.split(' ')[0]===nm.split(' ')[0]))e.crew.push({name:nm,loyalty:55+Math.floor(r()*35)})}}
-  if(save.flags.ricoDown&&!(save.deedLost&&save.deedLost[8])&&!e.terr.includes(8))e.terr.push(8);
+  if(save.flags.ricoDown&&CITY_ID==='goldsboro'&&!(save.deedLost&&save.deedLost[8])&&!e.terr.includes(8))e.terr.push(8);
   return e;
 }
 const scriptedLen=()=>list().length;
@@ -3175,7 +3175,7 @@ function empireTick(dt){
   if(save.mode==='crook'){
     e.incomeT-=dt;
     if(e.incomeT<=0){e.incomeT=90;const n=e.terr.length;
-      {const tr=(orgSeats.pimp?300:0)+(orgSeats.escort?200:0);if(tr){save.cash+=tr}if(orgSeats.supplier){save.grow.bags=(save.grow.bags||0)+4}if(tr||orgSeats.supplier)setTimeout(()=>toast(`Your people kicked up${tr?` ${money(tr)}`:''}${orgSeats.supplier?`${tr?' and':''} 4 bags`:''}.`,2.4),1200)}
+      save.perkN=(save.perkN||0)+1;if(save.perkN%7===0){const tr=(orgSeats.pimp?300:0)+(orgSeats.escort?200:0);if(tr){save.cash+=tr}if(orgSeats.supplier){save.grow.bags=(save.grow.bags||0)+4}if(tr||orgSeats.supplier)setTimeout(()=>toast(`Your people kicked up${tr?` ${money(tr)}`:''}${orgSeats.supplier?`${tr?' and':''} 4 bags`:''}.`,2.4),1200)}
       if(n){const away=!!save.witsec,amt=Math.round(n*350*seasonOf(epIdx())*(orgHas('lt')?1.25:1)*(away?.5:1));save.cash+=amt;e.fed+=n*2*(e.front?.4:1);toast(`Your houses paid ${money(amt)}.${away?' Half. Your people skim when you\'re not around.':''}${e.front?' The car wash cleaned it.':''}`,2.6)}
       {const side=(save.flags.hattie===1?300:0)+(save.flags.contract===1?400:0)+(save.flags.bizN||0)*250;if(side){const amt=side*seasonOf(epIdx());save.cash+=amt;toast(`${save.flags.hattie===1?'Miss Hattie\'s numbers':''}${save.flags.hattie===1&&save.flags.contract===1?' and ':''}${save.flags.contract===1?'your paving company':''} paid ${money(amt)}.`,2.4)}}
       if(e.front)e.fed=Math.max(0,e.fed-3);if(orgHas('accountant'))e.fed=Math.max(0,e.fed-3);
@@ -3647,7 +3647,7 @@ async function frontSync(){if(!window.__fronts)return;offersSync();try{const row
 function frontContext(){if(save.mode!=='crook'||scene!=='city'||player.inCar)return null;
   for(const k of Object.keys(FRONTS)){const d=frontDoor(k);if(dist(player,d)>46)continue;const F=FRONTS[k];
     if(myFront(k))return{t:'front',label:`Run ${F.name}`,k};
-    const o=frontOwner(k);if(o)return(shakeCd[k]||0)>Date.now()?{t:'none',label:`${o}'s shop · laying low`}:{t:'shake',label:`Hold: rob ${o}'s register`,hold:2,k};
+    const o=frontOwner(k);if(o)returnMath.max(shakeCd[k]||0,(save.shk&&save.shk[k])||0)>Date.now()?{t:'none',label:`${o}'s shop · laying low`}:{t:'shake',label:`Hold: rob ${o}'s register`,hold:2,k};
     return{t:'buyfront',label:`Buy ${F.name} · ${money(F.price)}`,k}}
   return null}
 async function buyFront(k){const F=FRONTS[k];if(save.cash<F.price){toast(`${F.name} costs ${money(F.price)}.`,2.4);return}
@@ -3675,7 +3675,7 @@ function frontsTick(dt){frontT-=dt;if(frontT<=0){frontT=25;frontSync()}
     const n=Math.min(f.stock,F.rate*2+ri(0,2)),amt=Math.round(n*230*prodMult());f.stock-=n;f.till+=amt;f.earned+=amt;f.heat=Math.min(100,f.heat+n*1.3*F.heatK);
     if(f.heat>=85){const lost=Math.round(f.till/2);f.till-=lost;f.stock=0;f.heat=30;radio(`Police raided ${F.name}. They took the product and ${money(lost)}.`,5);if(scene==='city'&&dist(player,frontDoor(k))<320)addStars(2,'Raid at your front! Get out of there.')}}
   if(fedCut&&save.empire){save.empire.fed=Math.max(0,(save.empire.fed||0)-fedCut)}persist()}
-function shakeDown(k){gangLick();const o=frontOwner(k)||'the owner';shakeCd[k]=Date.now()+300000;const amt=ri(3,9)*100;save.cash+=amt;hudKey='';persist();addStars(2,`You robbed ${o}'s register. +${money(amt)}.`)}
+function shakeDown(k){gangLick();const o=frontOwner(k)||'the owner';shakeCd[k]=Date.now()+300000;(save.shk=save.shk||{})[k]=shakeCd[k];const amt=ri(3,9)*100;save.cash+=amt;hudKey='';persist();addStars(2,`You robbed ${o}'s register. +${money(amt)}.`)}
 
 /* ================= crews ================= */
 let myCrew=null,crewBoard=[],crewT=5,crewMsg='',crewMsgT=0,crewCode='';
@@ -4182,7 +4182,7 @@ function renderTrap(){if(!trapOpen)return;const t=trapFix(),cop=save.mode==='cop
 
 
 $('trapBtn').addEventListener('click',()=>{if(trapOpen)closeTrap();else openTrap()});$('trapClose').addEventListener('click',closeTrap);
-$('trapBody').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;const a=b.dataset.t,x=b.dataset.x;if(a.startsWith('sc_')){scamDo(a.slice(3));renderTrap()}else if(['list','pull','test','buy','blast','hire'].includes(a))trapDo(a,x);else trapAct(a)});
+$('trapBody').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;const a=b.dataset.t,x=b.dataset.x;if(!a)return;if(a.startsWith('sc_')){scamDo(a.slice(3));renderTrap()}else if(['list','pull','test','buy','blast','hire'].includes(a))trapDo(a,x);else trapAct(a)});
 /* ---------- NETWORK v2.1: hustles, scams, Kingsley Towers, cop career ---------- */
 const has=h=>save.role===h||!!(save.hustles&&save.hustles[h]);
 const HUSTLES={
@@ -4593,6 +4593,7 @@ const JOBT_COP={
 /* ---------- v3.3 every character has its own jobs board ---------- */
 const ROLE_JOBS={
   gang:['collect','hit','tags','boost','van','protect','counterfeit','g_drill','g_corner'],
+  lawyer:['delivery'],
   smuggler:['delivery','smuggle','boost','van','s_dock','s_border','s_ditch'],
   grower:['gr_clones','gr_sell','gr_light','gr_scout','gr_dryer','delivery'],
   owner:['o_dj','o_door','o_liquor','o_flyers','o_vip','protect'],
@@ -4742,7 +4743,7 @@ async function citySync(){if(!window.__boss)return;try{const prev=cityState;city
 async function claimCity(){if(isSetM()){noCityForSets();return 'set'}if(!window.__boss||save.mode!=='crook')return null;try{await lbEnsure();const pf=prof();const r=await window.__boss.claim(save.lbId,save.lbSecret,pf.name,pf.crew||'',CITY_ID);await citySync();if(r==='green')safeOffer('Not yet',`Somebody already sits in that seat, and a green player can't take it. Put in work first: 10,000 score.`,[{l:'Got it',go:1,f:()=>{}}]);else if(r&&/^blocks:/.test(r))safeOffer(`You need the streets first`,`Nobody runs ${CITY.name} from a story. You need at least 3 blocks of your own here before the city answers to you. You have ${r.slice(7)}. Take corners, then make your move.`,[{l:'Got it',go:1,f:()=>{}}]);return r}catch(e){return null}}
 function heldMsg(name){offer(`${CITY.name} already has a boss`,`${clip(name)} runs ${CITY.name}. You don't get the city by beating somebody else's lieutenants. It changes hands three ways: you put ${clip(name)} down yourself, ${clip(name)} gets locked up and you make your move while they're inside, or ${clip(name)} disappears for three days.`,[{l:'Understood',go:1,f:()=>{}}])}
 function cityTick(dt){cityT-=dt;if(cityT<=0){cityT=25;citySync()}}
-function cityRows(el,row){if(!window.__boss||save.mode!=='crook')return;const cs=cityState;
+function cityRows(el,row){if(!window.__boss||save.mode!=='crook'||isSetM())return;const cs=cityState;
   if(!cs||!cs.boss_id){row(`${CITY.name} boss`,`Nobody. Finish the city story and hold 3+ blocks (you have ${cityBlocks()}).`);if(cityBlocks()>=3&&save.arcs&&(save.arcs[CITY_ID]||0)>=(ARCS[CITY_ID]||[]).length){const d=document.createElement('div');d.className='btnrow';d.innerHTML=`<button class="small go" data-claimc="1">Claim ${tEsc(CITY.name)}</button>`;el.appendChild(d)}return}
   if(cs.boss_id===save.lbId){row(`${CITY.name} boss`,`You, since ${new Date(cs.since).toLocaleDateString()}. Stay alive and stay out of jail.`);
     row('Underboss',cs.underboss_name?`${clip(cs.underboss_name)} runs ${CITY.name} when you're away. Your seat holds as long as they stay active.`:`Nobody. Leave ${CITY.name} for 24 hours with no underboss and anybody with 3 blocks can take your seat.`);
@@ -4751,7 +4752,7 @@ function cityRows(el,row){if(!window.__boss||save.mode!=='crook')return;const cs
   row(`${CITY.name} boss`,`${clip(cs.boss_name)} · ${cs.boss_blocks||0} blocks${cs.boss_jailed?' · LOCKED UP right now':cs.boss_weak?' · holds almost no corners':cs.boss_unwatched?' · left town, nobody watching the seat':cs.away?` · out of town${cs.underboss_name?`, ${clip(cs.underboss_name)} holds it`:''}`:''}`);
   row('How the city changes hands','Put the boss down yourself, catch them locked up, or out-hold them: a boss with fewer than 2 blocks loses their grip. You need 3+ blocks to take the seat.');
   if(cs.boss_open){const d=document.createElement('div');d.className='btnrow';d.innerHTML=`<button class="small go" data-grab="1">${cs.boss_jailed?`${tEsc(clip(cs.boss_name))} is locked up. Make your move`:cs.boss_weak?`${tEsc(clip(cs.boss_name))} has no corners. Take the city`:cs.boss_unwatched?`${tEsc(clip(cs.boss_name))} left ${tEsc(CITY.name)}. Take the seat`:`${tEsc(clip(cs.boss_name))} disappeared. Take the city`}</button>`;el.appendChild(d)}}
-function startGrab(){const cs=cityState;if(!cs||!cs.boss_open){toast('The boss is on the street. You need to catch them slipping.',2.6);return}if(cityBlocks()<3){toast(`You need 3 blocks of your own first. You have ${cityBlocks()}.`,3);return}if(save.side){toast('Finish your current side job first.',2.4);return}
+function startGrab(){if(isSetM()){noCityForSets();return}const cs=cityState;if(!cs||!cs.boss_open){toast('The boss is on the street. You need to catch them slipping.',2.6);return}if(cityBlocks()<3){toast(`You need 3 blocks of your own first. You have ${cityBlocks()}.`,3);return}if(save.side){toast('Finish your current side job first.',2.4);return}
   const j=genJob('grab');j.title=`Power grab: ${clip(cs.boss_name||'the boss')}'s people`;j.pay=0;j.grab=1;jobsFix().list.push(j);takeJob(j.id)}
 JOBT.grab={n:'Power grab',hidden:1,f:(p,cl)=>({t:'Power grab',b:'Hit the boss\'s headquarters while they\'re away and take the city.',steps:[HOUSE(p.a,`The boss's right hand`,5,'Hit the boss\'s headquarters')],pay:0})};
 
@@ -4902,12 +4903,12 @@ async function deedClaim(s,quiet){if(!window.__deeds||!save.lbId||save.mode!=='c
     if(/^(ok|yours|taken:)/.test(r||'')&&deedRows){deedRows[s.id]={stash:s.id,owner_id:save.lbId,owner_name:prof().name}}if(save.deedLost)delete save.deedLost[s.id];if(/^taken:/.test(r)&&!quiet)toast(`You took the deed from ${clip(r.slice(6))}.`,3.4);deedT=0;return r}catch(e){return 'err'}finally{s._claiming=0}}
 async function deedSync(){if(!window.__deeds||deedBusy||!save.mode)return;deedBusy=true;
   try{const rows=await window.__deeds.list(CITY_ID);deedRows={};for(const r of rows||[])deedRows[r.stash]=r;
-    for(const s of stashes){if(s.hq||(s.main&&!save.flags.ricoDown))continue;const d=deedRows[s.id],was=s.pOwner||null;if(d&&d.owner_id&&d.owner_id!==save.lbId){s.boss=clip(d.owner_name);s.pOwner=d.owner_id}else if(s.pOwner){s.boss=STASH_DEF[s.id][2];s.pOwner=null}
+    for(const s of stashes){if(s.hq||(s.main&&!(save.flags.ricoDown&&CITY_ID==='goldsboro')))continue;const d=deedRows[s.id],was=s.pOwner||null;if(d&&d.owner_id&&d.owner_id!==save.lbId){s.boss=clip(d.owner_name);s.pOwner=d.owner_id}else if(s.pOwner){s.boss=STASH_DEF[s.id][2];s.pOwner=null}
       if((s.pOwner||null)!==was&&!s.owned&&s.cooldown<=0&&scene==='city')try{spawnOutsideGuards(s)}catch(e){}}
     const ids=[...new Set((rows||[]).map(r=>r.owner_id).filter(x=>x&&x!==save.lbId&&!defRows[x]))];
     if(ids.length&&window.__def){try{for(const r of await window.__def.list(ids))defRows[r.owner_id]=r}catch(e){}}
     if(save.mode==='crook')for(const s of stashes){const d=deedRows[s.id];if(s._claiming&&Date.now()-s._claiming<10000)continue;
-      if(d&&d.owner_id===save.lbId&&!s.owned&&(s.id!==8||save.flags.ricoDown||save.empire.terr.includes(s.id))){s.owned=true;if(save.deedLost)delete save.deedLost[s.id];if(!save.empire.terr.includes(s.id))save.empire.terr.push(s.id);actors=actors.filter(a=>!(a.kind==='guard'&&a.s===s));persist();continue}
+      if(d&&d.owner_id===save.lbId&&!s.owned&&(s.id!==8||(save.flags.ricoDown&&CITY_ID==='goldsboro')||save.empire.terr.includes(s.id))){s.owned=true;if(save.deedLost)delete save.deedLost[s.id];if(!save.empire.terr.includes(s.id))save.empire.terr.push(s.id);actors=actors.filter(a=>!(a.kind==='guard'&&a.s===s));persist();continue}
       if(!s.owned)continue;
       if(d&&d.owner_id!==save.lbId)loseHouse(s,clip(d.owner_name));else if(!d&&save.lbId)await deedClaim(s,true)}}catch(e){}
   deedBusy=false}
@@ -5118,7 +5119,7 @@ async function buyIntel(pid,name,src){const I=INTEL[src];if(!I||!window.__rats)r
     if(r==='self'){save.cash+=I.c;persist();return}
     if(/^found:|^listed:/.test(r)){const c=r.split(':')[1];toast(`${clip(name)} is hiding in ${CITY_DEFS[c]?CITY_DEFS[c].name:c}. Everybody can see it on the board now.`,4.5);ratT=0}
     else if(r==='dry')toast(`${I.n} took your money and gave you nothing real.`,3.4);else{save.cash+=I.c;persist();toast('Nobody to find right now. Money back.',2.4)}}catch(e){toast('Your contact went quiet. Check the board in a minute.',2.6);ratT=0}}
-function flyTo(city,who){if(!bossLeaving.ok&&cityState&&cityState.boss_id===save.lbId&&!cityState.underboss_id&&save.mode==='crook'){bossLeaving(()=>flyTo(city,who));return}
+function flyTo(city,who){if(!bossLeaving.ok&&cityState&&save.lbId&&cityState.boss_id===save.lbId&&!cityState.underboss_id&&save.mode==='crook'){bossLeaving(()=>flyTo(city,who));return}
   try{if(myCrew&&typeof sendCrewMsg==='function'&&save.cash>=2000)sendCrewMsg(`Flying to ${CITY_DEFS[city].name} to find ${clip(who)}. Meet me there.`)}catch(e){}
   travelGo(city,2000,0,{flight:{city,until:Date.now()+3*3600000,who}})}
 function ratRows2(el,row){if(!window.__rats||save.mode!=='crook')return;
@@ -5223,7 +5224,8 @@ function crewSwap(dest,escort,from){from=from||save.crewCity||CITY_ID;
   const there=save.crewAt[dest]||{crew:[]};delete save.crewAt[dest];
   e.crew=(there.crew||[]).concat(keep);for(const k of ['enforcer','lt'])if(there[k]){if(o[k])e.crew.push(there[k]);else o[k]=there[k]}
   save.crewCity=dest;save.crewSplit=1}
-function crewSync(){if(save.mode!=='crook')return;if(!save.crewCity){save.crewCity=CITY_ID;return}if(save.crewCity!==CITY_ID)crewSwap(CITY_ID,null,save.crewCity)}
+function placeSwap(from,to){save.placeAt=save.placeAt||{};const e=save.empire;if(!e)return;save.placeAt[from]={terr:(e.terr||[]).slice(),lost:Object.assign({},save.deedLost||{})};const t=save.placeAt[to]||{terr:[],lost:{}};delete save.placeAt[to];e.terr=(t.terr||[]).slice();save.deedLost=Object.assign({},t.lost||{});save.placeCity=to}
+function crewRosterSync(){if(save.mode!=='crook')return;if(!save.placeCity)save.placeCity=CITY_ID;else if(save.placeCity!==CITY_ID)placeSwap(save.placeCity,CITY_ID);if(!save.crewCity){save.crewCity=CITY_ID;return}if(save.crewCity!==CITY_ID)crewSwap(CITY_ID,null,save.crewCity)}
 function guardsLeft(){let n=0;for(const c in (save.crewAt||{})){if(c===CITY_ID)continue;const t=save.crewAt[c];n+=(t.crew||[]).length+(t.enforcer?1:0)+(t.lt?1:0)}return n}
 function pubDef(){return clamp(myDefLvl()+(guardsLeft()>=2?1:0),0,4)}
 function crewLeft(){const out=[];for(const c in (save.crewAt||{})){const t=save.crewAt[c];const n=((t.crew||[]).length)+(t.enforcer?1:0)+(t.lt?1:0);if(n)out.push(`${(CITY_DEFS[c]||{}).name||c} ×${n}`)}return out}
@@ -5231,7 +5233,7 @@ function travelGo(id,cost,wasHot,opt,rc){const hs=Math.max(stars,wasHot||0),hot=
   if(lastHitPid&&performance.now()-lastHitT<8000){toast('You are in a shootout. Get clear before you try to leave town.',2.6);return}
   if(hot&&!travelGo.ok){const why=hs>0?`The cops are on you (${hs} star${hs>1?'s':''}). A driver will still get you out, but it costs ${money(c)} and your warrant follows you: ${nm} police will have your picture when you land.`:'';
     safeOffer('Leaving hot',`${why}${turfWar?`${why?' ':''}You are in the middle of a turf war. Leave now and you forfeit it.`:''}`,[{l:c>cost?`Pay ${money(c)} and go`:'Leave anyway',go:1,f:()=>{travelGo.ok=1;travelGo(id,cost,stars,opt)}},{l:'Stay and handle it',f:()=>{bossLeaving.ok=0}}]);return}
-  travelGo.ok=0;if(save.cash<c){toast(`The ride costs ${money(c)}.`,2.2);return}
+  travelGo.ok=0;if(travelGo.busy)return;if(save.cash<c){toast(`The ride costs ${money(c)}.`,2.2);return}
   if(save.mode==='crook'&&!rc){const R=crewRoster();if(R.length){const fare=250;
     const go=esc=>{if(hot)travelGo.ok=1;travelGo(id,cost,wasHot,opt,{esc})};
     const btns=[{l:`Go alone · ${R.length} stay and guard ${CITY.name}`,go:1,f:()=>go(null)}];
@@ -5240,14 +5242,14 @@ function travelGo(id,cost,wasHot,opt,rc){const hs=Math.max(stars,wasHot||0),hot=
     safeOffer('Your crew stays here',`Your crew works ${CITY.name}. They don't know ${nm} and ${nm} doesn't know them. You can take one man with you; everybody else stays and guards what you built here, so you'll have less muscle in ${nm} and you'll have to put a new crew together there.`,btns);return}}
   const esc=(rc&&rc.esc)||null;
   if(esc&&save.cash<c+250){toast('Not enough cash for the extra fare.',2.2);return}
-  if(save.mode==='crook'){crewSync();if(esc)save.cash-=250;crewSwap(id,esc,CITY_ID)}
+  if(save.mode==='crook'){crewRosterSync();if(esc)save.cash-=250;crewSwap(id,esc,CITY_ID);placeSwap(CITY_ID,id)}
   if(save.debt&&!save.debt.skipped&&save.debt.city===CITY_ID){save.debt.skipped=1;save.debt.due=Math.min(save.debt.due,Date.now()+2*3600000)}
-  save.cash-=c;if(hs>0)save.hotArrive=Math.min(3,hs);turfWar=null;save.heat=null;save.cameFrom=CITY_ID;save.flight=(opt&&opt.flight)||null;bossLeaving.ok=0;
+  travelGo.busy=1;save.cash-=c;if(hs>0)save.hotArrive=Math.min(3,hs);turfWar=null;save.heat=null;save.cameFrom=CITY_ID;save.flight=(opt&&opt.flight)||null;bossLeaving.ok=0;
   save.turfAll=save.turfAll||{};save.turfAll[CITY_ID]=save.turf||{};save.city=id;stars=0;persist();try{cloudPush(true)}catch(x){}
   try{if(myCrew&&typeof sendCrewMsg==='function')sendCrewMsg(`Leaving ${CITY.name} for ${nm}.`)}catch(x){}
   try{localStorage.setItem('uws-go',JSON.stringify({r:SLOT}))}catch(x){}
   toast(hot?`Ducking out of ${CITY.name}…`:`Heading to ${nm}…`,2);setTimeout(()=>location.reload(),900)}
-function hgoTravel(id){if(!bossLeaving.ok&&cityState&&cityState.boss_id===save.lbId&&!cityState.underboss_id&&save.mode==='crook'){bossLeaving(()=>hgoTravel(id));return}travelGo(id,900)}
+function hgoTravel(id){if(!bossLeaving.ok&&cityState&&save.lbId&&cityState.boss_id===save.lbId&&!cityState.underboss_id&&save.mode==='crook'){bossLeaving(()=>hgoTravel(id));return}travelGo(id,900)}
 function homeTick(dt){homeT-=dt;if(homeT<=0){homeT=60;homeSync()}}
 async function homeFound(){if(!window.__home)return;const c=($('hmCity')||{}).value||'',r=($('hmReg')||{}).value||'',sz=($('hmSize')||{}).value||'small';
   if(save.m<scriptedLen()){toast('Finish your Goldsboro story first. Everybody earns their name here before they go home.',3.4);return}
@@ -5336,7 +5338,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('button');i
     else if(b.dataset.allyjoin){await lbEnsure();const r=await window.__ally.join(save.lbId,save.lbSecret,+b.dataset.allyjoin);toast(r==='pending'?'You asked. The leader decides.':r==='full'?'They\'re full (6 max).':r==='already'?'You\'re already in one here.':'That alliance is gone.',2.6)}
     else if(b.dataset.allyans){const me=allyS&&allyS.mine;await window.__ally.answer(save.lbId,save.lbSecret,me,b.dataset.allyans,b.dataset.y==='1')}
     else if(b.dataset.allyleave){const r=await window.__ally.leave(save.lbId,save.lbSecret,+b.dataset.allyleave);toast(r==='disbanded'?'You broke it up.':'You walked away.',2.4)}
-    else if(b.dataset.allycoup){const r=await window.__ally.coup(save.lbId,save.lbSecret,CITY_ID);
+    else if(b.dataset.allycoup&&isSetM()){noCityForSets()}else if(b.dataset.allycoup){const r=await window.__ally.coup(save.lbId,save.lbSecret,CITY_ID);
       if(r==='ok'){titleCard('Coup',CITY.name);toast(`It's done. ${CITY.name} belongs to your alliance now.`,4);citySync()}
       else toast(/^need:/.test(r)?`Not enough muscle yet: ${r.split(':')[1]} of ${r.split(':')[2]} blocks.`:r==='fresh'?'The seat just changed hands. Give it two hours.':r==='alone'?'You need at least one partner.':r==='green'?'The leader needs 10,000 score before anybody follows them into a coup.':r==='ours'?'You already run it.':'Only the leader can call it.',3.2)}
     else return;allySync()}catch(x){toast('Try again in a minute.',2)}});
@@ -5359,7 +5361,7 @@ function serveCoke(p){const t=trapFix(),k=cokeFix();if(!(k.packs+k.cut)||demandL
   if(policeNear(320))addStars(2,'Serving work in front of a cop. +2 stars');persist();hudKey='';toast(`Served a pack. +${money(per)}.`,1.6);trapCheckUp()}
 const ROLE_WORK={owner:{l:'Supply the VIP room',n:5,m:1.5,heat:.15,why:'Your VIP room moves product at a premium.'},dancer:{l:'Party favors backstage',n:3,m:1.3,heat:.1,why:'The girls and the regulars pay extra backstage.'},
   escort:{l:'Clients want party favors',n:2,m:1.8,heat:.12,why:'Your clients pay almost double, quietly.'},pimp:{l:'Put packs on the track',n:4,m:1.1,heat:.25,why:'Your people move it on the track. Vice watches the track.'},
-  smuggler:{l:'Sell packs to the truck stop',n:3,m:1.1,heat:.1,why:'Drivers buy on the road.'},grower:{l:'Mix in with your weed buyers',n:3,m:1.15,heat:.1,why:'Your weed buyers want something stronger.'},lawyer:{l:'Sell to your clients',n:2,m:1.6,heat:.05,why:'Your clients have money and secrets.'}};
+  smuggler:{l:'Sell packs to the truck stop',n:3,m:1.1,heat:.1,why:'Drivers buy on the road.'},grower:{l:'Mix in with your weed buyers',n:3,m:1.15,heat:.1,why:'Your weed buyers want something stronger.'},};
 function roleWork(){const k=cokeFix(),w=ROLE_WORK[save.role];if(!w)return;if(Date.now()<(k.roleT||0)){toast(`Give it ${mmss(k.roleT-Date.now())}.`,2);return}
   const have=k.packs+k.cut;if(!have){toast('No packs. Buy a brick and break it down.',2.4);return}const n=Math.min(have,w.n);let pay=0;for(let i=0;i<n;i++){const c=k.packs<=0;if(c)k.cut--;else k.packs--;pay+=Math.round(packPrice(c)*w.m)}
   k.roleT=Date.now()+600000;save.cash+=pay;save.rep+=n;if(Math.random()<w.heat&&save.mode==='crook')addStars(1,'Too many people knew. +1 star');persist();hudKey='';toast(`${w.l}: ${n} packs, +${money(pay)}.`,2.8);if(empOpen)renderEmpire(true)}
@@ -5485,7 +5487,7 @@ function pushRows(el,row){if(!window.__push)return;if(save.pushOn){const d0=docu
 
 /* travel between cities */
 function renderTravel(){const el=$('travelRow');el.textContent='';
-  if(!OPEN_CITIES.includes(CITY_ID)||(window.__rats&&save.witsec&&save.witsec.city===CITY_ID)){const b=document.createElement('button');b.className='small go';const w=!!(window.__rats&&save.witsec&&save.witsec.city===CITY_ID);if(!window.__rats&&save.witsec){save.witsec=null;persist()}b.textContent=w?(wsElapsed()>=24*3600000?'Leave witness protection: go home to Goldsboro':`Witness protection: ${hm(24*3600000-wsElapsed())} until you can surface. Walk out early?`):'Fly home to Goldsboro · $2,000';if(w)b.addEventListener('click',leaveWitsec);if(!w)b.addEventListener('click',function flyHome(){if(!bossLeaving.ok&&cityState&&cityState.boss_id===save.lbId&&!cityState.underboss_id&&save.mode==='crook'){bossLeaving(()=>flyHome());return}travelGo('goldsboro',2000)});el.appendChild(b);
+  if(!OPEN_CITIES.includes(CITY_ID)||(window.__rats&&save.witsec&&save.witsec.city===CITY_ID)){const b=document.createElement('button');b.className='small go';const w=!!(window.__rats&&save.witsec&&save.witsec.city===CITY_ID);if(!window.__rats&&save.witsec){save.witsec=null;persist()}b.textContent=w?(wsElapsed()>=24*3600000?'Leave witness protection: go home to Goldsboro':`Witness protection: ${hm(24*3600000-wsElapsed())} until you can surface. Walk out early?`):'Fly home to Goldsboro · $2,000';if(w)b.addEventListener('click',leaveWitsec);if(!w)b.addEventListener('click',function flyHome(){if(!bossLeaving.ok&&cityState&&save.lbId&&cityState.boss_id===save.lbId&&!cityState.underboss_id&&save.mode==='crook'){bossLeaving(()=>flyHome());return}travelGo('goldsboro',2000)});el.appendChild(b);
     if(CITY.home&&!(window.__rats&&save.witsec&&save.witsec.city===CITY_ID)){for(const id of CITY_ORDER.filter(x=>x!==CITY_ID&&OPEN_CITIES.includes(x)).concat(HOME_OPEN.filter(x=>x!==CITY_ID&&CITY_DEFS[x]))){const c2=document.createElement('button');c2.className='small';c2.textContent=`Ride to ${CITY_DEFS[id].name} · $900`;c2.dataset.hgo=id;el.appendChild(c2)}}
     return}
   if(HUB_CITY){const p=document.createElement('p');p.className='muted2';p.textContent=`Everybody plays in ${CITY.name} until somebody conquers it. The boss of ${CITY.name} who holds 6 blocks or 5 houses can expand the whole game to ${CITY_DEFS[CITY_ORDER[CITY_ORDER.indexOf(CITY_ID)+1]]?CITY_DEFS[CITY_ORDER[CITY_ORDER.indexOf(CITY_ID)+1]].name:'the next city'} from Empire. Then Durham, Charlotte, Chicago, and beyond.`;el.appendChild(p);return}
@@ -5499,7 +5501,7 @@ function renderTravel(){const el=$('travelRow');el.textContent='';
   for(const id of HOME_OPEN){if(id===CITY_ID||!CITY_DEFS[id])continue;const c=CITY_DEFS[id],b=document.createElement('button');b.className='small';
     b.textContent=`Hometown · ${c.name}${c.st?', '+c.st:''} · $900 · ${c.status==='open'?'established':'new city'}`;b.dataset.city=id;b.dataset.cost=900;el.appendChild(b)}}
 $('travelRow').addEventListener('click',e=>{const b=e.target.closest('button');if(b&&!b.disabled&&b.dataset.hgo){hgoTravel(b.dataset.hgo);return}if(b&&!b.disabled&&b.dataset.fly){flyTo(b.dataset.fly,b.dataset.who);return}if(!b||b.disabled||!b.dataset.city)return;
-  if(!bossLeaving.ok&&cityState&&cityState.boss_id===save.lbId&&!cityState.underboss_id&&save.mode==='crook'){bossLeaving(()=>b.click());return}travelGo(b.dataset.city,+b.dataset.cost)});
+  if(!bossLeaving.ok&&cityState&&save.lbId&&cityState.boss_id===save.lbId&&!cityState.underboss_id&&save.mode==='crook'){bossLeaving(()=>b.click());return}travelGo(b.dataset.city,+b.dataset.cost)});
 
 $('lbBtn').addEventListener('click',openLb);$('evBtn').addEventListener('click',()=>{if(started&&!cineOn)evInfo()});
 $('extHold').addEventListener('pointerdown',e=>{e.preventDefault();if(ext)ext.hold=true});['pointerup','pointerleave','pointercancel'].forEach(ev=>$('extHold').addEventListener(ev,()=>extRelease()));
@@ -5773,7 +5775,7 @@ const myOrgRow=()=>(ctB&&ctB.boss||[]).slice().sort((x,y)=>String(y.since||'').l
 const myOrgSeat=()=>{const b=myOrgRow();return b?String(b.seat||''):''};
 const myOrgBoss=()=>{const b=myOrgRow();return b?clip(b.boss_name):''};
 const runsBlocks=()=>isSetM()&&/^blocks/.test(myOrgSeat());
-function kickCut(amt,rate){if(!myOrgSeat()||!(amt>0))return 0;const c=Math.round(amt*rate);save.kickQ=Math.min(6000,(save.kickQ||0)+c);return c}
+function kickCut(amt,rate){if(!myOrgSeat()||!(amt>0))return 0;const c=Math.min(Math.round(amt*rate),Math.max(0,6000-(save.kickQ||0)));save.kickQ=Math.min(6000,(save.kickQ||0)+c);return c}
 let kickT=60;
 async function kickFlush(){const q=save.kickQ||0;if(q<100||!window.__contracts||!window.__contracts.kick||!save.lbId)return;const amt=Math.min(3000,q);
   try{const r=await window.__contracts.kick(save.lbId,save.lbSecret,amt);if(r==='ok'){save.kickQ=Math.max(0,(save.kickQ||0)-amt);persist()}else if(r==='none'){save.cash+=save.kickQ||0;save.kickQ=0;persist();hudKey=''}}catch(e){}}
